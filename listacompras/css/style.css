@@ -1,0 +1,31 @@
+:root {
+  --ion-safe-area-top: 20px;
+  --ion-safe-area-bottom: 22px;
+}
+
+.text-right {
+  text-align: right;
+}
+
+body {
+  /* background:rgb(196, 193, 193); */
+  border: 1px solid rgb(196, 193, 193);
+}
+
+.app {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.sc-ion-label-md-s  h2{
+  font-weight:bolder;
+}
+
+h2 {
+  font-weight: bolder;
+}
+
+.lbl {
+  font-weight: 700;
+  margin-right: 10px;
+}
