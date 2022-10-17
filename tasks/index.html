@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <style>
+        tr:hover {
+            background-color: blanchedalmond;
+            cursor: default;
+        }
+
+        table {
+            border: 1px solid;
+        }
+
+        td {
+            padding-left: 5px;
+        }
+
+        th {
+            background-color: black;
+            color: white;
+            text-align: center;
+        }
+
+        td,
+        th {
+            border: 1px solid;
+        }
+
+        .principall {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        .projeto {
+            margin: 15px;
+            border: 1px solid;
+            padding: 5px;
+        }
+
+        label {
+            cursor: pointer;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .pos {
+            border: 1px solid;
+            padding: 5px;
+        }
+
+        .linha {
+            width: 100%;
+            padding: 5px;
+            display: inline-grid;
+        }
+
+        pre {
+            font-family: auto;
+        }
+
+        .glyphicon {
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        .glyphicon:hover {
+            box-shadow: rgb(190, 151, 77) 1px 1px 2px;
+        }
+
+        .linha2 {
+            display: flex;
+            justify-content: center;
+        }
+
+        .inpt {
+            width: 25%;
+            margin: 0px 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="principal" class="principal">
+        <button id="btnNovoPrj" class="btn btn-primary">Novo Projeto</button>
+        <ul id="ulProjetos">
+
+        </ul>
+
+    </div>
+    <dialog id="mProjeto" class="mProjeto">
+        <div>
+            <div class="linha">
+                <label>Nome projeto</label>
+                <input maxlength="30" type="text" id="txtNmPrj">
+
+            </div>
+            <div class="linha">
+                <label>Descrição</label>
+                <textarea id="txtDescPrj" cols="40" rows="3"></textarea>
+            </div>
+            <div class="linha">
+                <label>Data:</label>
+                <input type="text" id="txtData" disabled>
+            </div>
+            <div class="linha">
+                <button id="btCncPrj" class="btn btn-warning">
+                    <i class="glyphicon glyphicon-remove"></i>
+                    Cancelar
+                </button>
+
+                <button id="btnSlvPrj" class="btn btn-primary">
+                    <i class="glyphicon glyphicon-ok"></i>
+                    Salvar</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="mPo">
+        <div>
+            <div class="linha">
+                <label>Nome</label>
+                <input maxlength="30" type="text" id="txtPONome">
+            </div>
+            <div class="linha">
+                <label>Email</label>
+                <input maxlength="30" type="text" id="txtPOEmail">
+            </div>
+            <div class="linha">
+                <label>Telefone</label>
+                <input maxlength="30" type="text" id="txtPOTelefone">
+            </div>
+            <div class="linha">
+                <button id="btCncPo" class="btn btn-warning">
+                    <i class="glyphicon glyphicon-remove"></i>
+                    Cancelar</button>
+                <button id="btnSlvPo" class="btn btn-primary">
+                    <i class="glyphicon glyphicon-ok"></i>
+                    Salvar</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="mTasks">
+        <div>
+            <div class="linha">
+                <label>Descrição da tarefa</label>
+                <input maxlength="30" type="text" id="txtDescTask">
+            </div>
+            <div class="linha">
+                <button id="btCncTask" class="btn btn-warning">
+                    <i class="glyphicon glyphicon-remove"></i>
+                    Cancelar</button>
+                <button id="btnSlvTask" class="btn btn-primary">
+                    <i class="glyphicon glyphicon-ok"></i>
+                    Salvar</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="mAtividade">
+        <div>
+            <div class="linha">
+                <label>Descrição da atividade</label>
+                <input class="form-control" maxlength="30" type="text" id="txtDescAtividade">
+            </div>
+            <div>
+                <label>Extimativa</label>
+                <br>
+                <div class="linha2">
+                    <input class="inpt form-control" min="0" type="number" id="txtExtHoraAtividade"> horas e
+                    <input class="inpt form-control" min="0" max="59" type="number" id="txtExtMinAtividade"> minutos
+                </div>
+            </div>
+            <div class="linha">
+                <button id="btCncAtividade" class="btn btn-warning">
+                    <i class="glyphicon glyphicon-remove"></i>
+                    Cancelar</button>
+                <button id="btnSlvAtividade" class="btn btn-primary">
+                    <i class="glyphicon glyphicon-ok"></i>
+                    Salvar</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="mApontamentos">
+        <div>
+            <div class="linha">
+                <label>Data</label>
+                <input class="form-control" value="new Date()" type="date" id="txtDataApontamento">
+            </div>
+            <div>
+                <label>Tempo</label>
+                <br>
+                <div class="linha2">
+                    <input class="inpt form-control" min="0" type="number" id="txtExtHoraApontamento"> horas e
+                    <input class="inpt form-control" min="0" max="59" type="number" id="txtExtMinApontamento"> minutos
+                </div>
+            </div>
+            <div class="linha">
+                <label>Percentual projeto</label>
+                <input class="form-control" type="number" max="100" id="txtPercentualProjeto">
+            </div>
+
+            <div class="linha">
+                <button id="btCncApontamento" class="btn btn-warning">
+                    <i class="glyphicon glyphicon-remove"></i>
+                    Cancelar</button>
+                <button id="btnSlvApontamento" class="btn btn-primary">
+                    <i class="glyphicon glyphicon-ok"></i>
+                    Salvar</button>
+            </div>
+        </div>
+    </dialog>
+
+    <script>
+        let projetos = [];
+
+        const btnNovoPrj = document.getElementById('btnNovoPrj');
+
+        const mProjeto = document.getElementById('mProjeto');
+
+        btnNovoPrj.addEventListener('click', () => {
+
+            mProjeto.showModal();
+
+            const txtData = document.getElementById('txtData');
+            txtData.value = new Date().toLocaleDateString();
+
+            const btCncPrj = document.getElementById('btCncPrj');
+
+            btCncPrj.addEventListener('click', () => {
+                limparCampos();
+                mProjeto.close();
+            })
+        });
+
+        const btnSlvPrj = document.getElementById('btnSlvPrj');
+
+        btnSlvPrj.addEventListener('click', () => {
+            const txtNmPrj = document.getElementById('txtNmPrj')
+
+            const txtDescPrj = document.getElementById('txtDescPrj')
+
+            const nPrj = {
+                nome: txtNmPrj.value,
+                descricao: txtDescPrj.value,
+                pos: [],
+                tasks: [],
+                data: new Date().toLocaleDateString()
+            };
+
+            projetos.push(nPrj);
+
+            limparCampos();
+
+            mProjeto.close();
+
+            gravarDadosStorage();
+
+            carregaListaProjetos();
+
+        });
+
+        const btnSlvPo = document.getElementById('btnSlvPo');
+
+        btnSlvPo.addEventListener('click', (e) => {
+            const txtPONome = document.getElementById('txtPONome')
+            const txtPOEmail = document.getElementById('txtPOEmail')
+            const txtPOTelefone = document.getElementById('txtPOTelefone')
+
+            const novo = {
+                nome: txtPONome.value,
+                email: txtPOEmail.value,
+                telefone: txtPOTelefone.value
+            };
+
+            const idd = mPo.getAttribute('data-id');
+
+            projetos[idd].pos.push(novo);
+
+            txtPONome.value = '';
+            txtPOEmail.value = '';
+            txtPOTelefone.value = '';
+
+            mPo.close();
+
+            gravarDadosStorage();
+
+            carregaListaProjetos();
+
+        });
+
+        const btnSlvTask = document.getElementById('btnSlvTask');
+
+        btnSlvTask.addEventListener('click', (e) => {
+            const txtDescTask = document.getElementById('txtDescTask')
+
+            const novo = {
+                descricao: txtDescTask.value,
+                status: "todo",
+                datainicio: "",
+                datafim: "",
+                apontamentos: [],
+                atividades: []
+            };
+
+            const idd = mTasks.getAttribute('data-id');
+
+            projetos[idd].tasks.push(novo);
+
+            txtDescTask.value = '';
+
+            mTasks.close();
+
+            gravarDadosStorage();
+
+            carregaListaProjetos();
+
+        });
+
+        const btnSlvAtividade = document.getElementById('btnSlvAtividade');
+
+        btnSlvAtividade.addEventListener('click', (e) => {
+            const txtDescAtividade = document.getElementById('txtDescAtividade');
+
+            const txtExtHoraAtividade = document.getElementById('txtExtHoraAtividade');
+
+            const txtExtMinAtividade = document.getElementById("txtExtMinAtividade");
+
+            const minuto = txtExtMinAtividade.value.padStart(2, '0')
+
+            const novo = {
+                descricao: txtDescAtividade.value,
+                estimativa: txtExtHoraAtividade.value + ':' + minuto
+            };
+
+            const id = mAtividade.getAttribute('data-id');
+            const idtask = mAtividade.getAttribute('data-idtask');
+
+            projetos[id].tasks[idtask].atividades.push(novo);
+
+            txtDescAtividade.value = '';
+
+            txtExtHoraAtividade.value = '0';
+
+            txtExtMinAtividade.value = '0';
+
+            mAtividade.close();
+
+            gravarDadosStorage();
+
+            carregaListaProjetos();
+
+        });
+
+        const btnSlvApontamento = document.getElementById('btnSlvApontamento');
+
+        btnSlvApontamento.addEventListener('click', (e) => {
+            const txtDataApontamento = document.getElementById('txtDataApontamento');
+
+            const txtExtHoraApontamento = document.getElementById('txtExtHoraApontamento');
+
+            const txtExtMinApontamento = document.getElementById("txtExtMinApontamento");
+
+            const txtPercentualProjeto = document.getElementById('txtPercentualProjeto');
+
+            const minuto = txtExtMinApontamento.value.padStart(2, '0')
+
+            const novo = {
+                data: txtDataApontamento.value,
+                tempo: txtExtHoraApontamento.value + ':' + minuto,
+                percentual: txtPercentualProjeto.value
+            };
+
+            const id = mApontamentos.getAttribute('data-id');
+            const idtask = mApontamentos.getAttribute('data-idtask');
+
+            projetos[id].tasks[idtask].apontamentos.push(novo);
+
+            txtDataApontamento.value = '';
+
+            txtExtHoraApontamento.value = '0';
+
+            txtExtMinApontamento.value = '0';
+
+            txtPercentualProjeto.value = '0';
+
+            mApontamentos.close();
+
+            gravarDadosStorage();
+
+            carregaListaProjetos();
+
+        });
+
+        const limparCampos = () => {
+            const txtNmPrj = document.getElementById('txtNmPrj')
+            const txtDescPrj = document.getElementById('txtDescPrj');
+
+            txtNmPrj.value = '';
+            txtDescPrj.value = '';
+        }
+
+        const carregaListaProjetos = () => {
+
+            lerDadosStorage();
+
+            const ulProjetos = document.getElementById('ulProjetos');
+
+            ulProjetos.innerHTML = '';
+
+            //let id = 0;
+
+            projetos.forEach(projeto => {
+                let indexProjeto = projetos.indexOf(projeto);
+
+                const nLiDescProjeto = document.createElement('LI');
+
+                const nLblDescPrj = document.createElement('LABEL');
+
+                nLblDescPrj.textContent = 'Projeto: ' + projeto.nome;
+
+                nLiDescProjeto.classList.add('projeto');
+
+                const btnExcluir = criarBotaoExcluir();
+
+                btnExcluir.addEventListener('click', () => {
+
+                    if (confirm('Deseja excluir o projeto?')) {
+
+                        projetos.splice(indexProjeto, 1);
+                        gravarDadosStorage();
+                        carregaListaProjetos();
+                    }
+                });
+
+                const btnExpPrj = criarBotaoExpandir();
+
+                btnExpPrj.addEventListener('click', () => {
+
+                    trocaIcone(btnExpPrj, nLiDescProjeto.children[3].style.display);
+
+                    if (nLiDescProjeto.children[3].style.display == 'none') {
+                        nLiDescProjeto.children[3].style.display = 'block';
+
+                    }
+                    else {
+                        nLiDescProjeto.children[3].style.display = 'none';
+
+                    }
+                });
+
+                nLiDescProjeto.appendChild(btnExpPrj);
+                nLiDescProjeto.appendChild(nLblDescPrj);
+                nLiDescProjeto.appendChild(btnExcluir);
+
+                const nUlItensPrj = document.createElement('UL');
+                nUlItensPrj.style.display = 'none';
+
+                const nLIdData = document.createElement('LI');
+                nLIdData.textContent = 'Data: ' + projeto.data;
+
+                nUlItensPrj.appendChild(nLIdData);
+
+                const nLIdDesc = document.createElement('LI');
+                nLIdDesc.innerHTML = '<pre>Descrição: ' + projeto.descricao + '</pre>';
+
+                nUlItensPrj.appendChild(nLIdDesc);
+
+                const nLIPOs = document.createElement('LI');
+
+                const nLblDescPos = document.createElement('LABEL');
+
+                nLblDescPos.textContent = 'Envolvidos(' + projeto.pos.length + ')';
+
+                const btnAddPo = criarBotaoAdicionar();
+
+                btnAddPo.addEventListener('click', () => {
+                    mPo.setAttribute('data-id', indexProjeto);
+
+                    const btCncPo = document.getElementById('btCncPo');
+
+                    btCncPo.addEventListener('click', () => {
+                        txtPONome.value = '';
+                        txtPOEmail.value = '';
+                        txtPOTelefone.value = '';
+
+                        mPo.close();
+                    })
+
+                    mPo.showModal();
+                });
+
+                const btnExpPos = criarBotaoExpandir();
+
+                btnExpPos.addEventListener('click', () => {
+
+                    trocaIcone(btnExpPos, nLIPOs.children[3].style.display);
+
+                    if (nLIPOs.children[3].style.display == 'none') {
+                        nLIPOs.children[3].style.display = 'inline-table';
+                    }
+                    else {
+                        nLIPOs.children[3].style.display = 'none';
+                    }
+                });
+
+                nLIPOs.appendChild(btnExpPos);
+                nLIPOs.appendChild(nLblDescPos);
+
+                nLIPOs.appendChild(btnAddPo);
+
+                const nUlItensPos = document.createElement('UL');
+
+                nUlItensPos.classList.add('pos');
+
+                nUlItensPos.style.display = 'none';
+
+                const tabela = document.createElement('TABLE');
+                tabela.style.width = '100%';
+
+                const line = document.createElement('TR');
+
+                const titNome = document.createElement('TH');
+                titNome.textContent = "Nome";
+                const titEmail = document.createElement('TH');
+                titEmail.textContent = "Email";
+                const titTelefone = document.createElement('TH');
+                titTelefone.textContent = "Telefone";
+                const titBotoes = document.createElement('TH');
+                titBotoes.textContent = "";
+
+                line.appendChild(titNome);
+                line.appendChild(titEmail);
+                line.appendChild(titTelefone);
+                line.appendChild(titBotoes);
+
+                tabela.appendChild(line);
+
+                projeto.pos.forEach(po => {
+
+                    const nLIPO = document.createElement('LI');
+
+                    const btnExcluirPo = criarBotaoExcluir();
+
+                    btnExcluirPo.addEventListener('click', () => {
+
+                        if (confirm('Deseja excluir o envolvidoo?')) {
+
+                            let indexPo = projetos[indexProjeto].pos.indexOf(po);
+
+                            projetos[indexProjeto].pos.splice(indexPo, 1);
+
+                            gravarDadosStorage();
+                            carregaListaProjetos();
+                        }
+                    });
+
+                    const linePo = document.createElement('TR');
+
+                    const colNome = document.createElement('TD');
+                    const colEmail = document.createElement('TD');
+                    const colTelefone = document.createElement('TD');
+                    const colBotoes = document.createElement('TD');
+
+                    colNome.textContent = po.nome;
+                    colEmail.textContent = po.email;
+                    colTelefone.textContent = po.telefone;
+                    colBotoes.appendChild(btnExcluirPo);
+
+                    linePo.appendChild(colNome);
+                    linePo.appendChild(colEmail);
+                    linePo.appendChild(colTelefone);
+                    linePo.appendChild(colBotoes);
+
+                    tabela.appendChild(linePo);
+                });
+
+                tabela.style.display = 'none';
+                nLIPOs.appendChild(tabela);
+
+                nUlItensPrj.appendChild(nLIPOs);
+
+                ///tarefas
+                const nLITasks = document.createElement('LI');
+
+                const nLblDescTasks = document.createElement('LABEL');
+
+                const estimativaGeral = projeto.tasks.map(tks => {
+                    return tks.atividades.map(x => x.estimativa).reduce((p, c) => {
+                        return somartempos(p, c)
+                    }, '00:00')
+                }).reduce((p, c) => {
+                    return somartempos(p, c)
+                }, '00:00');
+
+                const opontamentosGeral = projeto.tasks.map(tks => {
+                    return tks.apontamentos.map(x => x.tempo).reduce((p, c) => {
+                        return somartempos(p, c)
+                    }, '00:00')
+                }).reduce((p, c) => {
+                    return somartempos(p, c)
+                }, '00:00');
+                //projetos[0].tasks.map(tks => { return tks.atividades.map(x => x.estimativa).reduce((p,c) =>  { return somartempos(p,c)},'00:00') }).reduce((p,c) => { return somartempos(p,c)},'00:00')
+
+
+                nLblDescTasks.textContent = 'Tarefas(' + projeto.tasks.length + ') - Estimado: ' + estimativaGeral + ', Apontamentos(' + opontamentosGeral +')';
+
+                const btnExpTasks = criarBotaoExpandir();
+
+                btnExpTasks.addEventListener('click', () => {
+
+                    trocaIcone(btnExpTasks, nLITasks.children[3].style.display);
+
+                    if (nLITasks.children[3].style.display == 'none') {
+                        nLITasks.children[3].style.display = 'block';
+                    }
+                    else {
+                        nLITasks.children[3].style.display = 'none';
+                    }
+                });
+
+                const btnAddTask = criarBotaoAdicionar();
+
+                btnAddTask.addEventListener('click', () => {
+
+                    mTasks.setAttribute('data-id', indexProjeto);
+
+                    const btCncTask = document.getElementById('btCncTask');
+
+                    btCncTask.addEventListener('click', () => {
+                        txtDescTask.value = '';
+                        mTasks.close();
+                    })
+
+                    mTasks.showModal();
+                });
+
+                nLITasks.appendChild(btnExpTasks);
+                nLITasks.appendChild(nLblDescTasks);
+                nLITasks.appendChild(btnAddTask);
+
+                const nUlItensTasks = document.createElement('UL');
+
+                nUlItensTasks.classList.add('pos');
+
+                nUlItensTasks.style.display = 'none';
+
+                projeto.tasks.forEach(task => {
+
+                    let indexTask = projetos[indexProjeto].tasks.indexOf(task);
+
+                    const nLITask = document.createElement('LI');
+
+                    const lblTask = document.createElement('LABEL');
+
+                    let percentual = 0;
+
+                    if (projeto.tasks[indexTask].apontamentos.slice(-1).length > 0) {
+                        percentual = projeto.tasks[indexTask].apontamentos.slice(-1)[0].percentual;
+                    }
+
+                    const totEstimativas = projeto.tasks[indexTask].atividades.map(x => x.estimativa).reduce((p, c) => { return somartempos(p, c) }, '00:00');
+                    const totApontado = projeto.tasks[indexTask].apontamentos.map(x => x.tempo).reduce((p, c) => { return somartempos(p, c) }, '00:00');
+
+                    // const totEstimativasPtarefa = projeto.tasks[indexTask].atividades.map(x => x.estimativa).reduce((p,c) =>  { return somartempos(p,c)},'00:00')
+
+                    const restante = calcularRestante(totApontado,percentual);
+
+                    lblTask.textContent = 'Tarefa: ' + task.descricao + "| Estimado: " + totEstimativas + ', Apontamentos: ' + totApontado + ', Conluido: ' + percentual + '%, Restante:' + restante;
+
+                    const btnExcluirTask = criarBotaoExcluir();
+
+                    btnExcluirTask.addEventListener('click', () => {
+                        if (confirm('Deseja excluir a tarefa?')) {
+
+                            projetos[indexProjeto].tasks.splice(indexTask, 1);
+
+                            gravarDadosStorage();
+                            carregaListaProjetos();
+                        }
+                    });
+
+                    const btnExpAtividade = criarBotaoExpandir();
+
+                    btnExpAtividade.addEventListener('click', () => {
+
+                        trocaIcone(btnExpAtividade, nLITask.children[3].style.display);
+
+                        if (nLITask.children[3].style.display == 'none') {
+                            nLITask.children[3].style.display = 'block';
+                        }
+                        else {
+                            nLITask.children[3].style.display = 'none';
+                        }
+                    });
+
+                    const ulItens = document.createElement('UL');
+
+                    //atividades
+
+                    const nLblTltAtividades = document.createElement('LABEL');
+
+                    // const totEstimativas = projeto.tasks[indexTask].atividades.map(x => x.estimativa).reduce((p,c) =>  { return somartempos(p,c)},'00:00')
+
+                    nLblTltAtividades.textContent = 'Atividades(' + projeto.tasks[indexTask].atividades.length + ') | Estimado: ' + totEstimativas;
+
+                    //projetos[0].tasks[0].atividades.map(x => x.estimativa).reduce((p,c) =>  { return somartempos(p,c)},'00:00')
+
+                    const btnExpAtv = criarBotaoExpandir();
+
+                    btnExpAtv.addEventListener('click', () => {
+
+                        trocaIcone(btnExpAtv, ulAtv.children[3].style.display);
+
+                        if (ulAtv.children[3].style.display == 'none') {
+                            ulAtv.children[3].style.display = 'inline-table';
+                        }
+                        else {
+                            ulAtv.children[3].style.display = 'none';
+                        }
+                    });
+
+                    const btnAddAtv = criarBotaoAdicionar();
+
+                    btnAddAtv.addEventListener('click', () => {
+
+                        mAtividade.setAttribute('data-id', indexProjeto);
+
+                        mAtividade.setAttribute('data-idtask', indexTask);
+
+                        const btCncAtividade = document.getElementById('btCncAtividade');
+
+                        btCncAtividade.addEventListener('click', () => {
+                            //limparCampos();
+                            txtDescAtividade.value = '';
+                            txtExtHoraAtividade.value = '0'
+                            txtExtMinAtividade.value = '0';
+                            mAtividade.close();
+                        })
+
+                        mAtividade.showModal();
+                    });
+
+                    const tabelaAtv = document.createElement('TABLE');
+                    tabelaAtv.style.width = '100%';
+
+                    const LinhaHAtv = document.createElement('TR');
+                    const titAtv = document.createElement('TH');
+                    const titEstimativa = document.createElement('TH');
+                    const titBotoesAtv = document.createElement('TH');
+
+                    titAtv.textContent = 'Descrição';
+                    titEstimativa.textContent = 'Estimativa';
+                    titBotoesAtv.textContent = '';
+
+                    LinhaHAtv.appendChild(titAtv);
+                    LinhaHAtv.appendChild(titEstimativa);
+                    LinhaHAtv.appendChild(titBotoesAtv);
+
+                    tabelaAtv.appendChild(LinhaHAtv);
+
+                    task.atividades.forEach(atividade => {
+                        const btnExcluirAtv = criarBotaoExcluir();
+
+                        btnExcluirAtv.addEventListener('click', () => {
+
+                            if (confirm('Deseja excluir a atividade?')) {
+
+                                let indexAtividade = projetos[indexProjeto].tasks[indexTask].atividades.indexOf(atividade);
+
+                                projetos[indexProjeto].tasks[indexTask].atividades.splice(indexAtividade, 1);
+
+                                gravarDadosStorage();
+                                carregaListaProjetos();
+                            }
+                        });
+
+                        const LinhaAtv = document.createElement('TR');
+                        const colAtv = document.createElement('TD');
+                        const colEstimativa = document.createElement('TD');
+                        const colBotoesAtv = document.createElement('TD');
+
+                        colAtv.textContent = atividade.descricao;
+                        colEstimativa.textContent = atividade.estimativa;
+                        colBotoesAtv.appendChild(btnExcluirAtv);
+
+                        LinhaAtv.appendChild(colAtv);
+                        LinhaAtv.appendChild(colEstimativa);
+                        LinhaAtv.appendChild(colBotoesAtv);
+
+                        tabelaAtv.appendChild(LinhaAtv);
+                    });
+
+                    tabelaAtv.style.display = 'none';
+
+                    //abraa
+                    const ulAtv = document.createElement('LI');
+                    ulAtv.appendChild(btnExpAtv);
+                    ulAtv.appendChild(nLblTltAtividades);
+                    ulAtv.appendChild(btnAddAtv);
+                    ulAtv.appendChild(tabelaAtv);
+
+                    ulItens.appendChild(ulAtv);
+                    ///apontamentos
+
+                    const nLblTltApontamentos = document.createElement('LABEL');
+
+                    nLblTltApontamentos.textContent = 'Apontamentos(' + projeto.tasks[indexTask].apontamentos.length + '), Total:' + totApontado;
+
+                    const btnExpApt = criarBotaoExpandir();
+
+                    btnExpApt.addEventListener('click', () => {
+
+                        trocaIcone(btnExpApt, ulApt.children[3].style.display);
+
+                        if (ulApt.children[3].style.display == 'none') {
+                            ulApt.children[3].style.display = 'inline-table';
+                        }
+                        else {
+                            ulApt.children[3].style.display = 'none';
+                        }
+                    });
+
+                    const btnAddApt = criarBotaoAdicionar();
+
+                    btnAddApt.addEventListener('click', () => {
+
+                        mApontamentos.setAttribute('data-id', indexProjeto);
+
+                        mApontamentos.setAttribute('data-idtask', indexTask);
+
+                        const btCncApontamento = document.getElementById('btCncApontamento');
+
+                        btCncApontamento.addEventListener('click', () => {
+                            txtDataApontamento.value = '';
+                            txtExtHoraApontamento.value = '0'
+                            txtExtMinApontamento.value = '0';
+                            txtPercentualProjeto.value = '0'
+                            mApontamentos.close();
+                        })
+
+                        mApontamentos.showModal();
+                    });
+
+                    const tabelaApt = document.createElement('TABLE');
+                    tabelaApt.style.width = '100%';
+
+                    const lineApt = document.createElement('TR');
+
+                    const titDataApt = document.createElement('TH');
+                    titDataApt.textContent = "Data";
+
+                    const titTempo = document.createElement('TH');
+                    titTempo.textContent = "Tempo";
+
+                    const titPercentual = document.createElement('TH');
+                    titPercentual.textContent = "Percentual";
+                    titPercentual.colSpan = '2';
+                    titPercentual.style.textAlign = 'left';
+
+                    const titBotoesApt = document.createElement('TH');
+                    titBotoesApt.textContent = "";
+
+                    lineApt.appendChild(titDataApt);
+                    lineApt.appendChild(titTempo);
+                    lineApt.appendChild(titPercentual);
+
+                    tabelaApt.appendChild(lineApt);
+
+                    const ulItemApontamentos = document.createElement('UL');
+
+                    task.apontamentos.forEach(apontamento => {
+                        const btnExcluirApt = criarBotaoExcluir();
+
+                        btnExcluirApt.addEventListener('click', () => {
+
+                            if (confirm('Deseja excluir o apontamento?')) {
+
+                                let indexApontamento = projetos[indexProjeto].tasks[indexTask].apontamentos.indexOf(apontamento);
+
+                                projetos[indexProjeto].tasks[indexTask].apontamentos.splice(indexApontamento, 1);
+
+                                gravarDadosStorage();
+                                carregaListaProjetos();
+                            }
+                        });
+
+                        const lineApt2 = document.createElement('TR');
+
+                        const colDataApt = document.createElement('TD');
+                        colDataApt.textContent = apontamento.data;
+
+                        const colTempo = document.createElement('TD');
+                        colTempo.textContent = apontamento.tempo;
+
+                        const colPercentual = document.createElement('TD');
+                        colPercentual.textContent = apontamento.percentual + '%';
+
+                        const titBotoesApt2 = document.createElement('TD');
+                        titBotoesApt2.appendChild(btnExcluirApt);
+
+                        lineApt2.appendChild(colDataApt);
+                        lineApt2.appendChild(colTempo);
+                        lineApt2.appendChild(colPercentual);
+                        lineApt2.appendChild(titBotoesApt2);
+
+                        tabelaApt.appendChild(lineApt2);
+
+                    });
+
+                    tabelaApt.style.display = 'none';
+
+                    const ulApt = document.createElement('LI');
+                    ulApt.appendChild(btnExpApt);
+                    ulApt.appendChild(nLblTltApontamentos);
+                    ulApt.appendChild(btnAddApt);
+                    ulApt.appendChild(tabelaApt);
+
+                    ulItens.appendChild(ulApt);
+
+                    ulItens.style.display = 'none';
+                    nLITask.appendChild(btnExpAtividade);
+                    nLITask.appendChild(lblTask);
+
+                    nLITask.appendChild(btnExcluirTask);
+                    nLITask.appendChild(ulItens);
+                    nUlItensTasks.appendChild(nLITask);
+
+                });
+
+                nLITasks.appendChild(nUlItensTasks);
+
+                nUlItensPrj.appendChild(nLITasks);
+
+                //fim tarefas
+
+                nLiDescProjeto.appendChild(nUlItensPrj);
+
+                ulProjetos.appendChild(nLiDescProjeto);
+            });
+
+            ////
+
+        }
+
+        const criarBotaoExpandir = () => {
+            const btnExpandir = document.createElement('I');
+            btnExpandir.classList.add('glyphicon');
+            btnExpandir.classList.add('glyphicon-folder-close');
+            btnExpandir.setAttribute('alt', 'Expandir');
+            //setAttribute('data-id', indexProjeto);
+            return btnExpandir;
+        }
+
+        const criarBotaoExcluir = () => {
+            const btnExcluir = document.createElement('I');
+            btnExcluir.classList.add('glyphicon');
+            btnExcluir.classList.add('glyphicon-trash');
+            return btnExcluir;
+        }
+
+        const trocaIcone = (botao, status) => {
+
+            if (status == 'none') {
+                botao.classList.remove('glyphicon-folder-close');
+                botao.classList.add('glyphicon-folder-open');
+            }
+            else {
+                botao.classList.remove('glyphicon-folder-open');
+                botao.classList.add('glyphicon-folder-close');
+            }
+        }
+
+        const criarBotaoAdicionar = () => {
+            const btnAdicionar = document.createElement('I');
+            btnAdicionar.classList.add('glyphicon');
+            btnAdicionar.classList.add('glyphicon-plus');
+            return btnAdicionar;
+        }
+
+        const lerDadosStorage = () => {
+            const dados = localStorage.getItem('mngPrj');
+
+            if (dados)
+                projetos = JSON.parse(dados);
+        }
+
+        const gravarDadosStorage = () => {
+            const dados = JSON.stringify(projetos);
+
+            localStorage.setItem('mngPrj', dados);
+
+            // lerDadosStorage();
+        }
+
+        const transformaTempoEmInteiro = (tempo) => {
+            var arrayTempo = String(tempo).split(':');
+
+            var tempo_seg = ((parseInt(arrayTempo[0]) * 60) + parseInt(arrayTempo[1]));
+
+            return tempo_seg;
+        }
+
+        const somartempos = (tempo1, tempo2) => {
+
+            if (tempo1 === "") {
+                tempo1 = "00:00";
+            }
+
+            var tempo_seg1 = transformaTempoEmInteiro(tempo1);
+
+            var tempo_seg2 = transformaTempoEmInteiro(tempo2);
+
+            var totalMinutos = tempo_seg1 + tempo_seg2
+
+            var tempoDecimal = totalMinutos / 60;
+
+            var horas = Math.floor(tempoDecimal);
+
+            var minutosDecimal = tempoDecimal - horas;
+
+            var minutos = Math.round(minutosDecimal * 60);
+
+            return String(horas).padStart(2, '0') + ':' + String(minutos).padStart(2, '0');
+        }
+
+        const calcularRestante = (totApontado, percentual) => {
+
+            if (totApontado === "") {
+                totApontado = "00:00";
+            }
+
+            var tempo_seg1 = transformaTempoEmInteiro(totApontado);
+
+            var valor = tempo_seg1/(percentual/100);
+
+            var tempoDecimal = valor / 60;
+
+            var horas = Math.floor(tempoDecimal);
+
+            var minutosDecimal = tempoDecimal - horas;
+
+            var minutos = Math.round(minutosDecimal * 60);
+
+            return String(horas).padStart(2, '0') + ':' + String(minutos).padStart(2, '0');
+        }
+
+        carregaListaProjetos();
+
+
+    </script>
+</body>
+
+</html>
