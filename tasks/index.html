@@ -9,27 +9,48 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
     <style>
-        tr:hover {
-            background-color: blanchedalmond;
-            cursor: default;
+        pre {
+            padding: 9.5px;
+            margin: 0 0 10px;
+            font-size: large;
+            font-family: inherit;
+            /* line-height: 1.42857143; */
+            /* color: #333; */
+            /* word-break: break-all; */
+            /* word-wrap: break-word; */
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
         }
+
+        * {
+            font-size: medium;
+            align-items: baseline;
+        }
+
+        .titTarefas {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            font-weight: bolder;
+
+        }
+        
+        table tr:not(:first-child):hover{
+            background-color: #f5f5f5;
+            color: crimson;
+        }
+
+        tr {
+            cursor: default;
+
+        }
+
+        /* tr:hover {
+            background-color: #f5f5f5;
+            border-bottom: 1px solid;
+        } */
 
         table {
-            border: 1px solid;
-        }
-
-        td {
-            padding-left: 5px;
-        }
-
-        th {
-            background-color: black;
-            color: white;
-            text-align: center;
-        }
-
-        td,
-        th {
             border: 1px solid;
         }
 
@@ -50,6 +71,7 @@
 
         ul {
             list-style: none;
+            display: inline;
         }
 
         .pos {
@@ -99,6 +121,9 @@
     <dialog id="mProjeto" class="mProjeto">
         <div>
             <div class="linha">
+                <H1>Projeto</H1>
+            </div>
+            <div class="linha">
                 <label>Nome projeto</label>
                 <input maxlength="30" type="text" id="txtNmPrj">
 
@@ -106,10 +131,6 @@
             <div class="linha">
                 <label>Descrição</label>
                 <textarea id="txtDescPrj" cols="40" rows="3"></textarea>
-            </div>
-            <div class="linha">
-                <label>Data:</label>
-                <input type="text" id="txtData" disabled>
             </div>
             <div class="linha">
                 <button id="btCncPrj" class="btn btn-warning">
@@ -126,6 +147,9 @@
 
     <dialog id="mPo">
         <div>
+            <div class="linha">
+                <H1>Envolvido</H1>
+            </div>
             <div class="linha">
                 <label>Nome</label>
                 <input maxlength="30" type="text" id="txtPONome">
@@ -152,6 +176,9 @@
     <dialog id="mTasks">
         <div>
             <div class="linha">
+                <H1>Tarefa</H1>
+            </div>
+            <div class="linha">
                 <label>Descrição da tarefa</label>
                 <input maxlength="30" type="text" id="txtDescTask">
             </div>
@@ -169,15 +196,19 @@
     <dialog id="mAtividade">
         <div>
             <div class="linha">
+                <H1>Atividade</H1>
+            </div>
+            <div class="linha">
                 <label>Descrição da atividade</label>
-                <input class="form-control" maxlength="30" type="text" id="txtDescAtividade">
+                <input class="form-control" maxlength="60" type="text" id="txtDescAtividade">
             </div>
             <div>
-                <label>Extimativa</label>
+                <label>Estimativa</label>
                 <br>
                 <div class="linha2">
                     <input class="inpt form-control" min="0" type="number" id="txtExtHoraAtividade"> horas e
-                    <input class="inpt form-control" min="0" max="59" type="number" id="txtExtMinAtividade"> minutos
+                    <input class="inpt form-control" step="5" min="0" max="59" type="number" id="txtExtMinAtividade">
+                    minutos
                 </div>
             </div>
             <div class="linha">
@@ -194,8 +225,11 @@
     <dialog id="mApontamentos">
         <div>
             <div class="linha">
+                <H1>Apontamento</H1>
+            </div>
+            <div class="linha">
                 <label>Data</label>
-                <input class="form-control" value="new Date()" type="date" id="txtDataApontamento">
+                <input class="form-control" type="date" id="txtDataApontamento">
             </div>
             <div>
                 <label>Tempo</label>
@@ -232,9 +266,6 @@
 
             mProjeto.showModal();
 
-            const txtData = document.getElementById('txtData');
-            txtData.value = new Date().toLocaleDateString();
-
             const btCncPrj = document.getElementById('btCncPrj');
 
             btCncPrj.addEventListener('click', () => {
@@ -248,14 +279,26 @@
         btnSlvPrj.addEventListener('click', () => {
             const txtNmPrj = document.getElementById('txtNmPrj')
 
+            if (txtNmPrj.value.length === 0) {
+                alert('informe o nome do projeto');
+                txtNmPrj.focus();
+                return;
+            }
+
             const txtDescPrj = document.getElementById('txtDescPrj')
+
+            if (txtDescPrj.value.length === 0) {
+                alert('informe uma descrição para o projeto');
+                txtDescPrj.focus();
+                return;
+            }
 
             const nPrj = {
                 nome: txtNmPrj.value,
                 descricao: txtDescPrj.value,
                 pos: [],
                 tasks: [],
-                data: new Date().toLocaleDateString()
+                data: ''//new Date().toLocaleDateString()
             };
 
             projetos.push(nPrj);
@@ -274,6 +317,13 @@
 
         btnSlvPo.addEventListener('click', (e) => {
             const txtPONome = document.getElementById('txtPONome')
+
+            if (txtPONome.value.length === 0) {
+                alert('informe o nome do envolvido');
+                txtPONome.focus();
+                return;
+            }
+
             const txtPOEmail = document.getElementById('txtPOEmail')
             const txtPOTelefone = document.getElementById('txtPOTelefone')
 
@@ -304,6 +354,12 @@
         btnSlvTask.addEventListener('click', (e) => {
             const txtDescTask = document.getElementById('txtDescTask')
 
+            if (txtDescTask.value.length === 0) {
+                alert('informe a descrição da tarefa');
+                txtDescTask.focus();
+                return;
+            }
+
             const novo = {
                 descricao: txtDescTask.value,
                 status: "todo",
@@ -332,9 +388,21 @@
         btnSlvAtividade.addEventListener('click', (e) => {
             const txtDescAtividade = document.getElementById('txtDescAtividade');
 
+            if (txtDescAtividade.value.length === 0) {
+                alert('informe a descrição da atividade');
+                txtDescAtividade.focus();
+                return;
+            }
+
             const txtExtHoraAtividade = document.getElementById('txtExtHoraAtividade');
 
             const txtExtMinAtividade = document.getElementById("txtExtMinAtividade");
+
+            if (txtExtHoraAtividade.value.length === 0 || txtExtMinAtividade.value.length === 0) {
+                alert('informe o tempo da estimativa correto');
+                txtExtHoraAtividade.focus();
+                return;
+            }
 
             const minuto = txtExtMinAtividade.value.padStart(2, '0')
 
@@ -367,11 +435,29 @@
         btnSlvApontamento.addEventListener('click', (e) => {
             const txtDataApontamento = document.getElementById('txtDataApontamento');
 
+            if (txtDataApontamento.value.length === 0) {
+                alert('informe a data do apontamento');
+                txtDataApontamento.focus();
+                return;
+            }
+
             const txtExtHoraApontamento = document.getElementById('txtExtHoraApontamento');
 
             const txtExtMinApontamento = document.getElementById("txtExtMinApontamento");
 
+            if (txtExtHoraApontamento.value.length === 0 || txtExtMinApontamento.value.length === 0) {
+                alert('informe o tempo do apontamento correto');
+                txtExtHoraApontamento.focus();
+                return;
+            }
+
             const txtPercentualProjeto = document.getElementById('txtPercentualProjeto');
+
+            if (txtPercentualProjeto.value.length === 0) {
+                alert('informe o percentual executado correspondnete a tarefa');
+                txtPercentualProjeto.focus();
+                return;
+            }
 
             const minuto = txtExtMinApontamento.value.padStart(2, '0')
 
@@ -382,9 +468,14 @@
             };
 
             const id = mApontamentos.getAttribute('data-id');
-            const idtask = mApontamentos.getAttribute('data-idtask');
+            const idtask = mApontamentos.getAttribute('data-idtask');            
 
             projetos[id].tasks[idtask].apontamentos.push(novo);
+
+            if(projetos[id].data.length === 0)
+            {
+                projetos[id].data = txtDataApontamento.value;
+            }
 
             txtDataApontamento.value = '';
 
@@ -399,7 +490,6 @@
             gravarDadosStorage();
 
             carregaListaProjetos();
-
         });
 
         const limparCampos = () => {
@@ -467,7 +557,11 @@
                 nUlItensPrj.style.display = 'none';
 
                 const nLIdData = document.createElement('LI');
-                nLIdData.textContent = 'Data: ' + projeto.data;
+
+                if(projeto.data.length>0)
+                    nLIdData.textContent = 'Data: ' + projeto.data;
+                    else
+                    nLIdData.textContent ='';
 
                 nUlItensPrj.appendChild(nLIdData);
 
@@ -539,10 +633,11 @@
                 const titBotoes = document.createElement('TH');
                 titBotoes.textContent = "";
 
+                line.appendChild(titBotoes);
                 line.appendChild(titNome);
                 line.appendChild(titEmail);
                 line.appendChild(titTelefone);
-                line.appendChild(titBotoes);
+
 
                 tabela.appendChild(line);
 
@@ -573,14 +668,18 @@
                     const colBotoes = document.createElement('TD');
 
                     colNome.textContent = po.nome;
+                    colNome.setAttribute('width', '50%');
                     colEmail.textContent = po.email;
                     colTelefone.textContent = po.telefone;
+                    colBotoes.setAttribute('width', '5%');
+                    colBotoes.style.textAlign = 'center';
                     colBotoes.appendChild(btnExcluirPo);
 
+                    linePo.appendChild(colBotoes);
                     linePo.appendChild(colNome);
                     linePo.appendChild(colEmail);
                     linePo.appendChild(colTelefone);
-                    linePo.appendChild(colBotoes);
+
 
                     tabela.appendChild(linePo);
                 });
@@ -613,7 +712,7 @@
                 //projetos[0].tasks.map(tks => { return tks.atividades.map(x => x.estimativa).reduce((p,c) =>  { return somartempos(p,c)},'00:00') }).reduce((p,c) => { return somartempos(p,c)},'00:00')
 
 
-                nLblDescTasks.textContent = 'Tarefas(' + projeto.tasks.length + ') - Estimado: ' + estimativaGeral + ', Apontamentos(' + opontamentosGeral +')';
+                nLblDescTasks.textContent = 'Tarefas(' + projeto.tasks.length + ') - Estimado: ' + estimativaGeral + ', Apontamentos(' + opontamentosGeral + ')';
 
                 const btnExpTasks = criarBotaoExpandir();
 
@@ -661,8 +760,6 @@
 
                     const nLITask = document.createElement('LI');
 
-                    const lblTask = document.createElement('LABEL');
-
                     let percentual = 0;
 
                     if (projeto.tasks[indexTask].apontamentos.slice(-1).length > 0) {
@@ -674,9 +771,13 @@
 
                     // const totEstimativasPtarefa = projeto.tasks[indexTask].atividades.map(x => x.estimativa).reduce((p,c) =>  { return somartempos(p,c)},'00:00')
 
-                    const restante = calcularRestante(totApontado,percentual);
+                    let restante = totEstimativas;
 
-                    lblTask.textContent = 'Tarefa: ' + task.descricao + "| Estimado: " + totEstimativas + ', Apontamentos: ' + totApontado + ', Conluido: ' + percentual + '%, Restante:' + restante;
+                    if (percentual > 0) {
+                        restante = calcularRestante(totApontado, percentual);
+                    }
+
+                    //abraao
 
                     const btnExcluirTask = criarBotaoExcluir();
 
@@ -694,17 +795,19 @@
 
                     btnExpAtividade.addEventListener('click', () => {
 
-                        trocaIcone(btnExpAtividade, nLITask.children[3].style.display);
+                        trocaIcone(btnExpAtividade, nLITask.children[1].style.display);
 
-                        if (nLITask.children[3].style.display == 'none') {
-                            nLITask.children[3].style.display = 'block';
+                        if (nLITask.children[1].style.display == 'none') {
+                            nLITask.children[1].style.display = 'block';
                         }
                         else {
-                            nLITask.children[3].style.display = 'none';
+                            nLITask.children[1].style.display = 'none';
                         }
+
                     });
 
                     const ulItens = document.createElement('UL');
+                    ulItens.style.border = '1px solid';
 
                     //atividades
 
@@ -763,9 +866,9 @@
                     titEstimativa.textContent = 'Estimativa';
                     titBotoesAtv.textContent = '';
 
+                    LinhaHAtv.appendChild(titBotoesAtv);
                     LinhaHAtv.appendChild(titAtv);
                     LinhaHAtv.appendChild(titEstimativa);
-                    LinhaHAtv.appendChild(titBotoesAtv);
 
                     tabelaAtv.appendChild(LinhaHAtv);
 
@@ -786,17 +889,22 @@
                         });
 
                         const LinhaAtv = document.createElement('TR');
+
                         const colAtv = document.createElement('TD');
                         const colEstimativa = document.createElement('TD');
                         const colBotoesAtv = document.createElement('TD');
 
                         colAtv.textContent = atividade.descricao;
                         colEstimativa.textContent = atividade.estimativa;
+                        colBotoesAtv.style.width = '5%';
+                        colBotoesAtv.style.textAlign = 'center';
                         colBotoesAtv.appendChild(btnExcluirAtv);
 
+                        //abraao
+                        LinhaAtv.appendChild(colBotoesAtv);
                         LinhaAtv.appendChild(colAtv);
                         LinhaAtv.appendChild(colEstimativa);
-                        LinhaAtv.appendChild(colBotoesAtv);
+
 
                         tabelaAtv.appendChild(LinhaAtv);
                     });
@@ -871,6 +979,7 @@
                     const titBotoesApt = document.createElement('TH');
                     titBotoesApt.textContent = "";
 
+                    lineApt.appendChild(titBotoesApt);
                     lineApt.appendChild(titDataApt);
                     lineApt.appendChild(titTempo);
                     lineApt.appendChild(titPercentual);
@@ -908,11 +1017,13 @@
 
                         const titBotoesApt2 = document.createElement('TD');
                         titBotoesApt2.appendChild(btnExcluirApt);
+                        titBotoesApt2.style.width = '5%';
 
+                        lineApt2.appendChild(titBotoesApt2);
                         lineApt2.appendChild(colDataApt);
                         lineApt2.appendChild(colTempo);
                         lineApt2.appendChild(colPercentual);
-                        lineApt2.appendChild(titBotoesApt2);
+
 
                         tabelaApt.appendChild(lineApt2);
 
@@ -929,10 +1040,48 @@
                     ulItens.appendChild(ulApt);
 
                     ulItens.style.display = 'none';
-                    nLITask.appendChild(btnExpAtividade);
-                    nLITask.appendChild(lblTask);
 
-                    nLITask.appendChild(btnExcluirTask);
+                    // nLITask.appendChild(btnExpAtividade);
+
+                    const divTitTarefas = document.createElement('DIV');
+
+                    divTitTarefas.classList.add('titTarefas');
+
+                    const lblTask = document.createElement('SPAN');
+                    const lblDescTask = document.createElement('SPAN');
+                    const lblEstimadoTask = document.createElement('SPAN');
+                    const lblApontamentoTask = document.createElement('SPAN');
+                    const lblConcluidoTask = document.createElement('SPAN');
+                    const lblRestanteTask = document.createElement('SPAN');
+
+                    lblDescTask.textContent = 'Tarefa: ' + task.descricao;
+                    lblDescTask.style.width = '40%';
+                    lblEstimadoTask.textContent = "Estimado: " + totEstimativas;
+                    lblApontamentoTask.textContent = 'Apontamentos: ' + totApontado;
+                    lblConcluidoTask.textContent = 'Concluído: ' + percentual + '%';
+
+
+                    if(percentual==100)
+                    {
+                        lblRestanteTask.textContent = 'tempo Gato:' + restante;
+                    }
+                    else
+                        lblRestanteTask.textContent = 'Restante:' + restante;
+
+
+                    divTitTarefas.appendChild(btnExpAtividade);
+
+                    divTitTarefas.appendChild(lblDescTask);
+                    divTitTarefas.appendChild(lblEstimadoTask);
+                    divTitTarefas.appendChild(lblApontamentoTask);
+                    divTitTarefas.appendChild(lblConcluidoTask);
+                    divTitTarefas.appendChild(lblRestanteTask);
+
+                    divTitTarefas.appendChild(btnExcluirTask);
+
+                    nLITask.appendChild(divTitTarefas);
+
+                    // nLITask.appendChild(btnExcluirTask);
                     nLITask.appendChild(ulItens);
                     nUlItensTasks.appendChild(nLITask);
 
@@ -1042,7 +1191,7 @@
 
             var tempo_seg1 = transformaTempoEmInteiro(totApontado);
 
-            var valor = tempo_seg1/(percentual/100);
+            var valor = tempo_seg1 / (percentual / 100);
 
             var tempoDecimal = valor / 60;
 
