@@ -34,8 +34,8 @@
             font-weight: bolder;
 
         }
-        
-        table tr:not(:first-child):hover{
+
+        table tr:not(:first-child):hover {
             background-color: #f5f5f5;
             color: crimson;
         }
@@ -240,7 +240,7 @@
                 </div>
             </div>
             <div class="linha">
-                <label>Percentual projeto</label>
+                <label>Percentual atual da tarefa</label>
                 <input class="form-control" type="number" max="100" id="txtPercentualProjeto">
             </div>
 
@@ -324,8 +324,8 @@
                 return;
             }
 
-            const txtPOEmail = document.getElementById('txtPOEmail')
-            const txtPOTelefone = document.getElementById('txtPOTelefone')
+            const txtPOEmail = document.getElementById('txtPOEmail');
+            const txtPOTelefone = document.getElementById('txtPOTelefone');
 
             const novo = {
                 nome: txtPONome.value,
@@ -333,9 +333,9 @@
                 telefone: txtPOTelefone.value
             };
 
-            const idd = mPo.getAttribute('data-id');
+            const idProjeto = mPo.getAttribute('data-id');
 
-            projetos[idd].pos.push(novo);
+            projetos[idProjeto].pos.push(novo);
 
             txtPONome.value = '';
             txtPOEmail.value = '';
@@ -345,8 +345,7 @@
 
             gravarDadosStorage();
 
-            carregaListaProjetos();
-
+            carregaListaEnvolvidos(idProjeto);
         });
 
         const btnSlvTask = document.getElementById('btnSlvTask');
@@ -426,7 +425,7 @@
 
             gravarDadosStorage();
 
-            carregaListaProjetos();
+            carregaListaAtividades(id, idtask);
 
         });
 
@@ -468,12 +467,11 @@
             };
 
             const id = mApontamentos.getAttribute('data-id');
-            const idtask = mApontamentos.getAttribute('data-idtask');            
+            const idtask = mApontamentos.getAttribute('data-idtask');
 
             projetos[id].tasks[idtask].apontamentos.push(novo);
 
-            if(projetos[id].data.length === 0)
-            {
+            if (projetos[id].data.length === 0) {
                 projetos[id].data = txtDataApontamento.value;
             }
 
@@ -489,7 +487,7 @@
 
             gravarDadosStorage();
 
-            carregaListaProjetos();
+            carregaListaApontamentos(id, idtask);
         });
 
         const limparCampos = () => {
@@ -507,8 +505,6 @@
             const ulProjetos = document.getElementById('ulProjetos');
 
             ulProjetos.innerHTML = '';
-
-            //let id = 0;
 
             projetos.forEach(projeto => {
                 let indexProjeto = projetos.indexOf(projeto);
@@ -537,7 +533,7 @@
 
                 btnExpPrj.addEventListener('click', () => {
 
-                    trocaIcone(btnExpPrj, nLiDescProjeto.children[3].style.display);
+                    trocaIcone(btnExpPrj);
 
                     if (nLiDescProjeto.children[3].style.display == 'none') {
                         nLiDescProjeto.children[3].style.display = 'block';
@@ -554,14 +550,15 @@
                 nLiDescProjeto.appendChild(btnExcluir);
 
                 const nUlItensPrj = document.createElement('UL');
+                nUlItensPrj.setAttribute('id', 'nUlItensPrj' + indexProjeto);
                 nUlItensPrj.style.display = 'none';
 
                 const nLIdData = document.createElement('LI');
 
-                if(projeto.data.length>0)
-                    nLIdData.textContent = 'Data: ' + projeto.data;
-                    else
-                    nLIdData.textContent ='';
+                if (projeto.data.length > 0)
+                    nLIdData.textContent = 'Data inicio: ' + projeto.data;
+                else
+                    nLIdData.textContent = '';
 
                 nUlItensPrj.appendChild(nLIdData);
 
@@ -571,8 +568,10 @@
                 nUlItensPrj.appendChild(nLIdDesc);
 
                 const nLIPOs = document.createElement('LI');
+                nLIPOs.setAttribute('id', 'nLIPOs' + indexProjeto);
 
                 const nLblDescPos = document.createElement('LABEL');
+                nLblDescPos.setAttribute('id', 'nLblDescPos' + indexProjeto);
 
                 nLblDescPos.textContent = 'Envolvidos(' + projeto.pos.length + ')';
 
@@ -596,15 +595,20 @@
 
                 const btnExpPos = criarBotaoExpandir();
 
+                const tabelaPO = document.createElement('TABLE');
+                tabelaPO.setAttribute('id', 'tabelaPO' + indexProjeto);
+
                 btnExpPos.addEventListener('click', () => {
 
-                    trocaIcone(btnExpPos, nLIPOs.children[3].style.display);
-
-                    if (nLIPOs.children[3].style.display == 'none') {
-                        nLIPOs.children[3].style.display = 'inline-table';
+                    if (btnExpPos.classList.contains('glyphicon-folder-open')) {
+                        nLIPOs.children[3].style.display = 'none';
+                        tabelaPO.innerHTML = '';
+                        trocaIcone(btnExpPos);
                     }
                     else {
-                        nLIPOs.children[3].style.display = 'none';
+                        carregaListaEnvolvidos(indexProjeto);
+                        nLIPOs.children[3].style.display = 'inline-table';
+                        trocaIcone(btnExpPos);
                     }
                 });
 
@@ -613,79 +617,7 @@
 
                 nLIPOs.appendChild(btnAddPo);
 
-                const nUlItensPos = document.createElement('UL');
-
-                nUlItensPos.classList.add('pos');
-
-                nUlItensPos.style.display = 'none';
-
-                const tabela = document.createElement('TABLE');
-                tabela.style.width = '100%';
-
-                const line = document.createElement('TR');
-
-                const titNome = document.createElement('TH');
-                titNome.textContent = "Nome";
-                const titEmail = document.createElement('TH');
-                titEmail.textContent = "Email";
-                const titTelefone = document.createElement('TH');
-                titTelefone.textContent = "Telefone";
-                const titBotoes = document.createElement('TH');
-                titBotoes.textContent = "";
-
-                line.appendChild(titBotoes);
-                line.appendChild(titNome);
-                line.appendChild(titEmail);
-                line.appendChild(titTelefone);
-
-
-                tabela.appendChild(line);
-
-                projeto.pos.forEach(po => {
-
-                    const nLIPO = document.createElement('LI');
-
-                    const btnExcluirPo = criarBotaoExcluir();
-
-                    btnExcluirPo.addEventListener('click', () => {
-
-                        if (confirm('Deseja excluir o envolvidoo?')) {
-
-                            let indexPo = projetos[indexProjeto].pos.indexOf(po);
-
-                            projetos[indexProjeto].pos.splice(indexPo, 1);
-
-                            gravarDadosStorage();
-                            carregaListaProjetos();
-                        }
-                    });
-
-                    const linePo = document.createElement('TR');
-
-                    const colNome = document.createElement('TD');
-                    const colEmail = document.createElement('TD');
-                    const colTelefone = document.createElement('TD');
-                    const colBotoes = document.createElement('TD');
-
-                    colNome.textContent = po.nome;
-                    colNome.setAttribute('width', '50%');
-                    colEmail.textContent = po.email;
-                    colTelefone.textContent = po.telefone;
-                    colBotoes.setAttribute('width', '5%');
-                    colBotoes.style.textAlign = 'center';
-                    colBotoes.appendChild(btnExcluirPo);
-
-                    linePo.appendChild(colBotoes);
-                    linePo.appendChild(colNome);
-                    linePo.appendChild(colEmail);
-                    linePo.appendChild(colTelefone);
-
-
-                    tabela.appendChild(linePo);
-                });
-
-                tabela.style.display = 'none';
-                nLIPOs.appendChild(tabela);
+                nLIPOs.appendChild(tabelaPO);
 
                 nUlItensPrj.appendChild(nLIPOs);
 
@@ -694,34 +626,23 @@
 
                 const nLblDescTasks = document.createElement('LABEL');
 
-                const estimativaGeral = projeto.tasks.map(tks => {
-                    return tks.atividades.map(x => x.estimativa).reduce((p, c) => {
-                        return somartempos(p, c)
-                    }, '00:00')
-                }).reduce((p, c) => {
-                    return somartempos(p, c)
-                }, '00:00');
+                nLblDescTasks.setAttribute('id', 'nLblDescTasks' + indexProjeto);
 
-                const opontamentosGeral = projeto.tasks.map(tks => {
-                    return tks.apontamentos.map(x => x.tempo).reduce((p, c) => {
-                        return somartempos(p, c)
-                    }, '00:00')
-                }).reduce((p, c) => {
-                    return somartempos(p, c)
-                }, '00:00');
-                //projetos[0].tasks.map(tks => { return tks.atividades.map(x => x.estimativa).reduce((p,c) =>  { return somartempos(p,c)},'00:00') }).reduce((p,c) => { return somartempos(p,c)},'00:00')
+                const retEstimativaGeral = estimativaGeral(projeto);
 
+                const retApontamentosGeral = apontamentosGeral(projeto);
 
-                nLblDescTasks.textContent = 'Tarefas(' + projeto.tasks.length + ') - Estimado: ' + estimativaGeral + ', Apontamentos(' + opontamentosGeral + ')';
+                nLblDescTasks.textContent = 'Tarefas(' + projeto.tasks.length + ') - Estimado: ' + retEstimativaGeral + ', Apontamentos(' + retApontamentosGeral + ')';
 
                 const btnExpTasks = criarBotaoExpandir();
 
                 btnExpTasks.addEventListener('click', () => {
 
-                    trocaIcone(btnExpTasks, nLITasks.children[3].style.display);
+                    trocaIcone(btnExpTasks);
 
                     if (nLITasks.children[3].style.display == 'none') {
                         nLITasks.children[3].style.display = 'block';
+
                     }
                     else {
                         nLITasks.children[3].style.display = 'none';
@@ -766,18 +687,15 @@
                         percentual = projeto.tasks[indexTask].apontamentos.slice(-1)[0].percentual;
                     }
 
-                    const totEstimativas = projeto.tasks[indexTask].atividades.map(x => x.estimativa).reduce((p, c) => { return somartempos(p, c) }, '00:00');
-                    const totApontado = projeto.tasks[indexTask].apontamentos.map(x => x.tempo).reduce((p, c) => { return somartempos(p, c) }, '00:00');
+                    const totEstimativas = estimativaTarefa(indexProjeto, indexTask);
 
-                    // const totEstimativasPtarefa = projeto.tasks[indexTask].atividades.map(x => x.estimativa).reduce((p,c) =>  { return somartempos(p,c)},'00:00')
+                    const totApontado = apontamentosTarefa(indexProjeto, indexTask); //projeto.tasks[indexTask].apontamentos.map(x => x.tempo).reduce((p, c) => { return somartempos(p, c) }, '00:00');
 
                     let restante = totEstimativas;
 
                     if (percentual > 0) {
                         restante = calcularRestante(totApontado, percentual);
                     }
-
-                    //abraao
 
                     const btnExcluirTask = criarBotaoExcluir();
 
@@ -795,7 +713,7 @@
 
                     btnExpAtividade.addEventListener('click', () => {
 
-                        trocaIcone(btnExpAtividade, nLITask.children[1].style.display);
+                        trocaIcone(btnExpAtividade);
 
                         if (nLITask.children[1].style.display == 'none') {
                             nLITask.children[1].style.display = 'block';
@@ -812,24 +730,26 @@
                     //atividades
 
                     const nLblTltAtividades = document.createElement('LABEL');
-
-                    // const totEstimativas = projeto.tasks[indexTask].atividades.map(x => x.estimativa).reduce((p,c) =>  { return somartempos(p,c)},'00:00')
+                    nLblTltAtividades.setAttribute('id', 'nLblTltAtividades' + indexProjeto + '_' + indexTask);
 
                     nLblTltAtividades.textContent = 'Atividades(' + projeto.tasks[indexTask].atividades.length + ') | Estimado: ' + totEstimativas;
 
-                    //projetos[0].tasks[0].atividades.map(x => x.estimativa).reduce((p,c) =>  { return somartempos(p,c)},'00:00')
+                    const tabelaAtv = document.createElement('TABLE');
+                    tabelaAtv.style.width = '100%';
+                    tabelaAtv.setAttribute('id', 'tabelaAtv' + indexProjeto + '_' + indexTask);
 
                     const btnExpAtv = criarBotaoExpandir();
 
                     btnExpAtv.addEventListener('click', () => {
-
-                        trocaIcone(btnExpAtv, ulAtv.children[3].style.display);
-
-                        if (ulAtv.children[3].style.display == 'none') {
-                            ulAtv.children[3].style.display = 'inline-table';
+                        if (btnExpAtv.classList.contains('glyphicon-folder-open')) {
+                            ulAtv.children[3].style.display = 'none';
+                            tabelaAtv.innerHTML = '';
+                            trocaIcone(btnExpAtv);
                         }
                         else {
-                            ulAtv.children[3].style.display = 'none';
+                            carregaListaAtividades(indexProjeto, indexTask);
+                            ulAtv.children[3].style.display = 'inline-table';
+                            trocaIcone(btnExpAtv);
                         }
                     });
 
@@ -854,64 +774,6 @@
                         mAtividade.showModal();
                     });
 
-                    const tabelaAtv = document.createElement('TABLE');
-                    tabelaAtv.style.width = '100%';
-
-                    const LinhaHAtv = document.createElement('TR');
-                    const titAtv = document.createElement('TH');
-                    const titEstimativa = document.createElement('TH');
-                    const titBotoesAtv = document.createElement('TH');
-
-                    titAtv.textContent = 'Descrição';
-                    titEstimativa.textContent = 'Estimativa';
-                    titBotoesAtv.textContent = '';
-
-                    LinhaHAtv.appendChild(titBotoesAtv);
-                    LinhaHAtv.appendChild(titAtv);
-                    LinhaHAtv.appendChild(titEstimativa);
-
-                    tabelaAtv.appendChild(LinhaHAtv);
-
-                    task.atividades.forEach(atividade => {
-                        const btnExcluirAtv = criarBotaoExcluir();
-
-                        btnExcluirAtv.addEventListener('click', () => {
-
-                            if (confirm('Deseja excluir a atividade?')) {
-
-                                let indexAtividade = projetos[indexProjeto].tasks[indexTask].atividades.indexOf(atividade);
-
-                                projetos[indexProjeto].tasks[indexTask].atividades.splice(indexAtividade, 1);
-
-                                gravarDadosStorage();
-                                carregaListaProjetos();
-                            }
-                        });
-
-                        const LinhaAtv = document.createElement('TR');
-
-                        const colAtv = document.createElement('TD');
-                        const colEstimativa = document.createElement('TD');
-                        const colBotoesAtv = document.createElement('TD');
-
-                        colAtv.textContent = atividade.descricao;
-                        colEstimativa.textContent = atividade.estimativa;
-                        colBotoesAtv.style.width = '5%';
-                        colBotoesAtv.style.textAlign = 'center';
-                        colBotoesAtv.appendChild(btnExcluirAtv);
-
-                        //abraao
-                        LinhaAtv.appendChild(colBotoesAtv);
-                        LinhaAtv.appendChild(colAtv);
-                        LinhaAtv.appendChild(colEstimativa);
-
-
-                        tabelaAtv.appendChild(LinhaAtv);
-                    });
-
-                    tabelaAtv.style.display = 'none';
-
-                    //abraa
                     const ulAtv = document.createElement('LI');
                     ulAtv.appendChild(btnExpAtv);
                     ulAtv.appendChild(nLblTltAtividades);
@@ -925,18 +787,23 @@
 
                     nLblTltApontamentos.textContent = 'Apontamentos(' + projeto.tasks[indexTask].apontamentos.length + '), Total:' + totApontado;
 
+                    nLblTltApontamentos.setAttribute('id','nLblTltApontamentos'+indexProjeto+'_'+indexTask);
+
                     const btnExpApt = criarBotaoExpandir();
 
                     btnExpApt.addEventListener('click', () => {
 
-                        trocaIcone(btnExpApt, ulApt.children[3].style.display);
-
-                        if (ulApt.children[3].style.display == 'none') {
-                            ulApt.children[3].style.display = 'inline-table';
+                        if (btnExpApt.classList.contains('glyphicon-folder-open')) {
+                            ulApt.children[3].style.display = 'none';
+                            tabelaApt.innerHTML = '';
+                            trocaIcone(btnExpApt);
                         }
                         else {
-                            ulApt.children[3].style.display = 'none';
+                            carregaListaApontamentos(indexProjeto, indexTask);
+                            ulApt.children[3].style.display = 'inline-table';
+                            trocaIcone(btnExpApt);
                         }
+
                     });
 
                     const btnAddApt = criarBotaoAdicionar();
@@ -961,75 +828,7 @@
                     });
 
                     const tabelaApt = document.createElement('TABLE');
-                    tabelaApt.style.width = '100%';
-
-                    const lineApt = document.createElement('TR');
-
-                    const titDataApt = document.createElement('TH');
-                    titDataApt.textContent = "Data";
-
-                    const titTempo = document.createElement('TH');
-                    titTempo.textContent = "Tempo";
-
-                    const titPercentual = document.createElement('TH');
-                    titPercentual.textContent = "Percentual";
-                    titPercentual.colSpan = '2';
-                    titPercentual.style.textAlign = 'left';
-
-                    const titBotoesApt = document.createElement('TH');
-                    titBotoesApt.textContent = "";
-
-                    lineApt.appendChild(titBotoesApt);
-                    lineApt.appendChild(titDataApt);
-                    lineApt.appendChild(titTempo);
-                    lineApt.appendChild(titPercentual);
-
-                    tabelaApt.appendChild(lineApt);
-
-                    const ulItemApontamentos = document.createElement('UL');
-
-                    task.apontamentos.forEach(apontamento => {
-                        const btnExcluirApt = criarBotaoExcluir();
-
-                        btnExcluirApt.addEventListener('click', () => {
-
-                            if (confirm('Deseja excluir o apontamento?')) {
-
-                                let indexApontamento = projetos[indexProjeto].tasks[indexTask].apontamentos.indexOf(apontamento);
-
-                                projetos[indexProjeto].tasks[indexTask].apontamentos.splice(indexApontamento, 1);
-
-                                gravarDadosStorage();
-                                carregaListaProjetos();
-                            }
-                        });
-
-                        const lineApt2 = document.createElement('TR');
-
-                        const colDataApt = document.createElement('TD');
-                        colDataApt.textContent = apontamento.data;
-
-                        const colTempo = document.createElement('TD');
-                        colTempo.textContent = apontamento.tempo;
-
-                        const colPercentual = document.createElement('TD');
-                        colPercentual.textContent = apontamento.percentual + '%';
-
-                        const titBotoesApt2 = document.createElement('TD');
-                        titBotoesApt2.appendChild(btnExcluirApt);
-                        titBotoesApt2.style.width = '5%';
-
-                        lineApt2.appendChild(titBotoesApt2);
-                        lineApt2.appendChild(colDataApt);
-                        lineApt2.appendChild(colTempo);
-                        lineApt2.appendChild(colPercentual);
-
-
-                        tabelaApt.appendChild(lineApt2);
-
-                    });
-
-                    tabelaApt.style.display = 'none';
+                    tabelaApt.setAttribute('id', 'tabelaApt' + indexProjeto + '_' + indexTask);
 
                     const ulApt = document.createElement('LI');
                     ulApt.appendChild(btnExpApt);
@@ -1040,8 +839,6 @@
                     ulItens.appendChild(ulApt);
 
                     ulItens.style.display = 'none';
-
-                    // nLITask.appendChild(btnExpAtividade);
 
                     const divTitTarefas = document.createElement('DIV');
 
@@ -1056,18 +853,23 @@
 
                     lblDescTask.textContent = 'Tarefa: ' + task.descricao;
                     lblDescTask.style.width = '40%';
+
                     lblEstimadoTask.textContent = "Estimado: " + totEstimativas;
+                    lblEstimadoTask.setAttribute('id', 'lblEstimadoTask' + indexProjeto + '_' + indexTask);
+
                     lblApontamentoTask.textContent = 'Apontamentos: ' + totApontado;
+                    lblApontamentoTask.setAttribute('id', 'lblApontamentoTask' + indexProjeto + '_' + indexTask);
+
                     lblConcluidoTask.textContent = 'Concluído: ' + percentual + '%';
+                    lblConcluidoTask.setAttribute('id', 'lblConcluidoTask' + indexProjeto + '_' + indexTask);
 
+                    lblRestanteTask.setAttribute('id', 'lblRestanteTask' + indexProjeto + '_' + indexTask);
 
-                    if(percentual==100)
-                    {
-                        lblRestanteTask.textContent = 'tempo Gato:' + restante;
+                    if (percentual == 100) {
+                        lblRestanteTask.textContent = 'Tempo Gasto:' + restante;
                     }
                     else
-                        lblRestanteTask.textContent = 'Restante:' + restante;
-
+                        lblRestanteTask.textContent = 'Real esperado:' + restante;
 
                     divTitTarefas.appendChild(btnExpAtividade);
 
@@ -1096,10 +898,8 @@
                 nLiDescProjeto.appendChild(nUlItensPrj);
 
                 ulProjetos.appendChild(nLiDescProjeto);
+
             });
-
-            ////
-
         }
 
         const criarBotaoExpandir = () => {
@@ -1118,9 +918,9 @@
             return btnExcluir;
         }
 
-        const trocaIcone = (botao, status) => {
+        const trocaIcone = (botao) => {
 
-            if (status == 'none') {
+            if (botao.classList.contains('glyphicon-folder-close')) {
                 botao.classList.remove('glyphicon-folder-close');
                 botao.classList.add('glyphicon-folder-open');
             }
@@ -1148,8 +948,6 @@
             const dados = JSON.stringify(projetos);
 
             localStorage.setItem('mngPrj', dados);
-
-            // lerDadosStorage();
         }
 
         const transformaTempoEmInteiro = (tempo) => {
@@ -1202,6 +1000,314 @@
             var minutos = Math.round(minutosDecimal * 60);
 
             return String(horas).padStart(2, '0') + ':' + String(minutos).padStart(2, '0');
+        }
+
+        const carregaListaEnvolvidos = (indexProjeto) => {
+            const tabelaPO = document.getElementById('tabelaPO' + indexProjeto);
+
+            tabelaPO.innerHTML = '';
+            tabelaPO.style.width = '100%';
+
+            const line = document.createElement('TR');
+
+            const titNome = document.createElement('TH');
+            titNome.textContent = "Nome";
+            const titEmail = document.createElement('TH');
+            titEmail.textContent = "Email";
+            const titTelefone = document.createElement('TH');
+            titTelefone.textContent = "Telefone";
+            const titBotoes = document.createElement('TH');
+            titBotoes.textContent = "";
+
+            line.appendChild(titBotoes);
+            line.appendChild(titNome);
+            line.appendChild(titEmail);
+            line.appendChild(titTelefone);
+
+            tabelaPO.appendChild(line);
+
+            projetos[indexProjeto].pos.forEach(po => {
+
+                const nLIPO = document.createElement('LI');
+
+                const btnExcluirPo = criarBotaoExcluir();
+
+                btnExcluirPo.addEventListener('click', () => {
+                    //abraao
+                    if (confirm('Deseja excluir o envolvidoo?')) {
+
+                        let indexPo = projetos[indexProjeto].pos.indexOf(po);
+
+                        projetos[indexProjeto].pos.splice(indexPo, 1);
+
+                        gravarDadosStorage();
+
+                        carregaListaEnvolvidos(indexProjeto);
+                    }
+                });
+
+                const linePo = document.createElement('TR');
+
+                const colNome = document.createElement('TD');
+                const colEmail = document.createElement('TD');
+                const colTelefone = document.createElement('TD');
+                const colBotoes = document.createElement('TD');
+
+                colNome.textContent = po.nome;
+                colNome.setAttribute('width', '50%');
+                colEmail.textContent = po.email;
+                colTelefone.textContent = po.telefone;
+                colBotoes.setAttribute('width', '5%');
+                colBotoes.style.textAlign = 'center';
+                colBotoes.appendChild(btnExcluirPo);
+
+                linePo.appendChild(colBotoes);
+                linePo.appendChild(colNome);
+                linePo.appendChild(colEmail);
+                linePo.appendChild(colTelefone);
+
+                tabelaPO.appendChild(linePo);
+            });
+
+            const nLblDescPos = document.getElementById('nLblDescPos' + indexProjeto);
+
+            nLblDescPos.textContent = 'Envolvidos(' + projetos[indexProjeto].pos.length + ')';
+
+        }
+
+        const carregaListaAtividades = (indexProjeto, indexTask) => {
+            const tabelaAtv = document.getElementById('tabelaAtv' + indexProjeto + '_' + indexTask);
+            tabelaAtv.innerHTML = '';
+            tabelaAtv.style.width = '100%';
+
+            const LinhaHAtv = document.createElement('TR');
+            const titAtv = document.createElement('TH');
+            const titEstimativa = document.createElement('TH');
+            const titBotoesAtv = document.createElement('TH');
+
+            titAtv.textContent = 'Descrição';
+            titEstimativa.textContent = 'Estimativa';
+            titBotoesAtv.textContent = '';
+
+            LinhaHAtv.appendChild(titBotoesAtv);
+            LinhaHAtv.appendChild(titAtv);
+            LinhaHAtv.appendChild(titEstimativa);
+
+            tabelaAtv.appendChild(LinhaHAtv);
+
+            projetos[indexProjeto].tasks[indexTask].atividades.forEach(atividade => {
+                const btnExcluirAtv = criarBotaoExcluir();
+
+                btnExcluirAtv.addEventListener('click', () => {
+
+                    if (confirm('Deseja excluir a atividade?')) {
+
+                        let indexAtividade = projetos[indexProjeto].tasks[indexTask].atividades.indexOf(atividade);
+
+                        projetos[indexProjeto].tasks[indexTask].atividades.splice(indexAtividade, 1);
+
+                        gravarDadosStorage();
+                        carregaListaAtividades(indexProjeto, indexTask);
+                    }
+                });
+
+                const LinhaAtv = document.createElement('TR');
+
+                const colAtv = document.createElement('TD');
+                const colEstimativa = document.createElement('TD');
+                const colBotoesAtv = document.createElement('TD');
+
+                colAtv.textContent = atividade.descricao;
+                colEstimativa.textContent = atividade.estimativa;
+                colBotoesAtv.style.width = '5%';
+                colBotoesAtv.style.textAlign = 'center';
+                colBotoesAtv.appendChild(btnExcluirAtv);
+
+                //abraao
+                LinhaAtv.appendChild(colBotoesAtv);
+                LinhaAtv.appendChild(colAtv);
+                LinhaAtv.appendChild(colEstimativa);
+                tabelaAtv.appendChild(LinhaAtv);
+            });
+
+            const nLblTltAtividades = document.getElementById('nLblTltAtividades' + indexProjeto + '_' + indexTask);
+
+            //abraaoaqui
+            const totEstimativas = estimativaTarefa(indexProjeto, indexTask);
+
+            nLblTltAtividades.textContent = 'Atividades(' + projetos[indexProjeto].tasks[indexTask].atividades.length + ') | Estimado: ' + totEstimativas;
+
+            const nLblDescTasks = document.getElementById('nLblDescTasks' + indexProjeto);
+
+            const retEstimativaGeral = estimativaGeral(projetos[indexProjeto]);
+
+            const retApontamentosGeral = apontamentosGeral(projetos[indexProjeto]);
+
+            nLblDescTasks.textContent = 'Tarefas(' + projetos[indexProjeto].tasks.length + ') - Estimado: ' + retEstimativaGeral + ', Apontamentos(' + retApontamentosGeral + ')';
+
+            carregaDadosHeaderTarefa(indexProjeto, indexTask);
+        }
+
+        const carregaListaApontamentos = (indexProjeto, indexTask) => {
+            const tabelaApt = document.getElementById('tabelaApt' + indexProjeto + '_' + indexTask);
+            tabelaApt.style.width = '100%';
+            tabelaApt.innerHTML = '';
+
+            const lineApt = document.createElement('TR');
+
+            const titDataApt = document.createElement('TH');
+            titDataApt.textContent = "Data";
+
+            const titTempo = document.createElement('TH');
+            titTempo.textContent = "Tempo";
+
+            const titPercentual = document.createElement('TH');
+            titPercentual.textContent = "Percentual atual da tarefa";
+            titPercentual.colSpan = '2';
+            titPercentual.style.textAlign = 'left';
+
+            const titBotoesApt = document.createElement('TH');
+            titBotoesApt.textContent = "";
+
+            lineApt.appendChild(titBotoesApt);
+            lineApt.appendChild(titDataApt);
+            lineApt.appendChild(titTempo);
+            lineApt.appendChild(titPercentual);
+
+            tabelaApt.appendChild(lineApt);
+
+            const ulItemApontamentos = document.createElement('UL');
+
+            projetos[indexProjeto].tasks[indexTask].apontamentos.reverse().forEach(apontamento => {
+                const btnExcluirApt = criarBotaoExcluir();
+
+                btnExcluirApt.addEventListener('click', () => {
+
+                    if (confirm('Deseja excluir o apontamento?')) {
+
+                        let indexApontamento = projetos[indexProjeto].tasks[indexTask].apontamentos.indexOf(apontamento);
+
+                        projetos[indexProjeto].tasks[indexTask].apontamentos.splice(indexApontamento, 1);
+
+                        gravarDadosStorage();
+                        carregaListaApontamentos(indexProjeto, indexTask);
+                    }
+                });
+
+                const lineApt2 = document.createElement('TR');
+
+                const colDataApt = document.createElement('TD');
+                colDataApt.textContent = apontamento.data;
+
+                const colTempo = document.createElement('TD');
+                colTempo.textContent = apontamento.tempo;
+
+                const colPercentual = document.createElement('TD');
+                colPercentual.textContent = apontamento.percentual + '%';
+
+                const titBotoesApt2 = document.createElement('TD');
+                titBotoesApt2.appendChild(btnExcluirApt);
+                titBotoesApt2.style.width = '5%';
+
+                lineApt2.appendChild(titBotoesApt2);
+                lineApt2.appendChild(colDataApt);
+                lineApt2.appendChild(colTempo);
+                lineApt2.appendChild(colPercentual);
+
+                tabelaApt.appendChild(lineApt2);
+            });
+
+            //tabelaApt.style.display = 'none';
+
+            const totApontado = apontamentosTarefa(indexProjeto, indexTask); //pr
+
+            const nLblTltApontamentos = document.getElementById('nLblTltApontamentos' + indexProjeto + '_' + indexTask);
+            //abraaoaqui
+            //const totEstimativas = estimativaTarefa(indexProjeto, indexTask);
+
+            nLblTltApontamentos.textContent = 'Apontamentos(' + projetos[indexProjeto].tasks[indexTask].apontamentos.length + '), Total:' + totApontado;
+
+            const nLblDescTasks = document.getElementById('nLblDescTasks' + indexProjeto);
+
+            const retEstimativaGeral = estimativaGeral(projetos[indexProjeto]);
+
+            const retApontamentosGeral = apontamentosGeral(projetos[indexProjeto]);
+
+            nLblDescTasks.textContent = 'Tarefas(' + projetos[indexProjeto].tasks.length + ') - Estimado: ' + retEstimativaGeral + ', Apontamentos(' + retApontamentosGeral + ')';
+
+            carregaDadosHeaderTarefa(indexProjeto, indexTask);
+        }
+
+        const carregaDadosHeaderTarefa = (indexProjeto, indexTask) => {
+            let percentual = 0;
+
+            if (projetos[indexProjeto].tasks[indexTask].apontamentos.slice(-1).length > 0) {
+                percentual = projetos[indexProjeto].tasks[indexTask].apontamentos.slice(-1)[0].percentual;
+            }
+
+            const totEstimativas = estimativaTarefa(indexProjeto, indexTask);
+
+            const totApontado = apontamentosTarefa(indexProjeto, indexTask);
+
+            let restante = totEstimativas;
+
+            if (percentual > 0) {
+                restante = calcularRestante(totApontado, percentual);
+            }
+
+            const lblEstimadoTask = document.getElementById('lblEstimadoTask' + indexProjeto + '_' + indexTask);
+            lblEstimadoTask.textContent = "Estimado: " + totEstimativas;
+
+            const lblApontamentoTask = document.getElementById('lblApontamentoTask' + indexProjeto + '_' + indexTask);
+            lblApontamentoTask.textContent = 'Apontamentos: ' + totApontado;
+
+            const lblConcluidoTask = document.getElementById('lblConcluidoTask' + indexProjeto + '_' + indexTask);
+            lblConcluidoTask.textContent = 'Concluído: ' + percentual + '%';
+
+            const lblRestanteTask = document.getElementById('lblRestanteTask' + indexProjeto + '_' + indexTask);
+
+            if (percentual == 100) {
+                lblRestanteTask.textContent = 'Tempo Gasto:' + restante;
+            }
+            else
+                lblRestanteTask.textContent = 'Real esperado:' + restante;
+        }
+
+        const estimativaGeral = (projeto) => {
+
+            return projeto.tasks.map(tks => {
+                return tks.atividades.map(x => x.estimativa).reduce((p, c) => {
+                    return somartempos(p, c)
+                }, '00:00')
+            }).reduce((p, c) => {
+                return somartempos(p, c)
+            }, '00:00');
+        }
+
+        const estimativaTarefa = (indexProjeto, indexTask) => {
+            return projetos[indexProjeto].tasks[indexTask].atividades
+                .map(x => x.estimativa)
+                .reduce((p, c) => {
+                    return somartempos(p, c)
+                }, '00:00');
+        }
+
+        const apontamentosTarefa = (indexProjeto, indexTask) => {
+            return projetos[indexProjeto].tasks[indexTask].apontamentos
+                .map(x => x.tempo)
+                .reduce((p, c) => {
+                    return somartempos(p, c)
+                }, '00:00');
+        }
+
+        const apontamentosGeral = (projeto) => {
+            return projeto.tasks.map(tks => {
+                return tks.apontamentos.map(x => x.tempo).reduce((p, c) => {
+                    return somartempos(p, c)
+                }, '00:00')
+            }).reduce((p, c) => {
+                return somartempos(p, c)
+            }, '00:00');
         }
 
         carregaListaProjetos();
