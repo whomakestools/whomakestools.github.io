@@ -1,14 +1,89 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<!doctype html>
+<html ng-app="prjMngProjetos">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
+
+    <!-- <script src="angular.js"></script> -->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.23/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-sanitize.min.js"></script>
+
+    <script src="FileServe.js"></script>
+
+    <script>
+        function salvar(nome, conteudo) {
+            let blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
+            saveAs(blob, nome + ".html");
+        }
+
+        function generateUUID() { // Public Domain/MIT
+            var d = new Date().getTime();//Timestamp
+            var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now() * 1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16;//random number between 0 and 16
+                if (d > 0) {//Use timestamp until depleted
+                    r = (d + r) % 16 | 0;
+                    d = Math.floor(d / 16);
+                } else {//Use microseconds since page-load if supported
+                    r = (d2 + r) % 16 | 0;
+                    d2 = Math.floor(d2 / 16);
+                }
+                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        }
+    </script>
+
     <style>
+        .displayTime {
+            text-align: center;
+            border: 1px solid;
+            padding: 5px;
+        }
+
+        .zero {
+
+            animation: example 1s infinite;
+        }
+
+        @keyframes example {
+            from {
+                /* background-color: red; */
+                /* color: red; */
+
+            }
+
+            to {
+                /* color: black; */
+                box-shadow: 1px 1px 10px silver;
+
+            }
+        }
+
+        .pontos {
+            font-weight: 600;
+            font-size: x-large;
+        }
+
+        .dPrj {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            border: none;
+            background: silver;
+            text-align: center;
+        }
+
+        .mPrj {
+            display: inline-table;
+            border: 1px solid;
+            background: white;
+            text-align: left;
+            padding: 15px;
+        }
+
         pre {
             padding: 9.5px;
             margin: 0 0 10px;
@@ -107,1213 +182,1000 @@
             width: 25%;
             margin: 0px 5px;
         }
+
+        li {
+            margin-left: 20px;
+        }
     </style>
+
 </head>
 
 <body>
-    <div id="principal" class="principal">
-        <button id="btnNovoPrj" class="btn btn-primary">Novo Projeto</button>
-        <ul id="ulProjetos">
 
+    <h2>Projetos</h2>
+    <div ng-controller="listProjetosController" class="principal">
+        <button id="btnNovoPrj" ng-click="abrirDiaolgProjeto()" class="btn btn-primary">Novo Projeto</button>
+        <ul class="projetos">
+            <li ng-repeat="projeto in projetos track by $index" class="projeto">
+                <i ng-class="{'glyphicon-folder-open': projeto.visible, 'zero': primeiroPrj(projeto)===false && projeto.visible===false} "
+                    ng-click="projeto.visible=!projeto.visible; projeto.pos.visible=false; projeto.tasks.visible=false;"
+                    class="glyphicon glyphicon-folder-close"></i>
+                <label>projeto - {{projeto.nome}} </label>
+                <i title="Editar" ng-click="abrirDiaolgProjeto(projeto)" class="glyphicon glyphicon-edit"></i>
+                <i title="Exportar" ng-click="exportarProjeto(projeto)" class="glyphicon glyphicon-share"></i>
+                <i title="Excluir" class="glyphicon glyphicon-trash" ng-click="deleteProjeto(projeto)"></i>
+                <ul ng-show="projeto.visible">
+                    <li class="lii">
+                        <pre>{{projeto.descricao}}</pre>
+                    </li>
+                    <li>
+                        <i ng-class="{'glyphicon-folder-open': projeto.pos.visible}"
+                            ng-click="projeto.pos.visible=!projeto.pos.visible" class="glyphicon glyphicon-folder-close"
+                            alt="Expandir"></i>
+                        <label> Envolvidos ({{projeto.pos.length}})</label>
+                        <i class="glyphicon glyphicon-plus" ng-click="abrirDiaolgPo(projeto)"></i>
+                        <table ng-show="projeto.pos.visible && projeto.visible"
+                            style="width: 100%; display: inline-table;">
+                            <tr>
+                                <th></th>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Telefone</th>
+                            </tr>
+                            <tr ng-repeat="po in projeto.pos track by $index">
+                                <td width="10%" style="text-align: center;">
+                                    <i ng-click="abrirDiaolgPo(projeto,po)" class="glyphicon glyphicon-edit"></i>
+                                    <i class="glyphicon glyphicon-trash"
+                                        ng-click="deletePo(projeto,po);projeto.pos.visible=true"></i>
+                                </td>
+                                <td width="50%">{{po.nome}}</td>
+                                <td>{{po.email}}</td>
+                                <td>{{po.telefone}}</td>
+                            </tr>
+                        </table>
+                    </li>
+                    <li>
+                        <i ng-class="{'glyphicon-folder-open': projeto.tasks.visible }"
+                            ng-click="projeto.tasks.visible=!projeto.tasks.visible;projeto.tasks.atividades.visible=false;projeto.tasks.apontamentos.visible=false;"
+                            class="glyphicon glyphicon-folder-close"></i>
+                        <label>Tarefas({{projeto.tasks.length}}) - Estimado: {{estimativaGeral(projeto)}} ,
+                            Apontamentos: {{apontamentosGeral(projeto)}} - Total Real {{restanteGeral(projeto)}}</label>
+                        <i class="glyphicon glyphicon-plus" ng-click="abrirDiaolgTask(projeto)"></i>
+                        <ul ng-show="projeto.tasks.visible && projeto.visible">
+                            <li ng-repeat="tarefa in projeto.tasks track by $index"
+                                style="border: 1px solid;margin-bottom:5px">
+                                <i ng-class="{'glyphicon-folder-open': tarefa.visible}"
+                                    ng-click="tarefa.visible=!tarefa.visible; tarefa.atividades.visible=false;tarefa.apontamentos.visible=false;"
+                                    class="glyphicon glyphicon-folder-close"></i>
+                                <label style="width: 30%;">Tarefa: {{tarefa.descricao}}</label>
+                                <label>Estimado: {{estimativaTarefa(tarefa)}}</label>
+                                <label>Apontamentos: {{apontamentosTarefa(tarefa)}}</label>
+                                <label>Concluído: {{tarefa.apontamentos.slice(-1)[0].percentual}}%</label>
+                                <label>Real esperado: {{restanteTarefa(tarefa)}}</label>
+                                <i class="glyphicon glyphicon-edit" ng-click="abrirDiaolgTask(projeto,tarefa)"></i>
+                                <i class="glyphicon glyphicon-trash"
+                                    ng-click="deleteTask(projeto,tarefa);projeto.tasks.visible=true;"></i>
+                                <ul ng-show="tarefa.visible && projeto.tasks.visible">
+                                    <li>
+                                        <i ng-class="{'glyphicon-folder-open': tarefa.atividades.visible}"
+                                            class="glyphicon glyphicon-folder-close"
+                                            ng-click="tarefa.atividades.visible=!tarefa.atividades.visible"></i>
+                                        <label>Atividades({{tarefa.atividades.length}}) | Estimado:
+                                            {{estimativaTarefa(tarefa)}} </label>
+                                        <i class="glyphicon glyphicon-plus" ng-click="abrirDialogAtividade(tarefa)"></i>
+
+                                        <table ng-show="tarefa.atividades.visible  && tarefa.visible"
+                                            style="width: 100%; display: inline-table;">
+                                            <tr>
+                                                <th></th>
+                                                <th>Descrição</th>
+                                                <th>Estimativa</th>
+                                            </tr>
+                                            <tr ng-repeat="atividade in tarefa.atividades track by $index">
+                                                <td style="width: 10%; text-align: center;">
+                                                    <i ng-click="abrirDialogAtividade(tarefa,atividade);tarefa.atividades.visible=true;"
+                                                        class="glyphicon glyphicon-edit"></i>
+                                                    <i ng-click="deleteAtividade(tarefa,atividade);tarefa.atividades.visible=true;"
+                                                        class="glyphicon glyphicon-trash"></i>
+                                                </td>
+                                                <td>{{atividade.descricao}}</td>
+                                                <td>{{atividade.hora | zpad:2}}:{{atividade.minuto | zpad:2}}</td>
+                                            </tr>
+                                        </table>
+                                    </li>
+                                    <li>
+                                        <i ng-class="{'glyphicon-folder-open': tarefa.apontamentos.visible}"
+                                            class="glyphicon glyphicon-folder-close"
+                                            ng-click="tarefa.apontamentos.visible=!tarefa.apontamentos.visible"></i>
+                                        <label>Apontamentos({{tarefa.apontamentos.length}}) | Total:
+                                            {{apontamentosTarefa(tarefa)}} </label>
+                                        <i class="glyphicon glyphicon-plus"
+                                            ng-click="abrirDialogApontamento(tarefa);tarefa.apontamentos.visible=true;"></i>
+                                        <table ng-show="tarefa.apontamentos.visible  && tarefa.visible"
+                                            style="width: 100%; display: inline-table;">
+                                            <tr>
+                                                <th></th>
+                                                <th>Data</th>
+                                                <th>Tempo</th>
+                                                <th>Percentual atual da tarefa</th>
+                                            </tr>
+                                            <tr
+                                                ng-repeat="apontamento in tarefa.apontamentos| orderBy: '-data' track by $index">
+                                                <td style="width: 10%; text-align: center;">
+                                                    <i class="glyphicon glyphicon-trash"
+                                                        ng-click="deleteApontamento(tarefa,apontamento);tarefa.apontamentos.visible=true;"></i>
+                                                </td>
+                                                <td>{{apontamento.data }}</td>
+                                                <td>{{apontamento.hora | zpad:2}}:{{apontamento.minuto | zpad:2}}</td>
+                                                <td>{{apontamento.percentual}}%</td>
+                                            </tr>
+                                        </table>
+                                    </li>
+                                </ul>
+
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
         </ul>
+        <!-- mProjeto -->
+        <dialog id="dProjeto" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Projeto</H1>
+                </div>
+                <div class="linha">
+                    <label>Nome projeto</label>
+                    <input maxlength="30" ng-model="projetoEditar.nome" placeholder="Digite o nome do projeto"
+                        type="text">
+                </div>
+                <div class="linha">
+                    <label>Descrição</label>
+                    <textarea ng-model="projetoEditar.descricao" placeholder="Digite a descrição do projeto" cols="40"
+                        rows="3"></textarea>
+                </div>
+                <div class="linha">
+                    <button id="btCncPrj" class="btn btn-warning" ng-click="cancelarProjeto()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar
+                    </button>
 
+                    <button id="btnSlvPrj" class="btn btn-primary" ng-click="gravarProjeto()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        Salvar</button>
+                </div>
+            </div>
+        </dialog>
+
+        <dialog id="dPo" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Envolvido</H1>
+                </div>
+                <div class="linha">
+                    <label>Nome</label>
+                    <input maxlength="30" ng-model="poEditar.nome" placeholder="Digite o nome" type="text">
+                </div>
+                <div class="linha">
+                    <label>Email</label>
+                    <input maxlength="30" ng-model="poEditar.email" placeholder="Digite o email" type="text">
+                </div>
+                <div class="linha">
+                    <label>Telefone</label>
+                    <input maxlength="30" ng-model="poEditar.telefone" placeholder="Digite o telefone" type="text">
+                </div>
+                <div class="linha">
+                    <button id="btCncPo" class="btn btn-warning" ng-click="cancelarPo()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar</button>
+                    <button id="btnSlvPo" class="btn btn-primary" ng-click="gravarPo()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        Salvar</button>
+                </div>
+            </div>
+        </dialog>
+
+        <dialog id="dTask" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Tarefa</H1>
+                </div>
+                <div class="linha">
+                    <label>Descrição da tarefa</label>
+                    <input maxlength="30" type="text" id="txtDescTask" ng-model="taskEditar.descricao"
+                        placeholder="Digite a tarefa">
+                </div>
+                <div class="linha">
+                    <button id="btCncTask" class="btn btn-warning" ng-click="cancelarTask()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar</button>
+                    <button id="btnSlvTask" class="btn btn-primary" ng-click="gravarTask()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        Salvar</button>
+                </div>
+            </div>
+        </dialog>
+
+        <dialog id="dAtividade" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Atividade</H1>
+                </div>
+                <div class="linha">
+                    <label>Descrição da atividade</label>
+                    <input class="form-control" ng-model="atividadeEditar.descricao"
+                        placeholder="Digite a descrição da atividade" maxlength="60" type="text">
+                </div>
+                <div>
+                    <label>Estimativa</label>
+                    <br>
+                    <div class="linha2">
+                        <input class="inpt form-control" min="0" ng-model="atividadeEditar.hora" type="number"><label
+                            class="pontos">:</label>
+                        <input class="inpt form-control" step="5" min="0" max="59" ng-model="atividadeEditar.minuto"
+                            type="number">
+
+                    </div>
+                </div>
+                <div class="displayTime">
+                    <label>{{ atividadeEditar.hora | zpad:1 }}:{{atividadeEditar.minuto | zpad:2}}</label>
+                </div>
+                <div class="linha">
+                    <button id="btCncAtividade" class="btn btn-warning" ng-click="cancelarAtividade()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar</button>
+                    <button id="btnSlvAtividade" class="btn btn-primary" ng-click="gravarAtividade()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        Salvar</button>
+                </div>
+            </div>
+        </dialog>
+
+        <dialog id="dApontamento" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Apontamento</H1>
+                </div>
+                <div class="linha">
+                    <label>Data</label>
+                    <input class="form-control" type="date" ng-model="apontamentoEditar.data">
+                </div>
+                <div>
+                    <label>Tempo</label>
+                    <br>
+                    <div class="linha2">
+                        <input class="input form-control" min="0" max="8" type="number"
+                            ng-model="apontamentoEditar.hora"> <label class="pontos">:</label>
+                        <input class="input form-control" min="0" step="5" max="59" type="number"
+                            ng-model="apontamentoEditar.minuto">
+                    </div>
+                </div>
+                <div class="displayTime">
+                    <label>{{ apontamentoEditar.hora | zpad:1 }}:{{apontamentoEditar.minuto | zpad:2}}</label>
+                </div>
+
+                <div class="linha">
+                    <label>Percentual atual da tarefa</label>
+                    <input class="form-control" type="number" min="0" max="100" step="5"
+                        ng-model="apontamentoEditar.percentual">
+                </div>
+                <div class="displayTime">
+                    <label>{{apontamentoEditar.data | date:'dd/MM/yyyy'}} - {{ apontamentoEditar.hora | zpad:1
+                        }}:{{apontamentoEditar.minuto
+                        | zpad:2}} - {{apontamentoEditar.percentual}}%</label>
+                </div>
+
+                <div class="linha">
+                    <button class="btn btn-warning" ng-click="cancelarApontamento()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar
+                    </button>
+                    <button class="btn btn-primary" ng-click="gravarApontamento()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        Salvar
+                    </button>
+                </div>
+            </div>
+        </dialog>
+
+        <dialog id="dSaida" class="dPrj">
+            <div class="mPrj">
+
+                <div class="linha">
+                    <textarea ng-show="1===3" ng-model="txtSaida" cols="100" rows="15">
+
+                    </textarea>
+                    <div>
+                        <p ng-bind-html="cnt"></p>
+                    </div>
+
+
+                    <div class="linha">
+                        <button class="btn btn-warning" ng-click="fecharSaida()">
+                            <i class="glyphicon glyphicon-remove"></i>
+                            Cancelar
+                        </button>
+                        <button class="btn btn-primary" ng-click="salvarArquivo()">
+                            <i class="glyphicon glyphicon-download-alt"></i>
+                            Exportar
+                        </button>
+                    </div>
+
+
+                </div>
+            </div>
+        </dialog>
     </div>
-    <dialog id="mProjeto" class="mProjeto">
-        <div>
-            <div class="linha">
-                <H1>Projeto</H1>
-            </div>
-            <div class="linha">
-                <label>Nome projeto</label>
-                <input maxlength="30" type="text" id="txtNmPrj">
+</body>
+<script>
+    angular.module('prjMngProjetos', ['ngSanitize'])
+        .filter("reverse", function () {
+            return function (items) {
+                return items.slice().reverse(); // Create a copy of the array and reverse the order of the items
+            };
+        })
+        .filter('zpad', function () {
+            return function (input, n) {
+                if (input === undefined)
+                    input = '0'
+                return String(input).padStart(n, '0');
+            };
+        })
+        .controller('listProjetosController', function ($scope) {
+            $scope.projetos = [];
 
-            </div>
-            <div class="linha">
-                <label>Descrição</label>
-                <textarea id="txtDescPrj" cols="40" rows="3"></textarea>
-            </div>
-            <div class="linha">
-                <button id="btCncPrj" class="btn btn-warning">
-                    <i class="glyphicon glyphicon-remove"></i>
-                    Cancelar
-                </button>
+            $scope.lerDadosStorage = function () {
+                const dados = localStorage.getItem('mngPrj');
 
-                <button id="btnSlvPrj" class="btn btn-primary">
-                    <i class="glyphicon glyphicon-ok"></i>
-                    Salvar</button>
-            </div>
-        </div>
-    </dialog>
+                if (dados) {
+                    $scope.projetos = JSON.parse(dados);
 
-    <dialog id="mPo">
-        <div>
-            <div class="linha">
-                <H1>Envolvido</H1>
-            </div>
-            <div class="linha">
-                <label>Nome</label>
-                <input maxlength="30" type="text" id="txtPONome">
-            </div>
-            <div class="linha">
-                <label>Email</label>
-                <input maxlength="30" type="text" id="txtPOEmail">
-            </div>
-            <div class="linha">
-                <label>Telefone</label>
-                <input maxlength="30" type="text" id="txtPOTelefone">
-            </div>
-            <div class="linha">
-                <button id="btCncPo" class="btn btn-warning">
-                    <i class="glyphicon glyphicon-remove"></i>
-                    Cancelar</button>
-                <button id="btnSlvPo" class="btn btn-primary">
-                    <i class="glyphicon glyphicon-ok"></i>
-                    Salvar</button>
-            </div>
-        </div>
-    </dialog>
+                    $scope.projetos.forEach(projeto => {
+                        projeto.visible = false;
 
-    <dialog id="mTasks">
-        <div>
-            <div class="linha">
-                <H1>Tarefa</H1>
-            </div>
-            <div class="linha">
-                <label>Descrição da tarefa</label>
-                <input maxlength="30" type="text" id="txtDescTask">
-            </div>
-            <div class="linha">
-                <button id="btCncTask" class="btn btn-warning">
-                    <i class="glyphicon glyphicon-remove"></i>
-                    Cancelar</button>
-                <button id="btnSlvTask" class="btn btn-primary">
-                    <i class="glyphicon glyphicon-ok"></i>
-                    Salvar</button>
-            </div>
-        </div>
-    </dialog>
+                        projeto.tasks.forEach((task) => {
+                            task.visible = false;
 
-    <dialog id="mAtividade">
-        <div>
-            <div class="linha">
-                <H1>Atividade</H1>
-            </div>
-            <div class="linha">
-                <label>Descrição da atividade</label>
-                <input class="form-control" maxlength="60" type="text" id="txtDescAtividade">
-            </div>
-            <div>
-                <label>Estimativa</label>
-                <br>
-                <div class="linha2">
-                    <input class="inpt form-control" min="0" type="number" id="txtExtHoraAtividade"> horas e
-                    <input class="inpt form-control" step="5" min="0" max="59" type="number" id="txtExtMinAtividade">
-                    minutos
-                </div>
-            </div>
-            <div class="linha">
-                <button id="btCncAtividade" class="btn btn-warning">
-                    <i class="glyphicon glyphicon-remove"></i>
-                    Cancelar</button>
-                <button id="btnSlvAtividade" class="btn btn-primary">
-                    <i class="glyphicon glyphicon-ok"></i>
-                    Salvar</button>
-            </div>
-        </div>
-    </dialog>
-
-    <dialog id="mApontamentos">
-        <div>
-            <div class="linha">
-                <H1>Apontamento</H1>
-            </div>
-            <div class="linha">
-                <label>Data</label>
-                <input class="form-control" type="date" id="txtDataApontamento">
-            </div>
-            <div>
-                <label>Tempo</label>
-                <br>
-                <div class="linha2">
-                    <input class="inpt form-control" min="0" type="number" id="txtExtHoraApontamento"> horas e
-                    <input class="inpt form-control" min="0" max="59" type="number" id="txtExtMinApontamento"> minutos
-                </div>
-            </div>
-            <div class="linha">
-                <label>Percentual atual da tarefa</label>
-                <input class="form-control" type="number" max="100" id="txtPercentualProjeto">
-            </div>
-
-            <div class="linha">
-                <button id="btCncApontamento" class="btn btn-warning">
-                    <i class="glyphicon glyphicon-remove"></i>
-                    Cancelar</button>
-                <button id="btnSlvApontamento" class="btn btn-primary">
-                    <i class="glyphicon glyphicon-ok"></i>
-                    Salvar</button>
-            </div>
-        </div>
-    </dialog>
-
-    <script>
-        let projetos = [];
-
-        const btnNovoPrj = document.getElementById('btnNovoPrj');
-
-        const mProjeto = document.getElementById('mProjeto');
-
-        btnNovoPrj.addEventListener('click', () => {
-
-            mProjeto.showModal();
-
-            const btCncPrj = document.getElementById('btCncPrj');
-
-            btCncPrj.addEventListener('click', () => {
-                limparCampos();
-                mProjeto.close();
-            })
-        });
-
-        const btnSlvPrj = document.getElementById('btnSlvPrj');
-
-        btnSlvPrj.addEventListener('click', () => {
-            const txtNmPrj = document.getElementById('txtNmPrj')
-
-            if (txtNmPrj.value.length === 0) {
-                alert('informe o nome do projeto');
-                txtNmPrj.focus();
-                return;
-            }
-
-            const txtDescPrj = document.getElementById('txtDescPrj')
-
-            if (txtDescPrj.value.length === 0) {
-                alert('informe uma descrição para o projeto');
-                txtDescPrj.focus();
-                return;
-            }
-
-            const nPrj = {
-                nome: txtNmPrj.value,
-                descricao: txtDescPrj.value,
-                pos: [],
-                tasks: [],
-                data: ''//new Date().toLocaleDateString()
+                            task.apontamentos.visible = false;
+                            task.atividades.visible = false;
+                        })
+                    })
+                }
             };
 
-            projetos.push(nPrj);
+            $scope.gravarDadosStorage = function () {
+                const dados = JSON.stringify($scope.projetos);
 
-            limparCampos();
-
-            mProjeto.close();
-
-            gravarDadosStorage();
-
-            carregaListaProjetos();
-
-        });
-
-        const btnSlvPo = document.getElementById('btnSlvPo');
-
-        btnSlvPo.addEventListener('click', (e) => {
-            const txtPONome = document.getElementById('txtPONome')
-
-            if (txtPONome.value.length === 0) {
-                alert('informe o nome do envolvido');
-                txtPONome.focus();
-                return;
-            }
-
-            const txtPOEmail = document.getElementById('txtPOEmail');
-            const txtPOTelefone = document.getElementById('txtPOTelefone');
-
-            const novo = {
-                nome: txtPONome.value,
-                email: txtPOEmail.value,
-                telefone: txtPOTelefone.value
+                localStorage.setItem('mngPrj', dados);
             };
 
-            const idProjeto = mPo.getAttribute('data-id');
+            $scope.lerDadosStorage();
 
-            projetos[idProjeto].pos.push(novo);
+            $scope.transformaTempoEmInteiro = function (tempo) {
+                var arrayTempo = String(tempo).split(':');
 
-            txtPONome.value = '';
-            txtPOEmail.value = '';
-            txtPOTelefone.value = '';
+                var tempo_seg = ((parseInt(arrayTempo[0]) * 60) + parseInt(arrayTempo[1]));
 
-            mPo.close();
-
-            gravarDadosStorage();
-
-            carregaListaEnvolvidos(idProjeto);
-        });
-
-        const btnSlvTask = document.getElementById('btnSlvTask');
-
-        btnSlvTask.addEventListener('click', (e) => {
-            const txtDescTask = document.getElementById('txtDescTask')
-
-            if (txtDescTask.value.length === 0) {
-                alert('informe a descrição da tarefa');
-                txtDescTask.focus();
-                return;
+                return tempo_seg;
             }
 
-            const novo = {
-                descricao: txtDescTask.value,
-                status: "todo",
-                datainicio: "",
-                datafim: "",
-                apontamentos: [],
-                atividades: []
+            $scope.somartempos = function (tempo1, tempo2) {
+
+                if (tempo1 === "") {
+                    tempo1 = "00:00";
+                }
+
+                var tempo_seg1 = $scope.transformaTempoEmInteiro(tempo1);
+
+                var tempo_seg2 = $scope.transformaTempoEmInteiro(tempo2);
+
+                var totalMinutos = tempo_seg1 + tempo_seg2
+
+                var tempoDecimal = totalMinutos / 60;
+
+                var horas = Math.floor(tempoDecimal);
+
+                var minutosDecimal = tempoDecimal - horas;
+
+                var minutos = Math.round(minutosDecimal * 60);
+
+                return String(horas).padStart(2, '0') + ':' + String(minutos).padStart(2, '0');
             };
 
-            const idd = mTasks.getAttribute('data-id');
-
-            projetos[idd].tasks.push(novo);
-
-            txtDescTask.value = '';
-
-            mTasks.close();
-
-            gravarDadosStorage();
-
-            carregaListaProjetos();
-
-        });
-
-        const btnSlvAtividade = document.getElementById('btnSlvAtividade');
-
-        btnSlvAtividade.addEventListener('click', (e) => {
-            const txtDescAtividade = document.getElementById('txtDescAtividade');
-
-            if (txtDescAtividade.value.length === 0) {
-                alert('informe a descrição da atividade');
-                txtDescAtividade.focus();
-                return;
-            }
-
-            const txtExtHoraAtividade = document.getElementById('txtExtHoraAtividade');
-
-            const txtExtMinAtividade = document.getElementById("txtExtMinAtividade");
-
-            if (txtExtHoraAtividade.value.length === 0 || txtExtMinAtividade.value.length === 0) {
-                alert('informe o tempo da estimativa correto');
-                txtExtHoraAtividade.focus();
-                return;
-            }
-
-            const minuto = txtExtMinAtividade.value.padStart(2, '0')
-
-            const novo = {
-                descricao: txtDescAtividade.value,
-                estimativa: txtExtHoraAtividade.value + ':' + minuto
-            };
-
-            const id = mAtividade.getAttribute('data-id');
-            const idtask = mAtividade.getAttribute('data-idtask');
-
-            projetos[id].tasks[idtask].atividades.push(novo);
-
-            txtDescAtividade.value = '';
-
-            txtExtHoraAtividade.value = '0';
-
-            txtExtMinAtividade.value = '0';
-
-            mAtividade.close();
-
-            gravarDadosStorage();
-
-            carregaListaAtividades(id, idtask);
-
-        });
-
-        const btnSlvApontamento = document.getElementById('btnSlvApontamento');
-
-        btnSlvApontamento.addEventListener('click', (e) => {
-            const txtDataApontamento = document.getElementById('txtDataApontamento');
-
-            if (txtDataApontamento.value.length === 0) {
-                alert('informe a data do apontamento');
-                txtDataApontamento.focus();
-                return;
-            }
-
-            const txtExtHoraApontamento = document.getElementById('txtExtHoraApontamento');
-
-            const txtExtMinApontamento = document.getElementById("txtExtMinApontamento");
-
-            if (txtExtHoraApontamento.value.length === 0 || txtExtMinApontamento.value.length === 0) {
-                alert('informe o tempo do apontamento correto');
-                txtExtHoraApontamento.focus();
-                return;
-            }
-
-            const txtPercentualProjeto = document.getElementById('txtPercentualProjeto');
-
-            if (txtPercentualProjeto.value.length === 0) {
-                alert('informe o percentual executado correspondnete a tarefa');
-                txtPercentualProjeto.focus();
-                return;
-            }
-
-            const minuto = txtExtMinApontamento.value.padStart(2, '0')
-
-            const novo = {
-                data: txtDataApontamento.value,
-                tempo: txtExtHoraApontamento.value + ':' + minuto,
-                percentual: txtPercentualProjeto.value
-            };
-
-            const id = mApontamentos.getAttribute('data-id');
-            const idtask = mApontamentos.getAttribute('data-idtask');
-
-            projetos[id].tasks[idtask].apontamentos.push(novo);
-
-            if (projetos[id].data.length === 0) {
-                projetos[id].data = txtDataApontamento.value;
-            }
-
-            txtDataApontamento.value = '';
-
-            txtExtHoraApontamento.value = '0';
-
-            txtExtMinApontamento.value = '0';
-
-            txtPercentualProjeto.value = '0';
-
-            mApontamentos.close();
-
-            gravarDadosStorage();
-
-            carregaListaApontamentos(id, idtask);
-        });
-
-        const limparCampos = () => {
-            const txtNmPrj = document.getElementById('txtNmPrj')
-            const txtDescPrj = document.getElementById('txtDescPrj');
-
-            txtNmPrj.value = '';
-            txtDescPrj.value = '';
-        }
-
-        const carregaListaProjetos = () => {
-
-            lerDadosStorage();
-
-            const ulProjetos = document.getElementById('ulProjetos');
-
-            ulProjetos.innerHTML = '';
-
-            projetos.forEach(projeto => {
-                let indexProjeto = projetos.indexOf(projeto);
-
-                const nLiDescProjeto = document.createElement('LI');
-
-                const nLblDescPrj = document.createElement('LABEL');
-
-                nLblDescPrj.textContent = 'Projeto: ' + projeto.nome;
-
-                nLiDescProjeto.classList.add('projeto');
-
-                const btnExcluir = criarBotaoExcluir();
-
-                btnExcluir.addEventListener('click', () => {
-
-                    if (confirm('Deseja excluir o projeto?')) {
-
-                        projetos.splice(indexProjeto, 1);
-                        gravarDadosStorage();
-                        carregaListaProjetos();
-                    }
-                });
-
-                const btnExpPrj = criarBotaoExpandir();
-
-                btnExpPrj.addEventListener('click', () => {
-
-                    trocaIcone(btnExpPrj);
-
-                    if (nLiDescProjeto.children[3].style.display == 'none') {
-                        nLiDescProjeto.children[3].style.display = 'block';
-
-                    }
-                    else {
-                        nLiDescProjeto.children[3].style.display = 'none';
-
-                    }
-                });
-
-                nLiDescProjeto.appendChild(btnExpPrj);
-                nLiDescProjeto.appendChild(nLblDescPrj);
-                nLiDescProjeto.appendChild(btnExcluir);
-
-                const nUlItensPrj = document.createElement('UL');
-                nUlItensPrj.setAttribute('id', 'nUlItensPrj' + indexProjeto);
-                nUlItensPrj.style.display = 'none';
-
-                const nLIdData = document.createElement('LI');
-
-                if (projeto.data.length > 0)
-                    nLIdData.textContent = 'Data inicio: ' + projeto.data;
+            $scope.estimativaGeral = function (projeto) {
+
+                if (projeto.tasks.length > 0)
+
+                    return projeto.tasks.map(tks => {
+                        return tks.atividades.map(x => x.hora + ':' + x.minuto).reduce((p, c) => {
+                            return $scope.somartempos(p, c)
+                        }, '00:00')
+                    }).reduce((p, c) => {
+                        return $scope.somartempos(p, c)
+                    }, '00:00');
                 else
-                    nLIdData.textContent = '';
+                    return '00:00';
+            };
 
-                nUlItensPrj.appendChild(nLIdData);
+            $scope.apontamentosGeral = (projeto) => {
 
-                const nLIdDesc = document.createElement('LI');
-                nLIdDesc.innerHTML = '<pre>Descrição: ' + projeto.descricao + '</pre>';
+                if (projeto.tasks.length > 0) {
 
-                nUlItensPrj.appendChild(nLIdDesc);
+                    return projeto.tasks.map(tks => {
+                        return tks.apontamentos.map(x => x.hora + ':' + x.minuto).reduce((p, c) => {
+                            return $scope.somartempos(p, c)
+                        }, '00:00')
+                    }).reduce((p, c) => {
+                        return $scope.somartempos(p, c)
+                    }, '00:00');
+                } else {
+                    return '00:00';
+                }
+            };
 
-                const nLIPOs = document.createElement('LI');
-                nLIPOs.setAttribute('id', 'nLIPOs' + indexProjeto);
+            $scope.estimativaTarefa = (tarefa) => {
+                return tarefa.atividades
+                    .map(x => x.hora + ':' + x.minuto)
+                    .reduce((p, c) => {
+                        return $scope.somartempos(p, c)
+                    }, '00:00');
+            };
 
-                const nLblDescPos = document.createElement('LABEL');
-                nLblDescPos.setAttribute('id', 'nLblDescPos' + indexProjeto);
+            $scope.apontamentosTarefa = (tarefa) => {
+                return tarefa.apontamentos
+                    .map(x => x.hora + ':' + x.minuto)
+                    .reduce((p, c) => {
+                        return $scope.somartempos(p, c)
+                    }, '00:00');
+            }
 
-                nLblDescPos.textContent = 'Envolvidos(' + projeto.pos.length + ')';
+            $scope.restanteTarefa = (tarefa) => {
+                let percentual = 0;
 
-                const btnAddPo = criarBotaoAdicionar();
+                if (tarefa.apontamentos.slice(-1).length > 0) {
+                    percentual = tarefa.apontamentos.slice(-1)[0].percentual;
+                }
 
-                btnAddPo.addEventListener('click', () => {
-                    mPo.setAttribute('data-id', indexProjeto);
+                const totEstimativas = $scope.estimativaTarefa(tarefa);
 
-                    const btCncPo = document.getElementById('btCncPo');
+                const totApontado = $scope.apontamentosTarefa(tarefa);
 
-                    btCncPo.addEventListener('click', () => {
-                        txtPONome.value = '';
-                        txtPOEmail.value = '';
-                        txtPOTelefone.value = '';
+                let restante = totEstimativas;
 
-                        mPo.close();
-                    })
+                if (percentual > 0) {
+                    restante = calcularRestante(totApontado, percentual);
+                }
+                return restante;
+            };
 
-                    mPo.showModal();
-                });
+            const calcularRestante = (totApontado, percentual) => {
 
-                const btnExpPos = criarBotaoExpandir();
+                if (totApontado === "") {
+                    totApontado = "00:00";
+                }
 
-                const tabelaPO = document.createElement('TABLE');
-                tabelaPO.setAttribute('id', 'tabelaPO' + indexProjeto);
+                var tempo_seg1 = $scope.transformaTempoEmInteiro(totApontado);
 
-                btnExpPos.addEventListener('click', () => {
+                var valor = tempo_seg1 / (percentual / 100);
 
-                    if (btnExpPos.classList.contains('glyphicon-folder-open')) {
-                        nLIPOs.children[3].style.display = 'none';
-                        tabelaPO.innerHTML = '';
-                        trocaIcone(btnExpPos);
-                    }
-                    else {
-                        carregaListaEnvolvidos(indexProjeto);
-                        nLIPOs.children[3].style.display = 'inline-table';
-                        trocaIcone(btnExpPos);
-                    }
-                });
+                var tempoDecimal = valor / 60;
 
-                nLIPOs.appendChild(btnExpPos);
-                nLIPOs.appendChild(nLblDescPos);
+                var horas = Math.floor(tempoDecimal);
 
-                nLIPOs.appendChild(btnAddPo);
+                var minutosDecimal = tempoDecimal - horas;
 
-                nLIPOs.appendChild(tabelaPO);
+                var minutos = Math.round(minutosDecimal * 60);
 
-                nUlItensPrj.appendChild(nLIPOs);
+                return String(horas).padStart(2, '0') + ':' + String(minutos).padStart(2, '0');
+            };
 
-                ///tarefas
-                const nLITasks = document.createElement('LI');
+            $scope.qtdProjetos = [];
 
-                const nLblDescTasks = document.createElement('LABEL');
+            $scope.abrirDiaolgProjeto = (projeto1) => {
 
-                nLblDescTasks.setAttribute('id', 'nLblDescTasks' + indexProjeto);
+                $scope.qtdProjetos = [];
 
-                const retEstimativaGeral = estimativaGeral(projeto);
+                for (let i = 0; i <= $scope.projetos.length; i++) {
+                    $scope.qtdProjetos.push(i + 1);
+                }
 
-                const retApontamentosGeral = apontamentosGeral(projeto);
+                $scope.projetoSel = projeto1;
 
-                nLblDescTasks.textContent = 'Tarefas(' + projeto.tasks.length + ') - Estimado: ' + retEstimativaGeral + ', Apontamentos(' + retApontamentosGeral + ')';
+                $scope.projetoEditar = angular.copy(projeto1);
 
-                const btnExpTasks = criarBotaoExpandir();
+                dProjeto.show();
 
-                btnExpTasks.addEventListener('click', () => {
+            };
 
-                    trocaIcone(btnExpTasks);
+            $scope.gravarProjeto = () => {
 
-                    if (nLITasks.children[3].style.display == 'none') {
-                        nLITasks.children[3].style.display = 'block';
+                if ($scope.projetoEditar === undefined) {
+                    alert('Informe os dados');
+                    return;
+                }
 
-                    }
-                    else {
-                        nLITasks.children[3].style.display = 'none';
-                    }
-                });
+                if ($scope.projetoEditar.nome === undefined) {
+                    alert('Informe o nome do projeto');
+                    return false;
+                }
+                else if ($scope.projetoEditar.nome.length < 5) {
+                    alert('O nome do projeto deve ter no minimo 5 caracteres');
+                    return;
+                }
 
-                const btnAddTask = criarBotaoAdicionar();
+                if ($scope.projetoEditar.descricao === undefined) {
+                    alert('Informe a descrição do projeto');
+                    return false;
+                }
+                else if ($scope.projetoEditar.descricao.length < 20) {
+                    alert('A descrição do projeto deve ter no minimo 20 caracteres');
+                    return;
+                }
 
-                btnAddTask.addEventListener('click', () => {
+                if ($scope.projetoSel) {
+                    angular.extend($scope.projetoSel, $scope.projetoEditar);
+                }
+                else {
+                    $scope.projetoEditar.tasks = [];
+                    $scope.projetoEditar.pos = [];
+                    $scope.projetoEditar.id = generateUUID();
 
-                    mTasks.setAttribute('data-id', indexProjeto);
 
-                    const btCncTask = document.getElementById('btCncTask');
+                    $scope.projetos.push($scope.projetoEditar);
+                }
 
-                    btCncTask.addEventListener('click', () => {
-                        txtDescTask.value = '';
-                        mTasks.close();
-                    })
+                $scope.projetoEditar = {};
 
-                    mTasks.showModal();
-                });
+                $scope.gravarDadosStorage();
+                $scope.qtdProjetos = [];
+                dProjeto.close();
+                $scope.lerDadosStorage();
+            };
 
-                nLITasks.appendChild(btnExpTasks);
-                nLITasks.appendChild(nLblDescTasks);
-                nLITasks.appendChild(btnAddTask);
+            $scope.cancelarProjeto = () => {
+                $scope.qtdProjetos = [];
+                $scope.projetoEditar = {};
+                dProjeto.close();
+            };
 
-                const nUlItensTasks = document.createElement('UL');
+            $scope.deleteProjeto = (projeto) => {
+                if (confirm('Deseja excluir o projeto?')) {
 
-                nUlItensTasks.classList.add('pos');
+                    $scope.projetos = $scope.projetos.filter((cc) => cc != projeto);
+                    $scope.gravarDadosStorage();
+                }
+            }
 
-                nUlItensTasks.style.display = 'none';
+            $scope.fecharSaida = () => {
+                $scope.txtSaida = null;
+                dSaida.close();
+            }
 
-                projeto.tasks.forEach(task => {
+            $scope.exportarProjeto = (projeto) => {
 
-                    let indexTask = projetos[indexProjeto].tasks.indexOf(task);
+                let oi = ''
 
-                    const nLITask = document.createElement('LI');
+                const ulPrj = document.createElement('UL');
+                ulPrj.classList = 'projetos';
 
+                const lblPrj = document.createElement('LABEL');
+                lblPrj.textContent = 'projeto - ' + projeto.nome;
+
+                ulPrj.appendChild(lblPrj);
+
+                const li1 = document.createElement('LI');
+
+
+                const preDesc = document.createElement('p');
+                preDesc.textContent ="Descrição: " + projeto.descricao;
+
+                li1.appendChild(lblPrj);
+                li1.appendChild(preDesc);
+
+                const li2 = document.createElement('LI');
+                li2.setAttribute('display','grid');
+                li2.innerHTML = "<label>Envolvidos(" + projeto.pos.length + ')</label>';
+
+                const ulPo = document.createElement('TABLE');
+                   
+                const trPo = document.createElement('TR');
+
+                trPo.innerHTML = '<th>Nome</th><th>E-mail</th><th>Telefone</th>';
+
+                ulPo.appendChild(trPo);
+
+                projeto.pos.forEach(po => {
+                    const liPo = document.createElement('TR');
+                        
+                    liPo.innerHTML =  '<TD>'+po.nome + '</TD><TD>' + po.email + '</TD><TD>' + po.telefone+'</TD>';
+                    ulPo.appendChild(liPo);
+                })
+
+                li2.appendChild(ulPo);
+
+                const li3 = document.createElement('LI');
+                li3.innerHTML = '<label>Tarefas(' + projeto.tasks.length +
+                    ') - Estimado: ' + $scope.estimativaGeral(projeto) +
+                    ', Apontamentos: ' + $scope.apontamentosGeral(projeto) +
+                    ' - Total Real ' + $scope.restanteGeral(projeto) + '</label>';
+
+                const ulTarefas = document.createElement('TABLE');
+
+
+                ulTarefas.innerHTML = '<TR><th>Tarefa</th><th>Estimado</th><th>Apontamentos</th><th>Concluído</th><th>Real esperado</th></TR>';
+
+
+                projeto.tasks.forEach(tarefa => {
                     let percentual = 0;
 
-                    if (projeto.tasks[indexTask].apontamentos.slice(-1).length > 0) {
-                        percentual = projeto.tasks[indexTask].apontamentos.slice(-1)[0].percentual;
+                    if (tarefa.apontamentos.length) {
+                        percentual = tarefa.apontamentos.slice(-1)[0].percentual;
                     }
 
-                    const totEstimativas = estimativaTarefa(indexProjeto, indexTask);
+                    const liAtividades = document.createElement('TR');
 
-                    const totApontado = apontamentosTarefa(indexProjeto, indexTask); //projeto.tasks[indexTask].apontamentos.map(x => x.tempo).reduce((p, c) => { return somartempos(p, c) }, '00:00');
+                    liAtividades.innerHTML = '<td>' + tarefa.descricao +
+                        '</td><td>' + $scope.estimativaTarefa(tarefa) +
+                        '</td><td>' + $scope.apontamentosTarefa(tarefa) +
+                        '</td><td>' + percentual + '%' +
+                        '</td><td>' + $scope.restanteTarefa(tarefa) + '</td>';
 
-                    let restante = totEstimativas;
 
-                    if (percentual > 0) {
-                        restante = calcularRestante(totApontado, percentual);
-                    }
-
-                    const btnExcluirTask = criarBotaoExcluir();
-
-                    btnExcluirTask.addEventListener('click', () => {
-                        if (confirm('Deseja excluir a tarefa?')) {
-
-                            projetos[indexProjeto].tasks.splice(indexTask, 1);
-
-                            gravarDadosStorage();
-                            carregaListaProjetos();
-                        }
-                    });
-
-                    const btnExpAtividade = criarBotaoExpandir();
-
-                    btnExpAtividade.addEventListener('click', () => {
-
-                        trocaIcone(btnExpAtividade);
-
-                        if (nLITask.children[1].style.display == 'none') {
-                            nLITask.children[1].style.display = 'block';
-                        }
-                        else {
-                            nLITask.children[1].style.display = 'none';
-                        }
-
-                    });
-
-                    const ulItens = document.createElement('UL');
-                    ulItens.style.border = '1px solid';
-
-                    //atividades
-
-                    const nLblTltAtividades = document.createElement('LABEL');
-                    nLblTltAtividades.setAttribute('id', 'nLblTltAtividades' + indexProjeto + '_' + indexTask);
-
-                    nLblTltAtividades.textContent = 'Atividades(' + projeto.tasks[indexTask].atividades.length + ') | Estimado: ' + totEstimativas;
-
-                    const tabelaAtv = document.createElement('TABLE');
-                    tabelaAtv.style.width = '100%';
-                    tabelaAtv.setAttribute('id', 'tabelaAtv' + indexProjeto + '_' + indexTask);
-
-                    const btnExpAtv = criarBotaoExpandir();
-
-                    btnExpAtv.addEventListener('click', () => {
-                        if (btnExpAtv.classList.contains('glyphicon-folder-open')) {
-                            ulAtv.children[3].style.display = 'none';
-                            tabelaAtv.innerHTML = '';
-                            trocaIcone(btnExpAtv);
-                        }
-                        else {
-                            carregaListaAtividades(indexProjeto, indexTask);
-                            ulAtv.children[3].style.display = 'inline-table';
-                            trocaIcone(btnExpAtv);
-                        }
-                    });
-
-                    const btnAddAtv = criarBotaoAdicionar();
-
-                    btnAddAtv.addEventListener('click', () => {
-
-                        mAtividade.setAttribute('data-id', indexProjeto);
-
-                        mAtividade.setAttribute('data-idtask', indexTask);
-
-                        const btCncAtividade = document.getElementById('btCncAtividade');
-
-                        btCncAtividade.addEventListener('click', () => {
-                            //limparCampos();
-                            txtDescAtividade.value = '';
-                            txtExtHoraAtividade.value = '0'
-                            txtExtMinAtividade.value = '0';
-                            mAtividade.close();
-                        })
-
-                        mAtividade.showModal();
-                    });
-
-                    const ulAtv = document.createElement('LI');
-                    ulAtv.appendChild(btnExpAtv);
-                    ulAtv.appendChild(nLblTltAtividades);
-                    ulAtv.appendChild(btnAddAtv);
-                    ulAtv.appendChild(tabelaAtv);
-
-                    ulItens.appendChild(ulAtv);
-                    ///apontamentos
-
-                    const nLblTltApontamentos = document.createElement('LABEL');
-
-                    nLblTltApontamentos.textContent = 'Apontamentos(' + projeto.tasks[indexTask].apontamentos.length + '), Total:' + totApontado;
-
-                    nLblTltApontamentos.setAttribute('id','nLblTltApontamentos'+indexProjeto+'_'+indexTask);
-
-                    const btnExpApt = criarBotaoExpandir();
-
-                    btnExpApt.addEventListener('click', () => {
-
-                        if (btnExpApt.classList.contains('glyphicon-folder-open')) {
-                            ulApt.children[3].style.display = 'none';
-                            tabelaApt.innerHTML = '';
-                            trocaIcone(btnExpApt);
-                        }
-                        else {
-                            carregaListaApontamentos(indexProjeto, indexTask);
-                            ulApt.children[3].style.display = 'inline-table';
-                            trocaIcone(btnExpApt);
-                        }
-
-                    });
-
-                    const btnAddApt = criarBotaoAdicionar();
-
-                    btnAddApt.addEventListener('click', () => {
-
-                        mApontamentos.setAttribute('data-id', indexProjeto);
-
-                        mApontamentos.setAttribute('data-idtask', indexTask);
-
-                        const btCncApontamento = document.getElementById('btCncApontamento');
-
-                        btCncApontamento.addEventListener('click', () => {
-                            txtDataApontamento.value = '';
-                            txtExtHoraApontamento.value = '0'
-                            txtExtMinApontamento.value = '0';
-                            txtPercentualProjeto.value = '0'
-                            mApontamentos.close();
-                        })
-
-                        mApontamentos.showModal();
-                    });
-
-                    const tabelaApt = document.createElement('TABLE');
-                    tabelaApt.setAttribute('id', 'tabelaApt' + indexProjeto + '_' + indexTask);
-
-                    const ulApt = document.createElement('LI');
-                    ulApt.appendChild(btnExpApt);
-                    ulApt.appendChild(nLblTltApontamentos);
-                    ulApt.appendChild(btnAddApt);
-                    ulApt.appendChild(tabelaApt);
-
-                    ulItens.appendChild(ulApt);
-
-                    ulItens.style.display = 'none';
-
-                    const divTitTarefas = document.createElement('DIV');
-
-                    divTitTarefas.classList.add('titTarefas');
-
-                    const lblTask = document.createElement('SPAN');
-                    const lblDescTask = document.createElement('SPAN');
-                    const lblEstimadoTask = document.createElement('SPAN');
-                    const lblApontamentoTask = document.createElement('SPAN');
-                    const lblConcluidoTask = document.createElement('SPAN');
-                    const lblRestanteTask = document.createElement('SPAN');
-
-                    lblDescTask.textContent = 'Tarefa: ' + task.descricao;
-                    lblDescTask.style.width = '40%';
-
-                    lblEstimadoTask.textContent = "Estimado: " + totEstimativas;
-                    lblEstimadoTask.setAttribute('id', 'lblEstimadoTask' + indexProjeto + '_' + indexTask);
-
-                    lblApontamentoTask.textContent = 'Apontamentos: ' + totApontado;
-                    lblApontamentoTask.setAttribute('id', 'lblApontamentoTask' + indexProjeto + '_' + indexTask);
-
-                    lblConcluidoTask.textContent = 'Concluído: ' + percentual + '%';
-                    lblConcluidoTask.setAttribute('id', 'lblConcluidoTask' + indexProjeto + '_' + indexTask);
-
-                    lblRestanteTask.setAttribute('id', 'lblRestanteTask' + indexProjeto + '_' + indexTask);
-
-                    if (percentual == 100) {
-                        lblRestanteTask.textContent = 'Tempo Gasto:' + restante;
-                    }
-                    else
-                        lblRestanteTask.textContent = 'Real esperado:' + restante;
-
-                    divTitTarefas.appendChild(btnExpAtividade);
-
-                    divTitTarefas.appendChild(lblDescTask);
-                    divTitTarefas.appendChild(lblEstimadoTask);
-                    divTitTarefas.appendChild(lblApontamentoTask);
-                    divTitTarefas.appendChild(lblConcluidoTask);
-                    divTitTarefas.appendChild(lblRestanteTask);
-
-                    divTitTarefas.appendChild(btnExcluirTask);
-
-                    nLITask.appendChild(divTitTarefas);
-
-                    // nLITask.appendChild(btnExcluirTask);
-                    nLITask.appendChild(ulItens);
-                    nUlItensTasks.appendChild(nLITask);
+                    ulTarefas.appendChild(liAtividades);
 
                 });
 
-                nLITasks.appendChild(nUlItensTasks);
 
-                nUlItensPrj.appendChild(nLITasks);
 
-                //fim tarefas
+                li3.appendChild(ulTarefas);
 
-                nLiDescProjeto.appendChild(nUlItensPrj);
 
-                ulProjetos.appendChild(nLiDescProjeto);
+                ulPrj.appendChild(li1);
+                ulPrj.appendChild(li2);
+                ulPrj.appendChild(li3);
 
-            });
-        }
+                const divGeral = document.createElement('DIV');
+                divGeral.appendChild(ulPrj);
 
-        const criarBotaoExpandir = () => {
-            const btnExpandir = document.createElement('I');
-            btnExpandir.classList.add('glyphicon');
-            btnExpandir.classList.add('glyphicon-folder-close');
-            btnExpandir.setAttribute('alt', 'Expandir');
-            //setAttribute('data-id', indexProjeto);
-            return btnExpandir;
-        }
-
-        const criarBotaoExcluir = () => {
-            const btnExcluir = document.createElement('I');
-            btnExcluir.classList.add('glyphicon');
-            btnExcluir.classList.add('glyphicon-trash');
-            return btnExcluir;
-        }
-
-        const trocaIcone = (botao) => {
-
-            if (botao.classList.contains('glyphicon-folder-close')) {
-                botao.classList.remove('glyphicon-folder-close');
-                botao.classList.add('glyphicon-folder-open');
-            }
-            else {
-                botao.classList.remove('glyphicon-folder-open');
-                botao.classList.add('glyphicon-folder-close');
-            }
-        }
-
-        const criarBotaoAdicionar = () => {
-            const btnAdicionar = document.createElement('I');
-            btnAdicionar.classList.add('glyphicon');
-            btnAdicionar.classList.add('glyphicon-plus');
-            return btnAdicionar;
-        }
-
-        const lerDadosStorage = () => {
-            const dados = localStorage.getItem('mngPrj');
-
-            if (dados)
-                projetos = JSON.parse(dados);
-        }
-
-        const gravarDadosStorage = () => {
-            const dados = JSON.stringify(projetos);
-
-            localStorage.setItem('mngPrj', dados);
-        }
-
-        const transformaTempoEmInteiro = (tempo) => {
-            var arrayTempo = String(tempo).split(':');
-
-            var tempo_seg = ((parseInt(arrayTempo[0]) * 60) + parseInt(arrayTempo[1]));
-
-            return tempo_seg;
-        }
-
-        const somartempos = (tempo1, tempo2) => {
-
-            if (tempo1 === "") {
-                tempo1 = "00:00";
+                $scope.cnt = divGeral.innerHTML;
+                dSaida.show();
+          
             }
 
-            var tempo_seg1 = transformaTempoEmInteiro(tempo1);
+            $scope.salvarArquivo = () => {
 
-            var tempo_seg2 = transformaTempoEmInteiro(tempo2);
 
-            var totalMinutos = tempo_seg1 + tempo_seg2
+                //salvar('projeto', $scope.txtSaida);
 
-            var tempoDecimal = totalMinutos / 60;
+                const data = new Date();
 
-            var horas = Math.floor(tempoDecimal);
 
-            var minutosDecimal = tempoDecimal - horas;
 
-            var minutos = Math.round(minutosDecimal * 60);
 
-            return String(horas).padStart(2, '0') + ':' + String(minutos).padStart(2, '0');
-        }
+                let txtHtml = '<html><head>'+
+                    '<style> '+
+                        '*{    font-size: x-large;}'+
+                        'li{margin-left: 20px; display: grid; padding: 10px;} '+
+                        'table {border: 1px solid; padding: 5px; margin-left: 20px;font-size: smaller; margin-top: 10px}'+
+                        'td{ border-bottom: 1px solid; border-right: 1px solid;}'+
+                        'label{font-weight: bolder;} '+
+                        'th{font-weight: bolder; border: 1px solid; background: black;color: beige} '+
+                        '</style>'+
+                    
+                    '</head><body><div>Report: ' + data.toLocaleString() +'</div>'+
+                        $scope.cnt + 
+                    '</body></html>';
 
-        const calcularRestante = (totApontado, percentual) => {
+                salvar('projeto', txtHtml);
 
-            if (totApontado === "") {
-                totApontado = "00:00";
             }
 
-            var tempo_seg1 = transformaTempoEmInteiro(totApontado);
+            $scope.abrirDiaolgPo = (projeto, po) => {
+                $scope.projetoAtual = projeto;
 
-            var valor = tempo_seg1 / (percentual / 100);
+                if (po) {
 
-            var tempoDecimal = valor / 60;
+                    $scope.poSel = po;
 
-            var horas = Math.floor(tempoDecimal);
+                    $scope.poEditar = angular.copy(po);
+                }
+                dPo.show();
+            };
 
-            var minutosDecimal = tempoDecimal - horas;
+            $scope.cancelarPo = () => {
+                $scope.poEditar = {};
+                dPo.close();
+            };
 
-            var minutos = Math.round(minutosDecimal * 60);
+            $scope.gravarPo = () => {
 
-            return String(horas).padStart(2, '0') + ':' + String(minutos).padStart(2, '0');
-        }
+                if ($scope.poEditar === undefined) {
+                    alert('Informe os dados');
+                    return;
+                }
 
-        const carregaListaEnvolvidos = (indexProjeto) => {
-            const tabelaPO = document.getElementById('tabelaPO' + indexProjeto);
+                if ($scope.poEditar.nome === undefined) {
+                    alert('Informe o nome do envolvida');
+                    return false;
+                }
+                else if ($scope.poEditar.nome.length < 5) {
+                    alert('O nome do envolvido deve ter no minimo 5 caracteres');
+                    return;
+                }
 
-            tabelaPO.innerHTML = '';
-            tabelaPO.style.width = '100%';
-
-            const line = document.createElement('TR');
-
-            const titNome = document.createElement('TH');
-            titNome.textContent = "Nome";
-            const titEmail = document.createElement('TH');
-            titEmail.textContent = "Email";
-            const titTelefone = document.createElement('TH');
-            titTelefone.textContent = "Telefone";
-            const titBotoes = document.createElement('TH');
-            titBotoes.textContent = "";
-
-            line.appendChild(titBotoes);
-            line.appendChild(titNome);
-            line.appendChild(titEmail);
-            line.appendChild(titTelefone);
-
-            tabelaPO.appendChild(line);
-
-            projetos[indexProjeto].pos.forEach(po => {
-
-                const nLIPO = document.createElement('LI');
-
-                const btnExcluirPo = criarBotaoExcluir();
-
-                btnExcluirPo.addEventListener('click', () => {
-                    //abraao
-                    if (confirm('Deseja excluir o envolvidoo?')) {
-
-                        let indexPo = projetos[indexProjeto].pos.indexOf(po);
-
-                        projetos[indexProjeto].pos.splice(indexPo, 1);
-
-                        gravarDadosStorage();
-
-                        carregaListaEnvolvidos(indexProjeto);
+                if ($scope.poEditar.email != undefined) {
+                    if ($scope.poEditar.email.length < 10) {
+                        alert('O e-mail do envolvido deve ter no minimo 10 caracteres');
+                        return;
                     }
-                });
+                }
 
-                const linePo = document.createElement('TR');
-
-                const colNome = document.createElement('TD');
-                const colEmail = document.createElement('TD');
-                const colTelefone = document.createElement('TD');
-                const colBotoes = document.createElement('TD');
-
-                colNome.textContent = po.nome;
-                colNome.setAttribute('width', '50%');
-                colEmail.textContent = po.email;
-                colTelefone.textContent = po.telefone;
-                colBotoes.setAttribute('width', '5%');
-                colBotoes.style.textAlign = 'center';
-                colBotoes.appendChild(btnExcluirPo);
-
-                linePo.appendChild(colBotoes);
-                linePo.appendChild(colNome);
-                linePo.appendChild(colEmail);
-                linePo.appendChild(colTelefone);
-
-                tabelaPO.appendChild(linePo);
-            });
-
-            const nLblDescPos = document.getElementById('nLblDescPos' + indexProjeto);
-
-            nLblDescPos.textContent = 'Envolvidos(' + projetos[indexProjeto].pos.length + ')';
-
-        }
-
-        const carregaListaAtividades = (indexProjeto, indexTask) => {
-            const tabelaAtv = document.getElementById('tabelaAtv' + indexProjeto + '_' + indexTask);
-            tabelaAtv.innerHTML = '';
-            tabelaAtv.style.width = '100%';
-
-            const LinhaHAtv = document.createElement('TR');
-            const titAtv = document.createElement('TH');
-            const titEstimativa = document.createElement('TH');
-            const titBotoesAtv = document.createElement('TH');
-
-            titAtv.textContent = 'Descrição';
-            titEstimativa.textContent = 'Estimativa';
-            titBotoesAtv.textContent = '';
-
-            LinhaHAtv.appendChild(titBotoesAtv);
-            LinhaHAtv.appendChild(titAtv);
-            LinhaHAtv.appendChild(titEstimativa);
-
-            tabelaAtv.appendChild(LinhaHAtv);
-
-            projetos[indexProjeto].tasks[indexTask].atividades.forEach(atividade => {
-                const btnExcluirAtv = criarBotaoExcluir();
-
-                btnExcluirAtv.addEventListener('click', () => {
-
-                    if (confirm('Deseja excluir a atividade?')) {
-
-                        let indexAtividade = projetos[indexProjeto].tasks[indexTask].atividades.indexOf(atividade);
-
-                        projetos[indexProjeto].tasks[indexTask].atividades.splice(indexAtividade, 1);
-
-                        gravarDadosStorage();
-                        carregaListaAtividades(indexProjeto, indexTask);
+                if ($scope.poEditar.telefone != undefined) {
+                    if ($scope.poEditar.telefone.length < 8) {
+                        alert('O telefone do envolvido deve ter no minimo 8 caracteres');
+                        return;
                     }
-                });
+                }
 
-                const LinhaAtv = document.createElement('TR');
 
-                const colAtv = document.createElement('TD');
-                const colEstimativa = document.createElement('TD');
-                const colBotoesAtv = document.createElement('TD');
+                if ($scope.poSel) {
+                    angular.extend($scope.poSel, $scope.poEditar);
+                }
+                else {
+                    $scope.projetoAtual.pos.push($scope.poEditar);
+                }
 
-                colAtv.textContent = atividade.descricao;
-                colEstimativa.textContent = atividade.estimativa;
-                colBotoesAtv.style.width = '5%';
-                colBotoesAtv.style.textAlign = 'center';
-                colBotoesAtv.appendChild(btnExcluirAtv);
+                $scope.poEditar = {};
 
-                //abraao
-                LinhaAtv.appendChild(colBotoesAtv);
-                LinhaAtv.appendChild(colAtv);
-                LinhaAtv.appendChild(colEstimativa);
-                tabelaAtv.appendChild(LinhaAtv);
-            });
+                delete $scope.projetoAtual;
 
-            const nLblTltAtividades = document.getElementById('nLblTltAtividades' + indexProjeto + '_' + indexTask);
+                $scope.gravarDadosStorage();
 
-            //abraaoaqui
-            const totEstimativas = estimativaTarefa(indexProjeto, indexTask);
+                dPo.close();
+            };
 
-            nLblTltAtividades.textContent = 'Atividades(' + projetos[indexProjeto].tasks[indexTask].atividades.length + ') | Estimado: ' + totEstimativas;
+            $scope.deletePo = (projeto, po) => {
+                if (confirm('Deseja excluir o envolvido?')) {
 
-            const nLblDescTasks = document.getElementById('nLblDescTasks' + indexProjeto);
+                    projeto.pos = projeto.pos.filter((cc) => cc != po);
+                    $scope.gravarDadosStorage();
+                }
+            }
 
-            const retEstimativaGeral = estimativaGeral(projetos[indexProjeto]);
+            $scope.abrirDiaolgTask = (projeto, task) => {
+                $scope.projetoAtual = projeto;
 
-            const retApontamentosGeral = apontamentosGeral(projetos[indexProjeto]);
+                $scope.taskSel = task;
 
-            nLblDescTasks.textContent = 'Tarefas(' + projetos[indexProjeto].tasks.length + ') - Estimado: ' + retEstimativaGeral + ', Apontamentos(' + retApontamentosGeral + ')';
+                if (task) {
 
-            carregaDadosHeaderTarefa(indexProjeto, indexTask);
-        }
+                    $scope.taskEditar = angular.copy(task);
+                }
+                dTask.show();
+            };
 
-        const carregaListaApontamentos = (indexProjeto, indexTask) => {
-            const tabelaApt = document.getElementById('tabelaApt' + indexProjeto + '_' + indexTask);
-            tabelaApt.style.width = '100%';
-            tabelaApt.innerHTML = '';
+            $scope.cancelarTask = () => {
+                $scope.taskEditar = {};
+                dTask.close();
+            };
 
-            const lineApt = document.createElement('TR');
+            $scope.gravarTask = () => {
 
-            const titDataApt = document.createElement('TH');
-            titDataApt.textContent = "Data";
+                if ($scope.taskEditar === undefined) {
+                    alert('Informe os dados');
+                    return;
+                }
 
-            const titTempo = document.createElement('TH');
-            titTempo.textContent = "Tempo";
+                if ($scope.taskEditar.descricao === undefined) {
+                    alert('Informe a descrição da tarefa');
+                    return false;
+                }
+                else if ($scope.taskEditar.descricao.length < 10) {
+                    alert('OA descrição da tarefa deve ter no minimo 10 caracteres');
+                    return;
+                }
 
-            const titPercentual = document.createElement('TH');
-            titPercentual.textContent = "Percentual atual da tarefa";
-            titPercentual.colSpan = '2';
-            titPercentual.style.textAlign = 'left';
+                if ($scope.taskSel) {
+                    angular.extend($scope.taskSel, $scope.taskEditar);
+                }
+                else {
+                    $scope.taskEditar.atividades = [];
+                    $scope.taskEditar.apontamentos = [];
+                    $scope.projetoAtual.tasks.push($scope.taskEditar);
+                }
 
-            const titBotoesApt = document.createElement('TH');
-            titBotoesApt.textContent = "";
+                $scope.taskEditar = {};
 
-            lineApt.appendChild(titBotoesApt);
-            lineApt.appendChild(titDataApt);
-            lineApt.appendChild(titTempo);
-            lineApt.appendChild(titPercentual);
+                delete $scope.projetoAtual;
 
-            tabelaApt.appendChild(lineApt);
+                $scope.gravarDadosStorage();
 
-            const ulItemApontamentos = document.createElement('UL');
+                dTask.close();
+            };
 
-            projetos[indexProjeto].tasks[indexTask].apontamentos.reverse().forEach(apontamento => {
-                const btnExcluirApt = criarBotaoExcluir();
+            $scope.deleteTask = (projeto, task) => {
+                if (confirm('Deseja excluir a tarefa?')) {
 
-                btnExcluirApt.addEventListener('click', () => {
+                    projeto.tasks = projeto.tasks.filter((cc) => cc != task);
+                    $scope.gravarDadosStorage();
+                }
+            }
 
-                    if (confirm('Deseja excluir o apontamento?')) {
+            $scope.abrirDialogAtividade = (task, atividade) => {
+                $scope.taskSel = task;
 
-                        let indexApontamento = projetos[indexProjeto].tasks[indexTask].apontamentos.indexOf(apontamento);
+                $scope.atividadekSel = atividade;
 
-                        projetos[indexProjeto].tasks[indexTask].apontamentos.splice(indexApontamento, 1);
+                if (atividade) {
 
-                        gravarDadosStorage();
-                        carregaListaApontamentos(indexProjeto, indexTask);
+                    $scope.atividadeEditar = angular.copy(atividade);
+                }
+                dAtividade.show();
+            };
+
+            $scope.cancelarAtividade = () => {
+                $scope.atividadeEditar = {};
+                $scope.atividadekSel = [];
+                dAtividade.close();
+            };
+
+            $scope.gravarAtividade = () => {
+
+                if ($scope.atividadeEditar === undefined) {
+                    alert('Informe os dados');
+                    return;
+                }
+
+                if ($scope.atividadeEditar.descricao === undefined) {
+                    alert('Informe a descrição da atividade');
+                    return false;
+                }
+                else if ($scope.atividadeEditar.descricao.length < 10) {
+                    alert('OA descrição da atividade deve ter no minimo 10 caracteres');
+                    return;
+                }
+
+                if ($scope.atividadeEditar.hora === undefined) {
+                    alert('Informe hora');
+                    return false;
+                }
+
+                if ($scope.atividadeEditar.minuto === undefined) {
+                    alert('Informe os minutos');
+                    return false;
+                }
+                else {
+                    if ($scope.atividadeEditar.minuto > 59) {
+                        alert('O valor maximo para minutos é 59');
+                        return false;
                     }
-                });
+                }
 
-                const lineApt2 = document.createElement('TR');
+                if ($scope.atividadekSel) {
+                    angular.extend($scope.atividadekSel, $scope.atividadeEditar);
+                }
+                else {
+                    $scope.taskSel.atividades.push($scope.atividadeEditar);
+                }
 
-                const colDataApt = document.createElement('TD');
-                colDataApt.textContent = apontamento.data;
+                $scope.atividadeEditar = {};
 
-                const colTempo = document.createElement('TD');
-                colTempo.textContent = apontamento.tempo;
+                $scope.gravarDadosStorage();
 
-                const colPercentual = document.createElement('TD');
-                colPercentual.textContent = apontamento.percentual + '%';
+                dAtividade.close();
+            };
 
-                const titBotoesApt2 = document.createElement('TD');
-                titBotoesApt2.appendChild(btnExcluirApt);
-                titBotoesApt2.style.width = '5%';
+            $scope.deleteAtividade = (tarefa, atividade) => {
+                if (confirm('Deseja excluir a atividade?')) {
 
-                lineApt2.appendChild(titBotoesApt2);
-                lineApt2.appendChild(colDataApt);
-                lineApt2.appendChild(colTempo);
-                lineApt2.appendChild(colPercentual);
+                    tarefa.atividades = tarefa.atividades.filter((x) => x != atividade);
 
-                tabelaApt.appendChild(lineApt2);
-            });
+                    $scope.gravarDadosStorage();
+                }
+            };
 
-            //tabelaApt.style.display = 'none';
+            $scope.abrirDialogApontamento = (task, apontamento) => {
 
-            const totApontado = apontamentosTarefa(indexProjeto, indexTask); //pr
+                $scope.taskSel = task;
 
-            const nLblTltApontamentos = document.getElementById('nLblTltApontamentos' + indexProjeto + '_' + indexTask);
-            //abraaoaqui
-            //const totEstimativas = estimativaTarefa(indexProjeto, indexTask);
+                $scope.aapontamentoSel = apontamento;
 
-            nLblTltApontamentos.textContent = 'Apontamentos(' + projetos[indexProjeto].tasks[indexTask].apontamentos.length + '), Total:' + totApontado;
+                if (apontamento) {
 
-            const nLblDescTasks = document.getElementById('nLblDescTasks' + indexProjeto);
+                    $scope.apontamentoEditar = angular.copy(apontamento);
+                }
+                else {
+                    //$scope.apontamentoEditar.hora ={ value:20} ;
+                }
+                dApontamento.show();
+                console.log($scope.apontamentoEditar);
+            };
 
-            const retEstimativaGeral = estimativaGeral(projetos[indexProjeto]);
+            $scope.cancelarApontamento = () => {
+                $scope.apontamentoEditar = {};
+                $scope.apontamentokSel = [];
+                dApontamento.close();
+            };
 
-            const retApontamentosGeral = apontamentosGeral(projetos[indexProjeto]);
+            $scope.gravarApontamento = () => {
 
-            nLblDescTasks.textContent = 'Tarefas(' + projetos[indexProjeto].tasks.length + ') - Estimado: ' + retEstimativaGeral + ', Apontamentos(' + retApontamentosGeral + ')';
 
-            carregaDadosHeaderTarefa(indexProjeto, indexTask);
-        }
+                if ($scope.apontamentoEditar === undefined) {
+                    alert('Informe os dados');
+                    return;
+                }
+                else {
+                    if ($scope.apontamentoEditar.data === undefined) {
+                        alert('Informe a data');
+                        return;
+                    }
 
-        const carregaDadosHeaderTarefa = (indexProjeto, indexTask) => {
-            let percentual = 0;
+                    if ($scope.apontamentoEditar.hora === undefined) {
+                        alert('Informe a hora');
+                        return;
+                    }
+                    if ($scope.apontamentoEditar.minuto === undefined) {
+                        alert('Informe os minutos')
+                        return;
+                    }
+                    if ($scope.apontamentoEditar.percentual === undefined) {
+                        alert('Infomre o percentual atual da tarefa');
+                        return;
+                    }
+                }
 
-            if (projetos[indexProjeto].tasks[indexTask].apontamentos.slice(-1).length > 0) {
-                percentual = projetos[indexProjeto].tasks[indexTask].apontamentos.slice(-1)[0].percentual;
+                let data = String($scope.apontamentoEditar.data).split('-');
+
+                let dt = new Date(data[0], data[1] - 1, data[2]);
+
+                $scope.apontamentoEditar.data = dt.toLocaleDateString();
+
+                console.log($scope.apontamentoEditar);
+
+                if ($scope.apontamentoSel) {
+                    angular.extend($scope.apontamentoSel, $scope.apontamentoEditar);
+                }
+                else {
+                    $scope.taskSel.apontamentos.push($scope.apontamentoEditar);
+                }
+
+                $scope.apontamentoEditar = {};
+
+                $scope.gravarDadosStorage();
+
+                dApontamento.close();
+            };
+
+            $scope.deleteApontamento = (tarefa, apontamento) => {
+                if (confirm('Deseja excluir o apontamento?')) {
+
+                    tarefa.apontamentos = tarefa.apontamentos.filter((x) => x != apontamento);
+
+                    $scope.gravarDadosStorage();
+                }
+            };
+
+            $scope.restanteGeral = (projeto) => {
+
+                let cc = "00:00";
+
+                projeto.tasks.forEach((tarefa) =>
+                    cc = $scope.somartempos(cc, $scope.restanteTarefa(tarefa))
+                )
+                return cc;
             }
 
-            const totEstimativas = estimativaTarefa(indexProjeto, indexTask);
-
-            const totApontado = apontamentosTarefa(indexProjeto, indexTask);
-
-            let restante = totEstimativas;
-
-            if (percentual > 0) {
-                restante = calcularRestante(totApontado, percentual);
+            $scope.primeiroPrj = (projeto) => {
+                if ($scope.projetos.length === 1) {
+                    return projeto.pos.length > 0 || projeto.tasks.length > 0;
+                }
+                return true;
             }
 
-            const lblEstimadoTask = document.getElementById('lblEstimadoTask' + indexProjeto + '_' + indexTask);
-            lblEstimadoTask.textContent = "Estimado: " + totEstimativas;
+        });
 
-            const lblApontamentoTask = document.getElementById('lblApontamentoTask' + indexProjeto + '_' + indexTask);
-            lblApontamentoTask.textContent = 'Apontamentos: ' + totApontado;
-
-            const lblConcluidoTask = document.getElementById('lblConcluidoTask' + indexProjeto + '_' + indexTask);
-            lblConcluidoTask.textContent = 'Concluído: ' + percentual + '%';
-
-            const lblRestanteTask = document.getElementById('lblRestanteTask' + indexProjeto + '_' + indexTask);
-
-            if (percentual == 100) {
-                lblRestanteTask.textContent = 'Tempo Gasto:' + restante;
-            }
-            else
-                lblRestanteTask.textContent = 'Real esperado:' + restante;
-        }
-
-        const estimativaGeral = (projeto) => {
-
-            return projeto.tasks.map(tks => {
-                return tks.atividades.map(x => x.estimativa).reduce((p, c) => {
-                    return somartempos(p, c)
-                }, '00:00')
-            }).reduce((p, c) => {
-                return somartempos(p, c)
-            }, '00:00');
-        }
-
-        const estimativaTarefa = (indexProjeto, indexTask) => {
-            return projetos[indexProjeto].tasks[indexTask].atividades
-                .map(x => x.estimativa)
-                .reduce((p, c) => {
-                    return somartempos(p, c)
-                }, '00:00');
-        }
-
-        const apontamentosTarefa = (indexProjeto, indexTask) => {
-            return projetos[indexProjeto].tasks[indexTask].apontamentos
-                .map(x => x.tempo)
-                .reduce((p, c) => {
-                    return somartempos(p, c)
-                }, '00:00');
-        }
-
-        const apontamentosGeral = (projeto) => {
-            return projeto.tasks.map(tks => {
-                return tks.apontamentos.map(x => x.tempo).reduce((p, c) => {
-                    return somartempos(p, c)
-                }, '00:00')
-            }).reduce((p, c) => {
-                return somartempos(p, c)
-            }, '00:00');
-        }
-
-        carregaListaProjetos();
-
-
-    </script>
+</script>
 </body>
 
 </html>
