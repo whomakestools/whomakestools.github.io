@@ -14,6 +14,13 @@
     <script src="FileServe.js"></script>
 
     <script>
+
+        function moveArrayElement(arr, from, to) {
+            var el = arr[from];
+            arr.splice(from, 1);
+            arr.splice(to, 0, el);
+        };
+
         function salvar(nome, conteudo) {
             let blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
             saveAs(blob, nome + ".html");
@@ -100,6 +107,7 @@
         * {
             font-size: medium;
             align-items: baseline;
+            font-family: sans-serif;
         }
 
         .titTarefas {
@@ -186,6 +194,20 @@
         li {
             margin-left: 20px;
         }
+
+        td,
+        th {
+            padding-left: 5px;
+        }
+
+        .done {
+            background: greenyellow;
+            color: blue;
+        }
+
+        .todo {
+            background-color: bisque;
+        }
     </style>
 
 </head>
@@ -196,14 +218,17 @@
     <div ng-controller="listProjetosController" class="principal">
         <button id="btnNovoPrj" ng-click="abrirDiaolgProjeto()" class="btn btn-primary">Novo Projeto</button>
         <ul class="projetos">
-            <li ng-repeat="projeto in projetos track by $index" class="projeto">
+            <li ng-repeat="projeto in projetos track by $index" class="projeto" id="proj{{$index}}">
                 <i ng-class="{'glyphicon-folder-open': projeto.visible, 'zero': primeiroPrj(projeto)===false && projeto.visible===false} "
                     ng-click="projeto.visible=!projeto.visible; projeto.pos.visible=false; projeto.tasks.visible=false;"
-                    class="glyphicon glyphicon-folder-close"></i>
-                <label>projeto - {{projeto.nome}} </label>
+                    class="glyphicon glyphicon-folder-close" title="Expadir projeto"></i>
+
+                <label>Código: {{projeto.codigo}} - Nome: {{projeto.nome}} </label>
                 <i title="Editar" ng-click="abrirDiaolgProjeto(projeto)" class="glyphicon glyphicon-edit"></i>
-                <i title="Exportar" ng-click="exportarProjeto(projeto)" class="glyphicon glyphicon-share"></i>
+                <i title="Report" ng-click="projeto.visible=false; exportarProjeto($index,projeto.codigo)"
+                    class="glyphicon glyphicon-share"></i>
                 <i title="Excluir" class="glyphicon glyphicon-trash" ng-click="deleteProjeto(projeto)"></i>
+                <i title="Configurações" class="glyphicon glyphicon-wrench" ng-click="deleteProjeto(projeto)"></i>
                 <ul ng-show="projeto.visible">
                     <li class="lii">
                         <pre>{{projeto.descricao}}</pre>
@@ -213,7 +238,7 @@
                             ng-click="projeto.pos.visible=!projeto.pos.visible" class="glyphicon glyphicon-folder-close"
                             alt="Expandir"></i>
                         <label> Envolvidos ({{projeto.pos.length}})</label>
-                        <i class="glyphicon glyphicon-plus" ng-click="abrirDiaolgPo(projeto)"></i>
+                        <i title="Adicionar envolvido" class="glyphicon glyphicon-plus" ng-click="abrirDiaolgPo(projeto)"></i>
                         <table ng-show="projeto.pos.visible && projeto.visible"
                             style="width: 100%; display: inline-table;">
                             <tr>
@@ -224,8 +249,8 @@
                             </tr>
                             <tr ng-repeat="po in projeto.pos track by $index">
                                 <td width="10%" style="text-align: center;">
-                                    <i ng-click="abrirDiaolgPo(projeto,po)" class="glyphicon glyphicon-edit"></i>
-                                    <i class="glyphicon glyphicon-trash"
+                                    <i title="Editar envolvido" ng-click="abrirDiaolgPo(projeto,po)" class="glyphicon glyphicon-edit"></i>
+                                    <i title="Excluir envolvido" class="glyphicon glyphicon-trash"
                                         ng-click="deletePo(projeto,po);projeto.pos.visible=true"></i>
                                 </td>
                                 <td width="50%">{{po.nome}}</td>
@@ -235,28 +260,56 @@
                         </table>
                     </li>
                     <li>
+                        <i ng-class="{'glyphicon-folder-open': projeto.observacoes.visible}"
+                            ng-click="projeto.observacoes.visible=!projeto.observacoes.visible"
+                            class="glyphicon glyphicon-folder-close" title="Expandir Observações"></i>
+                        <label> Observações Gerais({{projeto.observacoes.length}})</label>
+                        <i class="glyphicon glyphicon-plus" ng-click="abrirDialogObsProjeto(projeto)"></i>
+
+                        <table class="tbObservacoes" ng-show="projeto.observacoes.visible && projeto.visible"
+                            style="width: 100%; display: inline-table;">
+                            <tr>
+                                <th></th>
+                                <th>Observação</th>
+                                <th>Data</th>
+                            </tr>
+                            <tr ng-repeat="observacao in projeto.observacoes|reverse track by $index">
+                                <td width="10%" style="text-align: center;">
+                                    <i class="glyphicon glyphicon-trash"
+                                        ng-click="deleteObsProjeto(projeto,observacao);projeto.observacoes.visible=true"></i>
+                                </td>
+                                <td width="50%">{{observacao.observacao}}</td>
+                                <td>{{observacao.data}}</td>
+                            </tr>
+                        </table>
+
+                    </li>
+                    <li>
                         <i ng-class="{'glyphicon-folder-open': projeto.tasks.visible }"
                             ng-click="projeto.tasks.visible=!projeto.tasks.visible;projeto.tasks.atividades.visible=false;projeto.tasks.apontamentos.visible=false;"
                             class="glyphicon glyphicon-folder-close"></i>
                         <label>Tarefas({{projeto.tasks.length}}) - Estimado: {{estimativaGeral(projeto)}} ,
-                            Apontamentos: {{apontamentosGeral(projeto)}} - Total Real {{restanteGeral(projeto)}}</label>
+                            Apontamentos: {{apontamentosGeral(projeto)}} - Total Real {{realGeral(projeto)}} - Restante
+                            {{restanteGeral(projeto)}}</label>
                         <i class="glyphicon glyphicon-plus" ng-click="abrirDiaolgTask(projeto)"></i>
                         <ul ng-show="projeto.tasks.visible && projeto.visible">
-                            <li ng-repeat="tarefa in projeto.tasks track by $index"
+                            <li class="liAtvidade" ng-repeat="tarefa in projeto.tasks track by $index"
                                 style="border: 1px solid;margin-bottom:5px">
                                 <i ng-class="{'glyphicon-folder-open': tarefa.visible}"
                                     ng-click="tarefa.visible=!tarefa.visible; tarefa.atividades.visible=false;tarefa.apontamentos.visible=false;"
                                     class="glyphicon glyphicon-folder-close"></i>
-                                <label style="width: 30%;">Tarefa: {{tarefa.descricao}}</label>
-                                <label>Estimado: {{estimativaTarefa(tarefa)}}</label>
-                                <label>Apontamentos: {{apontamentosTarefa(tarefa)}}</label>
-                                <label>Concluído: {{tarefa.apontamentos.slice(-1)[0].percentual}}%</label>
-                                <label>Real esperado: {{restanteTarefa(tarefa)}}</label>
-                                <i class="glyphicon glyphicon-edit" ng-click="abrirDiaolgTask(projeto,tarefa)"></i>
+                                <label style="width: 30%;">Tarefa {{$index+1}}: {{tarefa.descricao}}</label>
+                                <label>|Estimado: {{estimativaTarefa(tarefa)}}</label>
+                                <label>|Apontado: {{apontamentosTarefa(tarefa)}}</label>
+                                <label>|Concluído: {{tarefa.apontamentos.slice(-1)[0].percentual}}%</label>
+                                <label>|Esperado: {{realTarefa(tarefa)}}</label>
+                                <label>|Restante: {{restanteTarefa(tarefa)}}</label>
+                                <i class="glyphicon glyphicon-edit"
+                                    ng-click="abrirDiaolgTask(projeto,tarefa,$index)"></i>
                                 <i class="glyphicon glyphicon-trash"
                                     ng-click="deleteTask(projeto,tarefa);projeto.tasks.visible=true;"></i>
                                 <ul ng-show="tarefa.visible && projeto.tasks.visible">
-                                    <li>
+                                    <li class="atividades">
                                         <i ng-class="{'glyphicon-folder-open': tarefa.atividades.visible}"
                                             class="glyphicon glyphicon-folder-close"
                                             ng-click="tarefa.atividades.visible=!tarefa.atividades.visible"></i>
@@ -267,12 +320,20 @@
                                         <table ng-show="tarefa.atividades.visible  && tarefa.visible"
                                             style="width: 100%; display: inline-table;">
                                             <tr>
-                                                <th></th>
+                                                <th style="text-align:center">Ações</th>
                                                 <th>Descrição</th>
                                                 <th>Estimativa</th>
+                                                <th>Feito</th>
                                             </tr>
-                                            <tr ng-repeat="atividade in tarefa.atividades track by $index">
-                                                <td style="width: 10%; text-align: center;">
+                                            <tr ng-repeat="atividade in tarefa.atividades track by $index"
+                                                ng-class="{'done': atividade.feito}">
+                                                <td style="width: 15%; text-align: center; border-right: 1px solid;">
+
+                                                    <i ng-click="modaOrdemAtividade(tarefa.atividades,'u',$index)"
+                                                        class="glyphicon glyphicon-circle-arrow-up"></i>
+                                                    <i ng-click="modaOrdemAtividade(tarefa.atividades,'d',$index)"
+                                                        class="	glyphicon glyphicon-circle-arrow-down"></i>
+
                                                     <i ng-click="abrirDialogAtividade(tarefa,atividade);tarefa.atividades.visible=true;"
                                                         class="glyphicon glyphicon-edit"></i>
                                                     <i ng-click="deleteAtividade(tarefa,atividade);tarefa.atividades.visible=true;"
@@ -280,10 +341,14 @@
                                                 </td>
                                                 <td>{{atividade.descricao}}</td>
                                                 <td>{{atividade.hora | zpad:2}}:{{atividade.minuto | zpad:2}}</td>
+                                                <td>
+                                                    <input ng-change="gravarDadosStorage()" type="checkbox"
+                                                        ng-model="atividade.feito">
+                                                </td>
                                             </tr>
                                         </table>
                                     </li>
-                                    <li>
+                                    <li class="apontamentos">
                                         <i ng-class="{'glyphicon-folder-open': tarefa.apontamentos.visible}"
                                             class="glyphicon glyphicon-folder-close"
                                             ng-click="tarefa.apontamentos.visible=!tarefa.apontamentos.visible"></i>
@@ -311,11 +376,38 @@
                                             </tr>
                                         </table>
                                     </li>
+                                    <li class="observacoesTarefa">
+                                        <i ng-class="{'glyphicon-folder-open': tarefa.observacoes.visible}"
+                                            class="glyphicon glyphicon-folder-close"
+                                            ng-click="tarefa.observacoes.visible=!tarefa.observacoes.visible"></i>
+                                        <label>Observações da tarefa({{tarefa.observacoes.length}}) </label>
+                                        <i class="glyphicon glyphicon-plus"
+                                            ng-click="abrirDialogOservacaoTarefa(tarefa);tarefa.observacoes.visible=true;"></i>
+
+                                        <table class="tbObservacoes" ng-show="tarefa.observacoes.visible  && tarefa.visible"
+                                            style="width: 100%; display: inline-table;">
+                                            <tr>
+                                                <th></th>
+                                                <th>Observação</th>
+                                                <th>Data</th>
+                                            </tr>
+                                            <tr ng-repeat="observacao in tarefa.observacoes| reverse track by $index">
+                                                <td style="width: 10%; text-align: center;">
+                                                    <i class="glyphicon glyphicon-trash"
+                                                        ng-click="deleteObsTarefa(tarefa,observacao);tarefa.observacoes.visible=true;"></i>
+                                                </td>
+                                                <td>{{observacao.observacao }}</td>
+                                                <td>{{observacao.data}}</td>
+                                            </tr>
+                                        </table>
+
+                                    </li>
                                 </ul>
 
                             </li>
                         </ul>
                     </li>
+                    
                 </ul>
             </li>
         </ul>
@@ -324,6 +416,11 @@
             <div class="mPrj">
                 <div class="linha">
                     <H1>Projeto</H1>
+                </div>
+                <div class="linha">
+                    <label>Código do projeto</label>
+                    <input maxlength="10" ng-model="projetoEditar.codigo" placeholder="Digite o código do projeto"
+                        type="text">
                 </div>
                 <div class="linha">
                     <label>Nome projeto</label>
@@ -383,9 +480,18 @@
                 </div>
                 <div class="linha">
                     <label>Descrição da tarefa</label>
-                    <input maxlength="30" type="text" id="txtDescTask" ng-model="taskEditar.descricao"
-                        placeholder="Digite a tarefa">
+                    <input maxlength="30" type="text" ng-model="taskEditar.descricao" placeholder="Digite a tarefa">
                 </div>
+                <div class="linha" ng-show="projetoAtual.tasks.length>1 && taskSel">
+                    <label>Posição atual : {{(posAtual+1)}}</label>
+                </div>
+                <div class="linha" ng-show="projetoAtual.tasks.length>1 && taskSel">
+                    <label>Nova posição</label>
+                    <select ng-model="novaPosTask">
+                        <option ng-repeat="x in tasksIndex" ng-value="{{x}}" value="{{(x+1)}}">{{(x+1)}}</option>
+                    </select>
+                </div>
+
                 <div class="linha">
                     <button id="btCncTask" class="btn btn-warning" ng-click="cancelarTask()">
                         <i class="glyphicon glyphicon-remove"></i>
@@ -479,6 +585,54 @@
             </div>
         </dialog>
 
+
+
+
+        <dialog id="dObsTarefa" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Observações</H1>
+                </div>
+                <div class="linha">
+                    <label>observacão</label>
+                    <input class="form-control" type="text" ng-model="obsTarefaEditar.observacao">
+                </div>
+                <div class="linha">
+                    <button class="btn btn-warning" ng-click="cancelarObsTarefa()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar
+                    </button>
+                    <button class="btn btn-primary" ng-click="gravarObsTarefa()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        Salvar
+                    </button>
+                </div>
+            </div>
+        </dialog>
+
+        <dialog id="dObsProjeto" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Observações</H1>
+                </div>
+                <div class="linha">
+                    <label>observacão</label>
+                    <input class="form-control" type="text" ng-model="obsProjetoEditar.observacao">
+                </div>
+                <div class="linha">
+                    <button class="btn btn-warning" ng-click="cancelarObsProjeto()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar
+                    </button>
+                    <button class="btn btn-primary" ng-click="gravarObsProjeto()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        Salvar
+                    </button>
+                </div>
+            </div>
+        </dialog>
+
+
         <dialog id="dSaida" class="dPrj">
             <div class="mPrj">
 
@@ -487,7 +641,8 @@
 
                     </textarea>
                     <div>
-                        <p ng-bind-html="cnt"></p>
+                        <label>Código projeto: {{codigoProjetoSel}}</label>
+                        <!-- <p ng-bind-html="cnt"></p> -->
                     </div>
 
 
@@ -583,6 +738,30 @@
                 return String(horas).padStart(2, '0') + ':' + String(minutos).padStart(2, '0');
             };
 
+
+            $scope.subtrairTempos = function (tempo1, tempo2) {
+
+                if (tempo1 === "") {
+                    tempo1 = "00:00";
+                }
+
+                var tempo_seg1 = $scope.transformaTempoEmInteiro(tempo1);
+
+                var tempo_seg2 = $scope.transformaTempoEmInteiro(tempo2);
+
+                var totalMinutos = tempo_seg1 - tempo_seg2
+
+                var tempoDecimal = totalMinutos / 60;
+
+                var horas = Math.floor(tempoDecimal);
+
+                var minutosDecimal = tempoDecimal - horas;
+
+                var minutos = Math.round(minutosDecimal * 60);
+
+                return String(horas).padStart(2, '0') + ':' + String(minutos).padStart(2, '0');
+            };
+
             $scope.estimativaGeral = function (projeto) {
 
                 if (projeto.tasks.length > 0)
@@ -596,22 +775,6 @@
                     }, '00:00');
                 else
                     return '00:00';
-            };
-
-            $scope.apontamentosGeral = (projeto) => {
-
-                if (projeto.tasks.length > 0) {
-
-                    return projeto.tasks.map(tks => {
-                        return tks.apontamentos.map(x => x.hora + ':' + x.minuto).reduce((p, c) => {
-                            return $scope.somartempos(p, c)
-                        }, '00:00')
-                    }).reduce((p, c) => {
-                        return $scope.somartempos(p, c)
-                    }, '00:00');
-                } else {
-                    return '00:00';
-                }
             };
 
             $scope.estimativaTarefa = (tarefa) => {
@@ -630,7 +793,7 @@
                     }, '00:00');
             }
 
-            $scope.restanteTarefa = (tarefa) => {
+            $scope.realTarefa = (tarefa) => {
                 let percentual = 0;
 
                 if (tarefa.apontamentos.slice(-1).length > 0) {
@@ -719,6 +882,7 @@
                 else {
                     $scope.projetoEditar.tasks = [];
                     $scope.projetoEditar.pos = [];
+                    $scope.projetoEditar.observacoes = [];
                     $scope.projetoEditar.id = generateUUID();
 
 
@@ -748,126 +912,72 @@
             }
 
             $scope.fecharSaida = () => {
+                delete $scope.codigoProjetoSel;
+                delete $scope.cnt;
                 $scope.txtSaida = null;
+                location.reload();
                 dSaida.close();
             }
 
-            $scope.exportarProjeto = (projeto) => {
+            $scope.exportarProjeto = (index, codigo) => {
 
-                let oi = ''
+                $scope.codigoProjetoSel = codigo;
 
-                const ulPrj = document.createElement('UL');
-                ulPrj.classList = 'projetos';
+                const botoes = document.querySelectorAll('i');
 
-                const lblPrj = document.createElement('LABEL');
-                lblPrj.textContent = 'projeto - ' + projeto.nome;
+                botoes.forEach(pl => pl.remove());
 
-                ulPrj.appendChild(lblPrj);
+                const atividades = document.querySelectorAll('.atividades');
+                atividades.forEach(a => a.remove());
 
-                const li1 = document.createElement('LI');
+                const apontamentos = document.querySelectorAll('.apontamentos');
+                apontamentos.forEach(a => a.remove());
 
+                const p = document.getElementById('proj' + index);
 
-                const preDesc = document.createElement('p');
-                preDesc.textContent ="Descrição: " + projeto.descricao;
+                const ul = document.createElement('UL');
+                ul.appendChild(p);
 
-                li1.appendChild(lblPrj);
-                li1.appendChild(preDesc);
+                $scope.cnt = ul.innerHTML;
 
-                const li2 = document.createElement('LI');
-                li2.setAttribute('display','grid');
-                li2.innerHTML = "<label>Envolvidos(" + projeto.pos.length + ')</label>';
+                const divGeral1 = document.createElement('DIV');
+                divGeral1.appendChild(p);
 
-                const ulPo = document.createElement('TABLE');
-                   
-                const trPo = document.createElement('TR');
+                $scope.cnt = divGeral1.innerHTML;
 
-                trPo.innerHTML = '<th>Nome</th><th>E-mail</th><th>Telefone</th>';
-
-                ulPo.appendChild(trPo);
-
-                projeto.pos.forEach(po => {
-                    const liPo = document.createElement('TR');
-                        
-                    liPo.innerHTML =  '<TD>'+po.nome + '</TD><TD>' + po.email + '</TD><TD>' + po.telefone+'</TD>';
-                    ulPo.appendChild(liPo);
-                })
-
-                li2.appendChild(ulPo);
-
-                const li3 = document.createElement('LI');
-                li3.innerHTML = '<label>Tarefas(' + projeto.tasks.length +
-                    ') - Estimado: ' + $scope.estimativaGeral(projeto) +
-                    ', Apontamentos: ' + $scope.apontamentosGeral(projeto) +
-                    ' - Total Real ' + $scope.restanteGeral(projeto) + '</label>';
-
-                const ulTarefas = document.createElement('TABLE');
-
-
-                ulTarefas.innerHTML = '<TR><th>Tarefa</th><th>Estimado</th><th>Apontamentos</th><th>Concluído</th><th>Real esperado</th></TR>';
-
-
-                projeto.tasks.forEach(tarefa => {
-                    let percentual = 0;
-
-                    if (tarefa.apontamentos.length) {
-                        percentual = tarefa.apontamentos.slice(-1)[0].percentual;
-                    }
-
-                    const liAtividades = document.createElement('TR');
-
-                    liAtividades.innerHTML = '<td>' + tarefa.descricao +
-                        '</td><td>' + $scope.estimativaTarefa(tarefa) +
-                        '</td><td>' + $scope.apontamentosTarefa(tarefa) +
-                        '</td><td>' + percentual + '%' +
-                        '</td><td>' + $scope.restanteTarefa(tarefa) + '</td>';
-
-
-                    ulTarefas.appendChild(liAtividades);
-
-                });
-
-
-
-                li3.appendChild(ulTarefas);
-
-
-                ulPrj.appendChild(li1);
-                ulPrj.appendChild(li2);
-                ulPrj.appendChild(li3);
-
-                const divGeral = document.createElement('DIV');
-                divGeral.appendChild(ulPrj);
-
-                $scope.cnt = divGeral.innerHTML;
                 dSaida.show();
-          
+                return;
             }
 
             $scope.salvarArquivo = () => {
 
-
-                //salvar('projeto', $scope.txtSaida);
-
                 const data = new Date();
 
-
-
-
-                let txtHtml = '<html><head>'+
-                    '<style> '+
-                        '*{    font-size: x-large;}'+
-                        'li{margin-left: 20px; display: grid; padding: 10px;} '+
-                        'table {border: 1px solid; padding: 5px; margin-left: 20px;font-size: smaller; margin-top: 10px}'+
-                        'td{ border-bottom: 1px solid; border-right: 1px solid;}'+
-                        'label{font-weight: bolder;} '+
-                        'th{font-weight: bolder; border: 1px solid; background: black;color: beige} '+
-                        '</style>'+
-                    
-                    '</head><body><div>Report: ' + data.toLocaleString() +'</div>'+
-                        $scope.cnt + 
+                let txtHtml = '<html><head>' +
+                    '<style> ' +
+                    'table {border: 1px solid; padding: 5px; margin-left: 20px;font-size: smaller; margin-top: 10px}' +
+                    'td{ border-bottom: 1px solid; border-right: 1px solid;}' +
+                    'label{font-weight: bolder;} ' +
+                    'li{ padding: 10px; list-style: none;} ' +
+                    'th{font-weight: bolder; border: 1px solid; background: black;color: beige} ' +
+                    'ul{display: contents;}' +
+                  
+                    '.tbObservacoes td {    border-right: none;} '+
+                    '.tbObservacoes tr:first-child {display:none;} ' +
+                    'tr>td:first-child { display: none;} ' +
+                    'tr>th:first-child { display: none;} ' +
+                    ' *{    font-size: large;     font-family: sans-serif;}' +
+                    ' pre{border: 1px solid;padding: 5px;}' +
+                    '.liAtvidade {margin-left:20px;}' +
+                    '</style>' +
+                    '</head><body><div>Report: ' + data.toLocaleString() + '</div>' +
+                    $scope.cnt +
                     '</body></html>';
 
-                salvar('projeto', txtHtml);
+                const tt = data.getDate() + '_' + (data.getMonth() + 1) + '_' + data.getFullYear() + '_' + data.getHours() + '_' + data.getMinutes()
+                salvar('prj_' + $scope.codigoProjetoSel + '_' + tt, txtHtml);
+
+                $scope.fecharSaida();
 
             }
 
@@ -943,15 +1053,74 @@
                 }
             }
 
-            $scope.abrirDiaolgTask = (projeto, task) => {
+            $scope.abrirDialogObsProjeto = (projeto, observacao) => {
                 $scope.projetoAtual = projeto;
 
+                if (observacao) {
+
+                    $scope.obsProjetoSel = observacao;
+
+                    $scope.obsProjetoEditar = angular.copy(observacao);
+                }
+                dObsProjeto.show();
+            };
+
+            $scope.cancelarObsProjeto = () => {
+                $scope.obsProjetoEditar = {};
+                dObsProjeto.close();
+            };
+
+            $scope.gravarObsProjeto = () => {
+
+                if ($scope.obsProjetoEditar === undefined) {
+                    alert('Informe os dados');
+                    return;
+                }
+
+
+                let dt = new Date();
+
+                const obs = { observacao: $scope.obsProjetoEditar.observacao, data: dt.toLocaleDateString() };
+
+
+                if ($scope.obsProjetoSel) {
+                    angular.extend($scope.obsProjetoSel, obs);
+                }
+                else {
+                    $scope.projetoAtual.observacoes.push(obs);
+                }
+
+                $scope.obsProjetoEditar = {};
+
+                delete $scope.projetoAtual;
+
+                $scope.gravarDadosStorage();
+
+                dObsProjeto.close();
+            };
+
+            $scope.deleteObsProjeto = (projeto, observacao) => {
+                if (confirm('Deseja excluir a observação?')) {
+
+                    projeto.observacoes = projeto.observacoes.filter((cc) => cc != observacao);
+                    $scope.gravarDadosStorage();
+                }
+            }
+
+            $scope.abrirDiaolgTask = (projeto, task, index) => {
+                $scope.projetoAtual = projeto;
+
+                $scope.posAtual = index;
+
                 $scope.taskSel = task;
+
+                $scope.ordemTask(projeto);
 
                 if (task) {
 
                     $scope.taskEditar = angular.copy(task);
                 }
+
                 dTask.show();
             };
 
@@ -978,10 +1147,18 @@
 
                 if ($scope.taskSel) {
                     angular.extend($scope.taskSel, $scope.taskEditar);
+
+
+                    if ($scope.novaPosTask != undefined)
+                        if ($scope.posAtual != $scope.novaPosTask) {
+                            moveArrayElement($scope.projetoAtual.tasks, $scope.posAtual, $scope.novaPosTask);
+                            delete $scope.novaPosTask;
+                        }
                 }
                 else {
                     $scope.taskEditar.atividades = [];
                     $scope.taskEditar.apontamentos = [];
+                    $scope.taskEditar.observacoes = [];
                     $scope.projetoAtual.tasks.push($scope.taskEditar);
                 }
 
@@ -1089,7 +1266,6 @@
                     //$scope.apontamentoEditar.hora ={ value:20} ;
                 }
                 dApontamento.show();
-                console.log($scope.apontamentoEditar);
             };
 
             $scope.cancelarApontamento = () => {
@@ -1099,7 +1275,6 @@
             };
 
             $scope.gravarApontamento = () => {
-
 
                 if ($scope.apontamentoEditar === undefined) {
                     alert('Informe os dados');
@@ -1156,14 +1331,99 @@
                 }
             };
 
-            $scope.restanteGeral = (projeto) => {
+            $scope.apontamentosGeral = (projeto) => {
+
+                if (projeto.tasks.length > 0) {
+
+                    return projeto.tasks.map(tks => {
+                        return tks.apontamentos.map(x => x.hora + ':' + x.minuto).reduce((p, c) => {
+                            return $scope.somartempos(p, c)
+                        }, '00:00')
+                    }).reduce((p, c) => {
+                        return $scope.somartempos(p, c)
+                    }, '00:00');
+                } else {
+                    return '00:00';
+                }
+            };
+
+            $scope.abrirDialogOservacaoTarefa = (task, observacao) => {
+                $scope.taskSel = task;
+
+                $scope.obsTarefaSel = observacao;
+
+                if (observacao) {
+
+                    $scope.obsTarefaEditar = angular.copy(observacao);
+                }
+                else {
+                    //$scope.apontamentoEditar.hora ={ value:20} ;
+                }
+                dObsTarefa.show();
+            }
+
+            $scope.cancelarObsTarefa = () => {
+                $scope.obsTarefaEditar = {};
+                $scope.obsTarefaSel = [];
+                dObsTarefa.close();
+            };
+
+            $scope.gravarObsTarefa = () => {
+
+                if ($scope.obsTarefaEditar === undefined) {
+                    alert('Informe os dados');
+                    return;
+                }
+
+                let dt = new Date();
+
+                const obs = { observacao: $scope.obsTarefaEditar.observacao, data: dt.toLocaleDateString() };
+
+                if ($scope.obsTarefaSel) {
+                    angular.extend($scope.obsTarefaSel, obs);
+                }
+                else {
+                    $scope.taskSel.observacoes.push(obs);
+                }
+
+                $scope.obsTarefaEditar = {};
+
+                $scope.gravarDadosStorage();
+
+                delete obs;
+                dObsTarefa.close();
+            };
+
+            $scope.deleteObsTarefa = (tarefa, observacao) => {
+                if (confirm('Deseja excluir a observação?')) {
+
+                    tarefa.observacoes = tarefa.observacoes.filter((x) => x != observacao);
+
+                    $scope.gravarDadosStorage();
+                }
+            };
+
+            $scope.realGeral = (projeto) => {
 
                 let cc = "00:00";
 
                 projeto.tasks.forEach((tarefa) =>
-                    cc = $scope.somartempos(cc, $scope.restanteTarefa(tarefa))
+                    cc = $scope.somartempos(cc, $scope.realTarefa(tarefa))
                 )
                 return cc;
+            }
+
+            $scope.restanteTarefa = (tarefa) => {
+                const t = $scope.realTarefa(tarefa);
+                const a = $scope.apontamentosTarefa(tarefa);
+
+                return $scope.subtrairTempos(t, a);
+            }
+
+            $scope.restanteGeral = (projeto) => {
+                const t = $scope.realGeral(projeto);
+                const a = $scope.apontamentosGeral(projeto);
+                return $scope.subtrairTempos(t, a);
             }
 
             $scope.primeiroPrj = (projeto) => {
@@ -1171,6 +1431,43 @@
                     return projeto.pos.length > 0 || projeto.tasks.length > 0;
                 }
                 return true;
+            }
+
+            $scope.ordemTask = (projeto) => {
+                $scope.tasksIndex = [];
+
+                projeto.tasks.forEach((x, index) => {
+                    if (index != $scope.posAtual)
+                        $scope.tasksIndex.push(index);
+                });
+
+                console.log($scope.tasksIndex);
+            }
+
+            $scope.modaOrdemAtividade = (array, direcao, posAtual) => {
+
+
+                if (direcao === 'u' && posAtual === 0) {
+                    return;
+                }
+
+                if (direcao === 'd' && posAtual === array.length - 1) {
+                    return;
+                }
+
+                let novaPos = 0;
+
+                if (direcao === 'u') {
+                    novaPos = posAtual - 1;
+                }
+                else {
+                    novaPos = posAtual + 1;
+                }
+
+                moveArrayElement(array, posAtual, novaPos);
+
+                $scope.gravarDadosStorage();
+
             }
 
         });
