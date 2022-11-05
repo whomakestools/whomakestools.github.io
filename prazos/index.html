@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<!-- https://www.feriados.com.br/2022 -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <style>
+        * {
+            font-family: sans-serif;
+        }
+/* 
+        td {
+            border: solid 1px;
+            padding: 5px 15px;
+        } */
+        .row
+        {
+            margin: 5px 0px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <form style="width: 80%;margin: 20px auto">
+        <div class="form-group row" style="text-align:center;">
+           <h1>Cálculo de Prazos</h1>
+        </div>
+        
+          <div class="form-group row">
+            <label for="data" class="col-sm-2 col-form-label">Data Inicial</label>
+            <div class="col-sm-10">
+              <input type="date" id="data" class="form-control">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="txtDiasTrabalhados" class="col-sm-2 col-form-label">Dias de Trabalho</label>
+            <div class="col-sm-10">
+              <input type="number" id="txtDiasTrabalhados" value="0" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label for="txtDiasAdicionados" class="col-sm-2 col-form-label">Dias adicionais</label>
+            <div class="col-sm-10">
+              <input type="number" id="txtDiasAdicionados" value="0" class="form-control">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="lstFeriados" class="col-sm-2 col-form-label">Lista de Feriados</label>
+            <div class="col-sm-10">
+              <select id="lstFeriados" class="form-select" multiple aria-label="multiple select example">                
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-sm-12" style="text-align: center;">
+            <button id="btTeste" class="btn btn-primary mb-2">Calcular</button>
+            <button id="btLimpar" class="btn btn-primary mb-2">Limpar</button>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label id="txtRes" style="text-align: center;font-weight: 900;" class="col-sm-12 col-form-label"></label>           
+          </div>
+
+    </form>
+    
+    <div id="datas" style="margin: 20px auto; width:80%">
+
+    </div>
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function (e) {
+           const lstFeriados= document.getElementById('lstFeriados');
+
+           const h = getHolidaysBr(2022);
+
+           console.log(h);
+           h.forEach(g =>{
+            const opt = document.createElement('option');
+              opt.text =  g.feriado;
+              lstFeriados.add(opt);
+           })
+
+        });
+
+        function easterDay(y) {
+            var c = Math.floor(y / 100);
+            var n = y - 19 * Math.floor(y / 19);
+            var k = Math.floor((c - 17) / 25);
+            var i = c - Math.floor(c / 4) - Math.floor((c - k) / 3) + 19 * n + 15;
+            i = i - 30 * Math.floor((i / 30));
+            i = i - Math.floor(i / 28) * (1 - Math.floor(i / 28) * Math.floor(29 / (i + 1)) * Math.floor((21 - n) / 11));
+            var j = y + Math.floor(y / 4) + i + 2 - c + Math.floor(c / 4);
+            j = j - 7 * Math.floor(j / 7);
+            var l = i - j;
+            var m = 3 + Math.floor((l + 40) / 44);
+            var d = l + 28 - 31 * Math.floor(m / 4);
+
+            return new Date([y, m, d]);
+        };
+
+        function verificaAnoBisexto(y) {
+            return (y % 400 == 0) || (y % 4 == 0) && (y % 100 != 0)
+        }
+
+        function getHolidaysBr(ano) {
+
+            const pascoa = easterDay(ano).toLocaleDateString();
+
+            const arrayDtPascoa = pascoa.split('/');
+
+            var carnaval1 = new Date(arrayDtPascoa[2], arrayDtPascoa[1] - 1, arrayDtPascoa[0]);
+
+            carnaval1.setDate(carnaval1.getDate() - 48);
+
+            var paixaoCristo = new Date(arrayDtPascoa[2], arrayDtPascoa[1] - 1, arrayDtPascoa[0]);
+
+            paixaoCristo.setDate(paixaoCristo.getDate() - 2);
+
+            var corpusChristi = new Date(arrayDtPascoa[2], arrayDtPascoa[1] - 1, arrayDtPascoa[0]);
+
+            corpusChristi.setDate(corpusChristi.getDate() + 60);
+
+            const feriados = [
+
+                { data: "01/01/" + ano, feriado: 'Ano Novo' },
+                { data: carnaval1.toLocaleDateString(), feriado: 'Carnaval' },
+                { data: paixaoCristo.toLocaleDateString(), feriado: 'Paixão de Cristo' },
+                { data: pascoa, feriado: 'Pascoa' },
+                { data: '21/04/' + ano, feriado: 'Tiradentes' },
+                { data: corpusChristi.toLocaleDateString(), feriado: 'Corpus Chriti' },
+                { data: '01/05/' + ano, feriado: 'Dia do Trabalhador' },
+                { data: '07/09/' + ano, feriado: 'Independencia do Brasil' },
+                { data: '12/10/' + ano, feriado: 'Nossa Senhora' },
+                { data: '02/11/' + ano, feriado: 'Finados' },
+                { data: '15/11/' + ano, feriado: 'Proclamação da Republica' },
+                { data: '25/12/' + ano, feriado: 'Natal' }
+            ]
+            return feriados;
+        }
+
+        const btTeste = document.getElementById('btTeste');
+
+        btTeste.addEventListener('click', (e) => {
+            e.preventDefault();
+            const data = document.getElementById('data');
+
+            const dt = data.value.split('-');
+
+            const dtt = new Date(dt[0], dt[1] - 1, dt[2]);
+
+            const txtDiasTrabalhados = document.getElementById('txtDiasTrabalhados');
+
+            const txtDiasAdicionados = document.getElementById('txtDiasAdicionados');
+
+            const y = teste(dt[0], dt[1], dt[2], Number(txtDiasTrabalhados.value), Number(txtDiasAdicionados.value));
+
+            const divDatas = document.getElementById('datas');
+
+            divDatas.innerHTML = '';
+
+            let dttt = 1;
+            const tabela = document.createElement('table');
+            tabela.classList ='table table-striped table-dark';
+           // tabela.style = "border: 1px solid; width: 100%;";
+
+            tabela.innerHTML = '<thead><tr><th>Dia</th><th>Data</th><th>Dia semana</th><th>Feriado</th><tr></thead>';
+
+            y.forEach((dt, index) => {
+                //const dia = document.createElement('P');
+
+                let linha = '';
+
+
+                if (dt.feriado.length > 0) {
+                    linha += '<tr><td></td><td>' + dt.data + '</td><td>' + dt.dia + '</td><td>' + dt.feriado + '</td>';
+                }
+                else {
+                    linha += '<tr><td>' + dttt + '</td><td>' + dt.data + '</td><td>' + dt.dia + '</td><td>' + dt.feriado + '</td>';
+                    dttt++;
+                }
+
+                tabela.innerHTML += linha;
+            })
+
+            divDatas.appendChild(tabela);
+
+
+            //console.log(y);
+            const rett = document.getElementById('txtRes');
+            rett.innerHTML = 'Data final: ' + y[y.length - 1].data;
+        })
+
+        const teste = (ano, mes, dia, diasTrabalho, diasAdicionais) => {
+            const diass = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+
+            const data = new Date(ano, mes - 1, dia);
+
+            let feriados = getHolidaysBr(ano);
+
+            let retDatas = [];
+
+            diasTrabalho += diasAdicionais;
+
+            let anoAtual = Number(ano);
+
+            for (let i = 0; i <= diasTrabalho - 1; i++) {
+
+                console.log(data.toLocaleDateString());
+
+                if (anoAtual !== data.getFullYear()) {
+                    console.log('mudou o ano');
+                    feriados = feriados.concat(getHolidaysBr(data.getFullYear()));
+                    anoAtual = data.getFullYear();
+                }
+
+                const diaSemana = data.getDay();
+
+                let diasSomar = 0;
+
+                if (diaSemana == 5) {
+
+                    diasSomar = 3;
+                }
+                else {
+                    diasSomar = 1;
+                }
+
+                const fer = feriados.find(x => x.data == data.toLocaleDateString());
+
+                if (fer) {
+                    retDatas.push(
+                        {
+                            data: fer.data,
+                            dia: diass[data.getDay()],
+                            feriado: fer.feriado
+                        });
+
+                    data.setDate(data.getDate() + diasSomar);
+                }
+
+                retDatas.push(
+                    {
+                        data: data.toLocaleDateString(),
+                        dia: diass[data.getDay()],
+                        feriado: ''
+                    });
+                data.setDate(data.getDate() + diasSomar);
+            }
+            console.log(feriados);
+            return retDatas;
+        }
+
+    </script>
+</body>
+
+</html>
