@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        body {
+            /* overflow: hidden; */
+        }
+
+        * {
+            margin: 0px;
+            padding: 0px;
+            /* font-family: cursive; */
+
+            font-family: monospace;
+            font-weight: bolder;
+        }
+
+        .titulo {
+            text-align: center;
+            line-height: 50px;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        #app {
+            height: 100vh;
+            padding: 5px;
+            font-size: large;
+            max-width: 600px;
+            margin: 0px auto;
+
+        }
+
+        .mes {
+            background-color: #5b19b7;
+            padding: 5px;
+            color: white;
+            margin-bottom: 3px;
+        }
+
+        .hItens {
+            display: flex;
+            justify-content: space-between;
+            color: brown;
+            border-bottom: 1px solid #5b19b7;
+            font-weight: bolder;
+        }
+
+        .Itens {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .it {
+            border-bottom: 1px solid #5b19b7;
+            padding-bottom: 10px;
+        }
+
+        .col {
+            text-align: left;
+            user-select: none;
+        }
+
+        .col5 {
+            width: 5%;
+        }
+
+
+        .col10 {
+            width: 10%;
+        }
+
+        .col15 {
+            width: 15%;
+        }
+
+        .col20 {
+            width: 20%;
+        }
+
+        .col25 {
+            width: 25%;
+        }
+
+        .col30 {
+            width: 30%;
+        }
+
+        .col35 {
+            width: 35%;
+        }
+
+        .col40 {
+            width: 40%;
+        }
+
+        .col45 {
+            width: 45%;
+        }
+
+        .col50 {
+            width: 50%;
+        }
+
+        .centro {
+            text-align: center;
+        }
+
+        .descricao {
+            cursor: pointer;
+            user-select: none;
+
+        }
+
+        .descricao:hover {
+            text-shadow: 1px 0 black;
+        }
+
+        button {
+
+            border: none;
+            font-weight: bolder;
+            padding: 2px 4px;
+            background: transparent;
+            color: white;
+        }
+
+        .btnMais {
+            color: greenyellow;
+        }
+
+        .btnMenos {
+            color: red;
+        }
+
+
+        .fab {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+        }
+
+        .fab button {
+            cursor: pointer;
+            width: 48px;
+            height: 48px;
+            border-radius: 30px;
+            background-color: #cb60b3;
+            border: none;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, .4);
+            font-size: 24px;
+            color: white;
+
+            -webkit-transition: .2s ease-out;
+            -moz-transition: .2s ease-out;
+            transition: .2s ease-out;
+        }
+
+
+
+        .fab button.main {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            background-color: #5b19b7;
+            right: 0;
+            bottom: 0;
+            z-index: 20;
+        }
+
+        .telaAdd {
+            border-top: 1px solid;
+        }
+
+        .linhaBtnsTelaAdd {
+            justify-content: space-evenly;
+            display: flex;
+            padding: 5px;
+        }
+
+        .btnTelaAdd {
+            background-color: #5b19b7;
+            padding: 5px;
+            width: 40%;
+            border-radius: 5px;
+        }
+
+        .linhaTelaAdd {
+            padding: 5px;
+        }
+
+        .linhaTelaAdd label {
+            display: grid;
+            margin-bottom: 5px;
+        }
+
+        .msgVazio {
+            text-align: center;
+            margin-top: 10px;
+            border-top: 1px solid;
+            padding-top: 10px;
+        }
+
+        .descConta {
+            cursor: pointer;
+        }
+
+        .descConta:hover {
+            text-align: center;
+            background: #f8fbff;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h1 class="titulo"> <i class="fa fa-calendar"></i> {{ appName }}</h1>
+
+        <uL v-if="!add">
+            <li class="msgVazio" v-if="cts.length==0">Adicione suas contas para gerenciar</li>
+            <li v-for="mes in meses">
+                <div class="mes Itens" v-on:click="mes.exibir=!mes.exibir">
+                    <div class="col col25 descricao">
+                        {{ descMeses[mes.mes] }}/{{mes.ano}}
+                    </div>
+                </div>
+                <ul v-if="mes.exibir">
+                    <li class="hItens">
+                        <div class="col col40">desc.</div>
+                        <div class="col col10">dia</div>
+                        <div class="col col20">valor($)</div>
+                        <div class="col col15 centro">dias</div>
+                        <div class="col col5 centro">&nbsp;</div>
+                    </li>
+                    <li class="it" v-for="conta in mes.contas">
+                        <div class="Itens">
+                            <div class="col40 descConta" v-on:click="editar(conta)">
+                                {{conta.descricao}}
+                            </div>
+                            <div class="col col10">{{ new Date(conta.vencimento).getDate()+1 }}</div>
+                            <div class="col col20">{{ parseFloat(conta.valor).toFixed(2) }}</div>
+                            <div class="col col15 centro">
+                                {{ diferencaEntreDatas(mes.ano, mes.mes+1,new
+                                Date(conta.vencimento).getDate()+1,conta.pagamentos.length) }}
+                            </div>
+                            <div class="col col5" style="padding-top: 3px;">
+                                <i v-on:click="apagar(conta)" class="fa fa-calendar-times-o" style="color: brown;"></i>
+                            </div>
+                        </div>
+
+                    </li>
+                </ul>
+
+            </li>
+        </uL>
+        <div class="telaAdd" v-if="add">
+            <h2>Nova conta</h2>
+            <div class="linhaTelaAdd">
+                <label>
+                    Descricao:
+                    <input v-model="dados.descricao" type="text" maxlength="15">
+                </label>
+            </div>
+
+            <div class="linhaTelaAdd">
+                <label>
+                    Valor:</label>
+                <input v-model="dados.valor" type="number">
+            </div>
+
+            <div class="linhaTelaAdd">
+                <label>
+                    Vencimento:
+                    <input v-model="dados.vencimento" type="date">
+                </label>
+            </div>
+
+            <div>
+                Pagamentos(não obrigatório)
+            </div>
+
+            <div class="Itens" style="padding: 5px; border: 1px solid; margin-bottom: 10px;">
+                <div class="col col45">
+                    Valor: <input style="width:100px;" v-model="valor_pago" type="number">
+                </div>
+    
+                <div class="col col45">
+                    Data: <input v-model="data_pagto" type="date">
+                </div>
+
+                <div class="col col10" style="display: flex; align-items: center;">
+                    <i v-on:click="addPagamento(dados.pagamentos)" class="fa fa-plus-square" style="color: #5b19b7;"></i>
+                </div>
+
+            </div>
+
+            <div class="linhaBtnsTelaAdd">
+                <button v-on:click="cancelarAdd(dados.pagamentos)" class="btnTelaAdd">Cancelar</button>
+                <button v-on:click="salvarAdd()" class="btnTelaAdd">Salvar</button>
+            </div>
+
+            <div class="linhaTelaAdd">
+                <div style=" height: 200px; overflow: auto;">                 
+                    <ul>                        
+                        <li  class="Itens" v-for="(pagamento,idxPgto) in dados.pagamentos">
+                            <div class="col col45"> {{idxPgto}} Pago: $ {{ parseFloat(pagamento.valor_pago).toFixed(2) }} </div>
+                            <div class="col col45">Data: {{ pagamento.data_pagto }} </div>
+                            <div class="col col10" style="text-align: right;">
+                                <i v-on:click="removerPagto(dados.pagamentos,idxPgto)" class="fa fa-remove" style="color: brown;"></i>                            
+                            </div>
+                        </li>
+                </ul>
+                </div>
+            </div>
+        </div>
+
+
+        <div v-if="!add" class="fab" ontouchstart="">
+            <button v-on:click="add=true" class="main">
+                +
+            </button>
+
+        </div>
+
+
+    </div>
+
+</body>
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            dados: {
+                descricao: "",
+                valor: 0.00,
+                vencimento: null,                
+                pagamentos: [],
+                exibir: false
+            },
+            data_pagto: null,
+            valor_pago: 0.00,
+            idEdit: null,
+            descricao: "",
+            valor: 0.00,
+            dataVencimento: null,
+            add: false,
+            descMeses: ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'],
+            meses: [], // 
+            appName: 'Account Manager',
+            lp: [],
+            cts: [],
+            ctst: [
+                {
+                    descricao: "conta de agua",
+                    vencimento: "2026-01-22",
+                    valor: 65.55,
+                    pagamentos: [{ data_pagto: "", valor_pago: 0.00 }],
+                    exibir: false
+                }]
+        },
+        methods: {
+
+            removerPagto:function(pagamento, indexRemover)
+            {
+                pagamento.splice(indexRemover,1);
+            },
+            addPagamento:function(pagamentos){
+                
+                pagamentos.push({data_pagto:this.data_pagto,valor_pago: this.valor_pago});
+                this.data_pagto = null;
+                this.valor_pago = 0.00;
+
+            },
+            cancelarAdd: function (pagamentos) {
+                
+                this.dados.descricao = "";
+                this.dados.valor = 0.00;
+                this.dados.vencimento = null;
+               
+                this.data_pagto = null;
+                this.valor_pago = 0.00;
+
+                console.log(pagamentos);
+              
+                    pagamentos = [];
+               
+
+                //this.dados.pagamentos = [];
+                this.dados.exibir = false;
+
+                this.add = false;
+
+                this.idEdit = null;
+
+            },
+
+            salvarAdd: function () {
+                if (this.idEdit === undefined || this.idEdit === null) {
+
+                }
+                else {
+                    this.cts.splice(this.idEdit, 1);
+
+                }
+
+                this.cts.push(Vue.util.extend({}, this.dados));
+
+                this.cancelarAdd();
+            },
+
+            editar: function (conta) {
+
+                this.idEdit = this.cts.indexOf(conta);
+
+                this.dados = Vue.util.extend({}, conta);
+                this.add = true;
+            },
+
+            montaMeses: function () {
+
+                let fin = [];
+
+                var novo = this.cts.map(x => new Object({ ano: new Date(x.vencimento).getFullYear(), mes: new Date(x.vencimento).getMonth() }))
+
+                var anos = [...new Set(novo.map(x => x.ano))]
+
+                for (var i = 0; i <= anos.length; i++) {
+                    novo.forEach(x => {
+
+                        if (x.ano === anos[i]) {
+                            if (fin.length > 0) {
+
+                                if (fin.filter(fx => fx.mes === x.mes && fx.ano === x.ano).length === 0) {
+                                    fin.push(x);
+                                }
+                            }
+                            else {
+
+                                fin.push(x);
+                            }
+                        }
+                    });
+                }
+                return fin.sort((a, b) => a.ano - b.ano);
+            },
+            refazTudo: function () {
+                var l_meses = this.montaMeses()
+
+                var j = [];
+
+                l_meses.forEach(x => {
+                    var l = new Object({ ano: x.ano, mes: x.mes, exibir: false, contas: [] });
+
+                    this.cts.forEach(xx => {
+
+                        var dia = new Date(xx.vencimento);
+
+                        if (dia.getFullYear() === x.ano && dia.getMonth() === x.mes) {
+                            l.contas.push(xx);
+                        }
+                    });
+
+                    l.contas.sort((a, b) => new Date(b.vencimento).getDate() - new Date(a.vencimento).getDate());
+
+                    j.push(l);
+
+                });
+
+                //orderna por ano mes
+                this.meses = j.sort(function (a, b) {
+                    if (a.ano === b.ano) {
+                        return a.mes - b.mes;
+                    }
+                    return a.ano > b.ano ? 1 : -1;
+                });
+            },
+            apagar: function (conta) {
+
+                const idx = this.cts.indexOf(conta);
+
+                this.cts.splice(idx, 1);
+
+            },
+            diferencaEntreDatas: function (ano, mes, dia, qtdPagtos) {
+
+                if (qtdPagtos > 0) {
+                    return 'pago(T)';
+                }
+                else {
+                    var dataVencimento = new Date(ano + '-' + mes + '-' + dia).getTime();
+
+                    var dataHoje = new Date().getTime();
+
+                    // Transforme 1 dia em milissegundos
+                    var umDiaMilissegundos = 1000 * 60 * 60 * 24;
+
+                    // Calcule a diferença em milissegundos
+                    var diferencaMilissegundos = dataVencimento - dataHoje;
+
+                    // Converta novamente para data
+                    var diferencaData = Math.round(diferencaMilissegundos / umDiaMilissegundos) + 1;
+
+                    if (diferencaData > 0) {
+                        // Exibe diferença
+                        return '(+)' + diferencaData;
+
+                    }
+                    else if (diferencaData === 0) {
+                        return '0'
+                    }
+                    else {
+                        return '(-)' + (diferencaData * -1);
+                    }
+                }
+            }
+        },
+
+        mounted() {
+
+            if (localStorage.contas) {
+                this.cts = JSON.parse(localStorage.contas);
+            }
+            else {
+                this.cts = [];
+            }
+
+            this.refazTudo();
+        },
+        watch: {
+            cts(novaConta) {
+                localStorage.contas = JSON.stringify(novaConta);
+                this.refazTudo();
+            }
+        }
+    })
+</script>
+
+</html>
