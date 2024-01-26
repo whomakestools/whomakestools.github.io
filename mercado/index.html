@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Compras</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        .linhaGeral {
+            display: flex;
+            justify-content: space-evenly;
+            padding: 5px;
+            font-weight: bolder;
+        }
+
+        tr {
+            border-bottom: 1px solid black;
+        }
+
+        body {
+            font-family: cursive;
+            padding: 20px;
+        }
+
+        td:first-child {
+            padding-left: 5px;
+            cursor: pointer;
+        }
+
+        td:first-child:hover {
+            padding-left: 8px;
+            font-weight: bold;
+        }
+
+        button {
+            margin: 5px;
+            font-weight: bolder;
+            background: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            box-shadow: 2px black;
+        }
+
+        label:first-child {
+            width: 30%;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        li {
+            text-decoration: underline;
+            color: blue;
+            cursor: pointer;
+        }
+
+        li:hover {
+            text-decoration: none;
+        }
+
+        .tbH {
+            color: green;
+            text-align: center;
+        }
+
+        .tbH td {
+            background-color: #cd9aff;
+            color: #481d1d;
+            padding: 5px;
+            border-left: none;
+            font-weight: bold;
+        }
+
+        .btnRemover {
+            color: #f10808;
+        }
+
+        td {
+            border-bottom: 1px solid black;
+        }
+
+        .glyphicon {
+            cursor: pointer;
+        }
+
+
+        @media only screen and (max-width: 600px) {
+            body {
+                font-size: larger;
+            }
+        }
+
+        @media only screen and (max-width: 450px) {
+            
+            *{
+                padding: 0px;
+            }
+            body {
+                font-size: x-large;
+                padding: 0px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div>
+        <button onclick="novo()">Novo Item</button>
+        <button onclick="zerar()">Zerar Preços</button>
+    </div>
+
+    <div class="linhaGeral">
+        <span id="totalGeral"></span>
+    </div>
+    <table id="tblLista" width="100%">
+
+    </table>
+
+    <dialog id="dItem">
+        <form id="frm" onsubmit="salvar()">
+            <div>
+                <labeL>
+                    Item:
+                </labeL> <input minlength="3" maxlength="20" id="iDesc" type="text" />
+            </div>
+            <br>
+            <div>
+                <label>
+                    Quantidade:</label>
+                <input value="0" step="0.001" id="iQtd" type="number" />
+            </div>
+            <br>
+            <div>
+                <label>
+                    Preço:</label>
+                <input value="0" step="0.01" id="iPreco" type="number" />
+            </div>
+            <div style=" display: flex; justify-content: space-evenly;padding: 10px 0px;">
+                <button>Salvar</button><button onclick="dItem.close()" type="reset" value="cancel">Voltar</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script>
+        var dados = [];
+
+        var indexSel = -1;
+
+        function carregaLisa() {
+            return dados;
+        }
+
+        function RemoverItem(index) {
+            dados.splice(index, 1);
+            gravaStorage();
+            desenhaTabela();
+        }
+
+        function somarTotal() {
+            let total = 0;
+            dados.forEach((x) => {
+                total += x.qtd * x.preco;
+            });
+
+            return total;
+        }
+
+        function carregaItem(item) {
+            //return dados.filter(x=> x.descricao === item);
+            return dados[item];
+        }
+
+        function desenhaItem(indexItem) {
+            indexSel = indexItem;
+
+            const item = carregaItem(indexItem);
+
+            iDesc.value = item.descricao;
+            iQtd.value = item.qtd;
+            iPreco.value = item.preco;
+
+            dItem.showModal();
+
+        }
+
+        function novo() {
+            indexSel = -1;
+            dItem.showModal();
+        }
+
+        function zerar()
+        {
+            dados.forEach(x => {
+            
+                x.preco = 0;
+            });
+            gravaStorage();
+            desenhaTabela();
+
+        }
+        function salvar() {
+            event.preventDefault();
+
+            if (iDesc.value === '') {
+
+            }
+            else {
+
+                if (indexSel === -1) {
+                    const novoItem = { descricao: iDesc.value, preco: Number(iPreco.value), qtd: Number(iQtd.value) };
+                    console.log(novoItem);
+                    dados.push(novoItem);
+                }
+                else {
+                    dados[indexSel].descricao = iDesc.value;
+                    dados[indexSel].qtd = Number(iQtd.value);
+                    dados[indexSel].preco = Number(iPreco.value);
+                }
+
+                dados = dados.sort((a, b) => a.descricao.localeCompare(b.descricao));
+            }
+            dItem.close();
+
+            gravaStorage();
+
+            desenhaTabela();
+            indexSel = -1;
+            frm.reset();
+        }
+
+        function desenhaTabela() {
+
+            lerStorage();
+
+            const tblLista = document.getElementById('tblLista');
+
+            tblLista.innerHTML = '<tr class="tbH"><td style="width:40%">Item</td><td>Qtd.</td><td>Preço</td><td colspan=2>Total</td></tr>';
+
+            dados.forEach((x, i) => {
+                const tr = document.createElement('tr');
+                const tdDesc = document.createElement('td');
+
+                tdDesc.textContent = x.descricao;                
+
+                tdDesc.addEventListener('click', () => {
+                    desenhaItem(i);
+                });
+
+                const tdQtd = document.createElement('td');
+
+                tdQtd.textContent = x.qtd;
+                tdQtd.style.textAlign = 'center';
+
+                const tdPreco = document.createElement('td');
+
+                tdPreco.textContent = '$ ' + x.preco.toFixed(2);
+
+                const tdTotal = document.createElement('td');
+
+                const total = (x.qtd * x.preco);
+
+                tdTotal.textContent = '$ ' + total.toFixed(2);
+
+                const tdBotao = document.createElement('td');
+                tdBotao.style.width = '5%';
+                tdBotao.style.borderLeft = 'none';
+
+                if(total>0)
+                {
+                    tdDesc.style.background = '#8eff8e';
+                    tdDesc.style.fontWeight = 'bold';
+                    tdPreco.style.background = '#8eff8e';
+                    tdQtd.style.background = '#8eff8e';
+                    tdBotao.style.background = '#8eff8e';
+                    tdTotal.style.background = '#8eff8e';
+                }
+
+                const btnRemover = document.createElement('i');
+
+                btnRemover.classList.add('btnRemover');
+                btnRemover.classList.add('glyphicon');
+                btnRemover.classList.add('glyphicon-trash');
+
+                btnRemover.addEventListener('click', () => {
+                    RemoverItem(i);
+                });
+
+
+                tdBotao.appendChild(btnRemover);
+
+                tr.appendChild(tdDesc);
+                tr.appendChild(tdQtd);
+                tr.appendChild(tdPreco);
+                tr.appendChild(tdTotal);
+                tr.appendChild(tdBotao);
+
+                tblLista.appendChild(tr);
+            });
+
+            const totalGeral = document.getElementById('totalGeral');
+            totalGeral.innerHTML = 'Total geral: $ ' + somarTotal().toFixed(2);
+           
+        }
+
+
+        function gravaStorage() {
+            localStorage.mercado = JSON.stringify(dados);
+        }
+
+        function lerStorage() {
+            if (localStorage.mercado) {
+                this.dados = JSON.parse(localStorage.mercado);
+            }
+            else {
+                this.dados = [];
+            }
+        }
+
+
+        desenhaTabela();
+
+    </script>
+</body>
+
+</html>
