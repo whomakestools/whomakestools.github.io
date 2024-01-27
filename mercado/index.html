@@ -141,7 +141,7 @@
             }
 
             dialog{
-                margin-top: 15px;
+                margin-top: 30px;
             }
 
             /* *{
@@ -196,20 +196,20 @@
             <div class="linhaCampos">
                 <labeL>
                     Descrição:
-                </labeL> <input tabindex="0" minlength="3" maxlength="15" id="iDesc" type="text" />
+                </labeL> <input minlength="3" maxlength="15" id="iDesc" type="text" />
             </div>
             <div class="linhaCampos">
                 <label>
                     Quantidade:</label>
-                <input value="0" step="0.001" id="iQtd" type="number" />
+                <input placeholder="0" step="0.001" id="iQtd" type="number" />
             </div>
             <div class="linhaCampos">
                 <label>
                     Preço:</label>
-                <input value="0" step="0.01" id="iPreco" type="number" />
+                <input placeholder="0,00" step="0.01" id="iPreco" type="number" />
             </div>
             <div style=" display: flex; justify-content: space-evenly;padding: 10px 0px;">
-                <button autofocus="true" onclick="dItem.close()" type="reset" value="cancel">Voltar</button>
+                <button  onclick="dItem.close()" type="reset" value="cancel">Voltar</button>
                 <button>Salvar</button>
             </div>
         </form>
