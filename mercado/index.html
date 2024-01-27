@@ -6,8 +6,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Compras</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
     <style>
+        dialog {
+            padding: 15px;
+        }
+
+        .linhaCampos {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0px;
+        }
+
         .linhaGeral {
             display: flex;
             justify-content: space-evenly;
@@ -45,9 +55,9 @@
             box-shadow: 2px black;
         }
 
-        label:first-child {
+        /* label:first-child {
             width: 30%;
-        }
+        } */
 
         ul {
             list-style: none;
@@ -78,6 +88,17 @@
 
         .btnRemover {
             color: #f10808;
+            FONT-WEIGHT: BOLD;
+            cursor: pointer;
+            transition: 0.9s;
+            display: flex;
+            justify-content: center;
+
+        }
+
+        .btnRemover:hover {
+            color: #481d1d;
+            transform: rotate(190deg);
         }
 
         td {
@@ -88,22 +109,59 @@
             cursor: pointer;
         }
 
+        input {
+            font-family: cursive;
+            font-size: large;
+            width: 50%;
+        }
+
+        p {
+            padding: 0;
+            margin: 0;
+        }
 
         @media only screen and (max-width: 600px) {
             body {
                 font-size: larger;
             }
+
+            p {
+                text-overflow: ellipsis;
+                max-width: 12ch;
+                overflow: hidden;
+                white-space: nowrap;
+            }
         }
 
         @media only screen and (max-width: 450px) {
-            
-            *{
-                padding: 0px;
+            .dolar {
+                display: none;
             }
+
+            /* *{
+                padding: 0px;
+            } */
             body {
                 font-size: x-large;
                 padding: 0px;
             }
+
+            button {
+                font-size: large;
+                padding: 5px;
+            }
+
+            p {
+                text-overflow: ellipsis;
+                max-width: 8ch;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            td:first-child {
+                width: 30%;          
+
+        }
         }
     </style>
 </head>
@@ -124,25 +182,29 @@
 
     <dialog id="dItem">
         <form id="frm" onsubmit="salvar()">
-            <div>
-                <labeL>
-                    Item:
-                </labeL> <input minlength="3" maxlength="20" id="iDesc" type="text" />
+            <!-- <input type="hidden" id="hi"/> -->
+
+            <div class="linhaCampos" style="justify-content: center; padding-bottom: 10px; font-weight: bold;">
+                Item
             </div>
-            <br>
-            <div>
+            <div class="linhaCampos">
+                <labeL>
+                    Descrição:
+                </labeL> <input tabindex="0" minlength="3" maxlength="15" id="iDesc" type="text" />
+            </div>
+            <div class="linhaCampos">
                 <label>
                     Quantidade:</label>
                 <input value="0" step="0.001" id="iQtd" type="number" />
             </div>
-            <br>
-            <div>
+            <div class="linhaCampos">
                 <label>
                     Preço:</label>
                 <input value="0" step="0.01" id="iPreco" type="number" />
             </div>
             <div style=" display: flex; justify-content: space-evenly;padding: 10px 0px;">
-                <button>Salvar</button><button onclick="dItem.close()" type="reset" value="cancel">Voltar</button>
+                <button autofocus="true" onclick="dItem.close()" type="reset" value="cancel">Voltar</button>
+                <button>Salvar</button>
             </div>
         </form>
     </dialog>
@@ -192,12 +254,12 @@
         function novo() {
             indexSel = -1;
             dItem.showModal();
+
         }
 
-        function zerar()
-        {
+        function zerar() {
             dados.forEach(x => {
-            
+
                 x.preco = 0;
             });
             gravaStorage();
@@ -246,7 +308,12 @@
                 const tr = document.createElement('tr');
                 const tdDesc = document.createElement('td');
 
-                tdDesc.textContent = x.descricao;                
+                //tdDesc.textContent = x.descricao;    
+
+                const spn = document.createElement('p');
+                spn.textContent = x.descricao;
+
+                tdDesc.appendChild(spn);
 
                 tdDesc.addEventListener('click', () => {
                     desenhaItem(i);
@@ -259,20 +326,19 @@
 
                 const tdPreco = document.createElement('td');
 
-                tdPreco.textContent = '$ ' + x.preco.toFixed(2);
+                tdPreco.innerHTML = '<span class="dolar">$ </span>' + x.preco.toFixed(2);
 
                 const tdTotal = document.createElement('td');
 
                 const total = (x.qtd * x.preco);
 
-                tdTotal.textContent = '$ ' + total.toFixed(2);
+                tdTotal.innerHTML = '<span class="dolar">$ </span>' + total.toFixed(2);
 
                 const tdBotao = document.createElement('td');
                 tdBotao.style.width = '5%';
                 tdBotao.style.borderLeft = 'none';
 
-                if(total>0)
-                {
+                if (total > 0) {
                     tdDesc.style.background = '#8eff8e';
                     tdDesc.style.fontWeight = 'bold';
                     tdPreco.style.background = '#8eff8e';
@@ -281,11 +347,11 @@
                     tdTotal.style.background = '#8eff8e';
                 }
 
-                const btnRemover = document.createElement('i');
+                const btnRemover = document.createElement('span');
 
                 btnRemover.classList.add('btnRemover');
-                btnRemover.classList.add('glyphicon');
-                btnRemover.classList.add('glyphicon-trash');
+
+                btnRemover.textContent = 'X';
 
                 btnRemover.addEventListener('click', () => {
                     RemoverItem(i);
@@ -305,7 +371,7 @@
 
             const totalGeral = document.getElementById('totalGeral');
             totalGeral.innerHTML = 'Total geral: $ ' + somarTotal().toFixed(2);
-           
+
         }
 
 
