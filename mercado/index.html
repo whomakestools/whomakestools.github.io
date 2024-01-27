@@ -8,6 +8,11 @@
     <title>Lista de Compras</title>
 
     <style>
+        table tbody {
+            overflow: auto;
+            height: 100px;
+        }
+
         dialog {
             padding: 15px;
         }
@@ -50,7 +55,7 @@
             background: none;
             border-radius: 5px;
             font-family: cursive;
-        
+
         }
 
         button:hover {
@@ -140,7 +145,7 @@
                 display: none;
             }
 
-            dialog{
+            dialog {
                 margin-top: 30px;
             }
 
@@ -165,26 +170,50 @@
             }
 
             td:first-child {
-                width: 30%;          
+                width: 30%;
 
+            }
         }
+
+        #hs{
+            position: sticky;
+            top: 0;
+            background-color: white;
         }
     </style>
 </head>
 
 <body>
 
-    <div>
-        <button onclick="novo()">Novo Item</button>
-        <button onclick="zerar()">Zerar Preços</button>
+    <div id="header">
+
+        <DIV id="hs">
+            <div>
+                <button onclick="novo()">Novo Item</button>
+                <button onclick="zerar()">Zerar Preços</button>
+            </div>
+
+            <div class="linhaGeral">
+                <span id="totalGeral"></span>
+            </div>
+            <table width="100%">
+                <thead>
+                    <tr class="tbH">
+                        <td style="width:30%">Item</td>
+                        <td style="width:20%">Qtd.</td>
+                        <td style="width:20%">Preço</td>
+                        <td style="width:30%">Total</td>
+                    </tr>
+                </thead>
+            </table>
+        </DIV>
+        <table id="tblLista" width="100%">
+
+        </table>
     </div>
 
-    <div class="linhaGeral">
-        <span id="totalGeral"></span>
-    </div>
-    <table id="tblLista" width="100%">
+   
 
-    </table>
 
     <dialog id="dItem">
         <form id="frm" onsubmit="salvar()">
@@ -209,7 +238,7 @@
                 <input placeholder="0,00" step="0.01" id="iPreco" type="number" />
             </div>
             <div style=" display: flex; justify-content: space-evenly;padding: 10px 0px;">
-                <button  onclick="dItem.close()" type="reset" value="cancel">Voltar</button>
+                <button onclick="dItem.close()" type="reset" value="cancel">Voltar</button>
                 <button>Salvar</button>
             </div>
         </form>
@@ -308,7 +337,9 @@
 
             const tblLista = document.getElementById('tblLista');
 
-            tblLista.innerHTML = '<tr class="tbH"><td style="width:40%">Item</td><td>Qtd.</td><td>Preço</td><td colspan=2>Total</td></tr>';
+            tblLista.innerHTML = '';
+
+            const tbody = document.createElement('tbody');
 
             dados.forEach((x, i) => {
                 const tr = document.createElement('tr');
@@ -317,9 +348,10 @@
                 //tdDesc.textContent = x.descricao;    
 
                 const spn = document.createElement('p');
-                spn.textContent = x.descricao;
+                spn.textContent = (i+1) +'. ' + x.descricao;
 
                 tdDesc.appendChild(spn);
+                tdDesc.style.width = '30%';
 
                 tdDesc.addEventListener('click', () => {
                     desenhaItem(i);
@@ -329,16 +361,19 @@
 
                 tdQtd.textContent = x.qtd;
                 tdQtd.style.textAlign = 'center';
+                tdQtd.style.width = '20%';
 
                 const tdPreco = document.createElement('td');
 
                 tdPreco.innerHTML = '<span class="dolar">$ </span>' + x.preco.toFixed(2);
+                tdPreco.style.width = '20%';
 
                 const tdTotal = document.createElement('td');
 
                 const total = (x.qtd * x.preco);
 
                 tdTotal.innerHTML = '<span class="dolar">$ </span>' + total.toFixed(2);
+                tdTotal.style.width = '25%';
 
                 const tdBotao = document.createElement('td');
                 tdBotao.style.width = '5%';
@@ -372,8 +407,11 @@
                 tr.appendChild(tdTotal);
                 tr.appendChild(tdBotao);
 
-                tblLista.appendChild(tr);
+                tbody.appendChild(tr);
             });
+
+
+            tblLista.appendChild(tbody);
 
             const totalGeral = document.getElementById('totalGeral');
             totalGeral.innerHTML = 'Total geral: $ ' + somarTotal().toFixed(2);
