@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listas</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        .btnBottom {
+            width: 100%;
+            bottom: 5px;
+            position: fixed;
+            display: flex;
+            justify-content: center;
+        }
+
+        .btnBottom span {
+            padding: 8px 14px;
+            border-radius: 100%;
+            background: blueviolet;
+            color: white;
+            font-weight: bolder;
+            font-size: xx-large;
+            cursor: pointer;
+        }
+
+        .btnBottom i {
+            padding: 14px;
+            border-radius: 100%;
+            background: blueviolet;
+            color: white;
+            /* font-weight: bolder; */
+            font-size: xx-large;
+            cursor: pointer;
+        }
+
+        .btnBottom span:hover {
+            border-radius: 10%;
+
+        }
+
+        .titulo {
+            text-align: center;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        .linhaLista {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid;
+        }
+
+        .hItens {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0px;
+
+        }
+
+        .ulListas {
+            padding: 0px;
+            margin: 0px;
+        }
+
+        .fa {
+            cursor: pointer;
+        }
+
+
+
+        @media only screen and (max-width: 600px) {
+            .ulListas {
+                font-size: x-large;
+            }
+
+            .hItens {
+                font-size: x-large;
+            }
+
+            /* #app{
+                width: 400px;
+                margin: 0 auto;
+            } */
+        }
+
+
+
+        /* @media only screen and (min-width: 600px) {
+            #app{
+                background-color: red;
+                width: 400px;
+                margin: 0 auto;
+            }
+
+
+        } */
+
+        .linhaBtnsTelaAdd {
+            display: flex;
+            justify-content: center;
+            font-size: x-large;
+            padding: 5px;
+        }
+
+        .linhaBtnsTelaAdd i {
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+
+
+        .linhaCampos {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+
+        <div id="telaInicial" v-if="!exibeTelaItens">
+            <h1 class="titulo"> <i class="fa fa-calendar"></i> Listas</h1>
+
+            <uL class="ulListas" v-if="true">
+                <li v-for="(lista,idxLista) in listas">
+                    <div class="linhaLista">
+                        <label>
+                            {{ lista.descricao }}
+                        </label>
+                        <div>
+                            <i title="Itens" v-on:click="exibirItensLista(lista,idxLista)"
+                                class="fa fa-shopping-cart"></i>
+                            <i title="Editar" v-on:click="exibeModalLista(lista,idxLista)" class="fa fa-edit"></i>
+                            <i title="Excluir" v-on:click="excluirLista(idxLista)" class="fa fa-trash-o"></i>
+                        </div>
+                    </div>
+                </li>
+            </uL>
+            <div class="btnBottom">
+                <span v-on:click="exibeModalLista()">+</span>
+            </div>
+        </div>
+
+        <div id="telaItens" v-if="exibeTelaItens">
+
+            <div class="hItens">
+                <i class="fa fa-home" v-on:click="exibeTelaItens=false"></i>
+                <label>{{lista.descricao}} ($ 200.00) </label>
+                <button>Zerar Preços</button>
+            </div>
+
+            <uL class="ulListas">
+                <li>
+                    <div class="linhaLista">
+                        <label>
+                            Item
+                        </label>
+                        <label>
+                            Qtd.
+                        </label>
+                        <label>
+                            Preço($)
+                        </label>
+                        <label>
+                            Total($)
+                        </label>
+                        <div>
+                            <i title="Editar" class="fa fa-edit" style="color: none;"></i>
+                            <i title="Excluir" class="fa fa-trash-o"></i>
+                        </div>
+                    </div>
+                </li>
+
+
+                <li v-for="(item,idxLista) in lista.itens">
+                    <div class="linhaLista">
+                        <label>
+                            {{ item.descricao }}
+                        </label>
+                        <label>
+                            {{item.qtd}}
+                        </label>
+                        <label>
+                            {{item.preco}}
+                        </label>
+                        <label>
+                            $ {{ item.qtd*item.preco}}
+                        </label>
+                        <div>
+                            <i title="Editar" v-on:click="exibeModalLista(item,idxLista)" class="fa fa-edit"></i>
+                            <i title="Excluir" v-on:click="excluirLista(idxLista)" class="fa fa-trash-o"></i>
+                        </div>
+                    </div>
+                </li>
+            </uL>
+
+
+            <div class="btnBottom">
+                <i title="Excluir" v-on:click="exibeModalLista()" class="fa fa-cart-plus"></i>
+            </div>
+        </div>
+
+        <dialog id="dLista" class="telaAddLista">
+            <h2>Lista</h2>
+            <div class="linhaCampos">
+                <label>
+                    Descricao:
+                    <input v-model="listaEdit.descricao" type="text" maxlength="15">
+                </label>
+            </div>
+
+            <div class="linhaBtnsTelaAdd">
+                <i title="Excluir" class="fa fa-window-close-o" v-on:click="cancelarEditarLista()"></i>
+                <i title="Salvar" class="fa fa-check-square" v-on:click="salvarLista()"></i>
+            </div>
+        </dialog>
+    </div>
+
+</body>
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            descricaoLista: "hhh",
+            addLista: false,
+            idxListaEdit: -1,
+            listaEdit: [],
+            lista: [],
+            exibeTelaItens: false,
+            listas: [
+                {
+                    descricao: "feira",
+                    itens: [
+                        { descricao: "limao", qtd: 10.00, preco: 2.56, ok: true },
+                        { descricao: "repolo", qtd: 1.00, preco: 3.00, ok: false }
+                    ]
+                },
+                {
+                    descricao: "despesa",
+                    itens: [
+                        { descricao: "limao", qtd: 10.00, preco: 2.56, ok: true }
+                    ]
+                }
+            ]
+        },
+        methods: {
+            salvarLista: function () {
+                //novo
+                if (this.addLista === true) {
+                    if (this.listaEdit.descricao) {
+                        const novo = { descricao: this.listaEdit.descricao, itens: [] };
+                        this.listas = [novo, ... this.listas];
+                    }
+                    else {
+                        return;
+                    }
+                }
+                else {
+                    this.listas[this.idxListaEdit].descricao = this.listaEdit.descricao;
+                }
+
+                this.cancelarEditarLista();
+            },
+            exibeModalLista: function (lista, index) {
+
+                if (lista === undefined) {
+                    this.addLista = true;
+                }
+                else {
+                    this.idxListaEdit = index;
+                    this.listaEdit = Vue.util.extend({}, lista);
+                    this.addLista = false;
+                }
+
+                dLista.showModal();
+            },
+            cancelarEditarLista: function () {
+                this.listaEdit = Vue.util.extend({}, []);
+                this.descricaoLista = "";
+                this.idxListaEdit = -1;
+                dLista.close()
+            },
+            excluirLista: function (idxLista) {
+                this.listas.splice(idxLista, 1);
+            },
+            exibirItensLista: function (lista, idx) {
+                this.exibeTelaItens = true;
+                this.lista = Vue.util.extend({}, lista);
+            }
+        },
+
+        mounted() {
+
+            // if (localStorage.lstMercado) {
+            //     this.listas = JSON.parse(localStorage.lstMercado);
+            // }
+            // else {
+            //     this.listas = [];
+            // }
+        },
+        watch: {
+            // listas(novaLista) {
+            //     localStorage.lstMercado = JSON.stringify(novaLista);
+            // }
+        }
+    })
+</script>
+
+</html>
