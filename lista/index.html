@@ -19,8 +19,8 @@
             justify-content: center;
         }
 
-        .btnBottom span {
-            padding: 8px 14px;
+        .btnBottom span {            
+            padding: 14px 22px;
             border-radius: 100%;
             background: blueviolet;
             color: white;
@@ -74,7 +74,30 @@
             cursor: pointer;
         }
 
+        .colDesc {
+            width: 25%;
+            padding-left: 5px;
+        }
 
+        .colQtd {
+            width: 20%;
+            text-align: center;
+        }
+
+        .colPreco {
+            width: 20%;
+            text-align: center;
+        }
+
+        .colTotal {
+            width: 20%;
+            text-align: center;
+        }
+
+        .colBotoes {
+            width: 7.5%;
+            text-align: center;
+        }
 
         @media only screen and (max-width: 600px) {
             .ulListas {
@@ -83,6 +106,10 @@
 
             .hItens {
                 font-size: x-large;
+            }
+
+            dialog {
+                margin-top: 30px;
             }
 
             /* #app{
@@ -105,7 +132,7 @@
 
         .linhaBtnsTelaAdd {
             display: flex;
-            justify-content: center;
+            justify-content: space-evenly;
             font-size: x-large;
             padding: 5px;
         }
@@ -115,6 +142,15 @@
             margin-right: 5px;
         }
 
+        .linhaBtnsTelaAdd button {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        dialog {
+            padding: 15px;
+        }
 
         .linhaCampos {
             display: flex;
@@ -155,27 +191,30 @@
             <div class="hItens">
                 <i class="fa fa-home" v-on:click="exibeTelaItens=false"></i>
                 <label>{{lista.descricao}} ($ 200.00) </label>
-                <button>Zerar Preços</button>
+                <i class="fa fa-cart-arrow-down"></i>
+
             </div>
 
             <uL class="ulListas">
                 <li>
-                    <div class="linhaLista">
-                        <label>
+                    <div class="linhaLista" style="background: blueviolet;  color: white;">
+                        <label class="colDesc">
                             Item
                         </label>
-                        <label>
+                        <label class="colQtd">
                             Qtd.
                         </label>
-                        <label>
-                            Preço($)
+                        <label class="colPreco">
+                            Preço
                         </label>
-                        <label>
-                            Total($)
+                        <label class="colTotal">
+                            Total
                         </label>
-                        <div>
-                            <i title="Editar" class="fa fa-edit" style="color: none;"></i>
-                            <i title="Excluir" class="fa fa-trash-o"></i>
+                        <div class="colBotoes">
+
+                        </div>
+                        <div class="colBotoes">
+
                         </div>
                     </div>
                 </li>
@@ -183,34 +222,37 @@
 
                 <li v-for="(item,idxLista) in lista.itens">
                     <div class="linhaLista">
-                        <label>
+                        <label class="colDesc">
                             {{ item.descricao }}
                         </label>
-                        <label>
+                        <label class="colQtd">
                             {{item.qtd}}
                         </label>
-                        <label>
+                        <label class="colPreco">
                             {{item.preco}}
                         </label>
-                        <label>
-                            $ {{ item.qtd*item.preco}}
+                        <label class="colTotal">
+                            {{ item.qtd*item.preco}}
                         </label>
-                        <div>
-                            <i title="Editar" v-on:click="exibeModalLista(item,idxLista)" class="fa fa-edit"></i>
+                        <div class="colBotoes">
+                            <i title="Editar" v-on:click="exibeModalItem(item,idxLista)" class="fa fa-edit"></i>
+                        </div>
+                        <div class="colBotoes">
                             <i title="Excluir" v-on:click="excluirLista(idxLista)" class="fa fa-trash-o"></i>
                         </div>
                     </div>
                 </li>
             </uL>
 
-
             <div class="btnBottom">
-                <i title="Excluir" v-on:click="exibeModalLista()" class="fa fa-cart-plus"></i>
+                <i title="Adicionar Item" v-on:click="exibeModalItem()" class="fa fa-cart-plus"></i>
             </div>
         </div>
 
         <dialog id="dLista" class="telaAddLista">
-            <h2>Lista</h2>
+            <div class="linhaCampos" style="justify-content: center; padding-bottom: 10px; font-weight: bold;">
+                Lista
+            </div>
             <div class="linhaCampos">
                 <label>
                     Descricao:
@@ -219,10 +261,41 @@
             </div>
 
             <div class="linhaBtnsTelaAdd">
-                <i title="Excluir" class="fa fa-window-close-o" v-on:click="cancelarEditarLista()"></i>
-                <i title="Salvar" class="fa fa-check-square" v-on:click="salvarLista()"></i>
+                <button v-on:click="cancelarEditarLista()"><i class="fa fa-window-close-o"></i>Cancelar</button>
+                <button v-on:click="salvarLista()"><i class="fa fa-check-square"></i>Salvar</button>
             </div>
         </dialog>
+
+        <dialog id="dItem">
+            <form id="frm" onsubmit="salvar()">
+                <!-- <input type="hidden" id="hi"/> -->
+
+                <div class="linhaCampos" style="justify-content: center; padding-bottom: 10px; font-weight: bold;">
+                    Item
+                </div>
+                <div class="linhaCampos">
+                    <labeL>
+                        Descrição:
+                    </labeL> <input minlength="3" maxlength="15" id="iDesc" type="text" />
+                </div>
+                <div class="linhaCampos">
+                    <label>
+                        Quantidade:</label>
+                    <input placeholder="0" step="0.001" id="iQtd" type="number" />
+                </div>
+                <div class="linhaCampos">
+                    <label>
+                        Preço:</label>
+                    <input placeholder="0,00" step="0.01" id="iPreco" type="number" />
+                </div>
+                <div style=" display: flex; justify-content: space-evenly;padding: 10px 0px;">
+                    <button onclick="dItem.close()" type="reset" value="cancel">Voltar</button>
+                    <button>Salvar</button>
+                </div>
+            </form>
+        </dialog>
+
+
     </div>
 
 </body>
@@ -232,8 +305,11 @@
         data: {
             descricaoLista: "hhh",
             addLista: false,
+            addItem: false,
             idxListaEdit: -1,
+            idxItemEdit: -1,
             listaEdit: [],
+            itemEdit: [],
             lista: [],
             exibeTelaItens: false,
             listas: [
@@ -254,7 +330,7 @@
         },
         methods: {
             salvarLista: function () {
-                //novo
+
                 if (this.addLista === true) {
                     if (this.listaEdit.descricao) {
                         const novo = { descricao: this.listaEdit.descricao, itens: [] };
@@ -267,7 +343,7 @@
                 else {
                     this.listas[this.idxListaEdit].descricao = this.listaEdit.descricao;
                 }
-
+                this.gravaStorage();
                 this.cancelarEditarLista();
             },
             exibeModalLista: function (lista, index) {
@@ -291,17 +367,45 @@
             },
             excluirLista: function (idxLista) {
                 this.listas.splice(idxLista, 1);
+                this.gravaStorage();
             },
             exibirItensLista: function (lista, idx) {
                 this.exibeTelaItens = true;
                 this.lista = Vue.util.extend({}, lista);
+            },
+            exibeModalItem: function (item, index) {
+
+                if (item === undefined) {
+                    this.addItem = true;
+                }
+                else {
+                    this.idxItemEdit = index;
+                    this.itemEdit = Vue.util.extend({}, item);
+                    this.addItem = false;
+                }
+
+                dItem.showModal();
+            },
+
+            gravaStorage: function () {
+                localStorage.lstCompras = JSON.stringify(this.listas);
+                this.lerStorage();
+            },
+
+            lerStorage: function () {
+                if (localStorage.lstCompras) {
+                    this.listas = JSON.parse(localStorage.lstCompras);
+                }
+                else {
+                    this.listas = [];
+                }
             }
         },
 
         mounted() {
-
-            // if (localStorage.lstMercado) {
-            //     this.listas = JSON.parse(localStorage.lstMercado);
+            this.lerStorage();
+            // if (localStorage.lstCompras) {
+            //     this.listas = JSON.parse(localStorage.lstCompras);
             // }
             // else {
             //     this.listas = [];
