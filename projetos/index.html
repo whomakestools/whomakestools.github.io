@@ -2178,7 +2178,6 @@
                         }
                         else {
                             this.apontamentoEditar.dataInc = new Date();
-
                             this.tarefaSelecionado.apontamentos.push(Vue.util.extend({}, this.apontamentoEditar));
                             //ordena pela data
                             this.tarefaSelecionado.apontamentos = this.tarefaSelecionado.apontamentos.slice().sort((date1, date2) => new Date(date2.dataInc) - new Date(date1.dataInc));
