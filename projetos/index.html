@@ -1,0 +1,2435 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projetos</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="FileServe.js"></script>
+    <style>
+        @media print {
+            .glyphicon {
+                display: none !important;
+            }
+        }
+
+        #mReport {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        .caixaNum {
+            border: 1px solid #9b8282;
+            /* padding: 1px 20px; */
+            width: 100px;
+            text-align: center;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+
+        }
+
+
+        .inputNumber {
+            margin: 0;
+            text-align: center;
+            font-weight: 900;
+            font-size: x-large;
+        }
+
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .input {
+            font-size: large;
+        }
+
+        .glyphicon {
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50px;
+            font-size: 16px;
+        }
+
+        .glyphicon:hover {
+            /* text-shadow: 2px 2px 2px #b7b7d9; */
+            background: black;
+            color: white;
+        }
+
+        .glyphicon-minus-sign:active,
+        .glyphicon-plus-sign:active {
+            background: white;
+            color: black;
+        }
+
+        .glyphicon-plus,
+        .glyphicon-remove {
+            transition: width 2s, height 2s, transform 1s;
+        }
+
+        .glyphicon-plus:hover,
+        .glyphicon-remove:hover {
+            transform: rotate(180deg);
+        }
+
+
+        .glyphicon-plus {
+            color: #3ba0d1;
+        }
+
+        .glyphicon-plus:hover {
+            color: white;
+            background: #3ba0d1;
+        }
+
+        .glyphicon-remove {
+            color: red;
+        }
+
+        .glyphicon-remove:hover {
+            color: white;
+            background: red;
+        }
+
+
+        dialog::backdrop {
+            background-color: #dfdede;
+            opacity: 0.9;
+        }
+
+        .nomeProjeto {
+            width: 50%;
+            display: inline-flex;
+        }
+
+        .inpt {
+            width: 25%;
+            margin: 0px 5px;
+        }
+
+        .mPrj {
+            display: inline-table;
+            border: 1px solid;
+            background: white;
+            text-align: left;
+            padding: 15px;
+        }
+
+        .linha {
+            width: 100%;
+            padding: 5px;
+            display: inline-grid;
+        }
+
+        .linha2 {
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
+        }
+
+        body {
+            font-family: sans-serif;
+            padding: 5px;
+        }
+
+        .lnTabela {
+            border-bottom: solid 1px;
+            border-left: solid 2px;
+            margin: 2px;
+
+        }
+
+        .lnTabelaItens {
+            border-bottom: solid 1px;
+            margin: 2px;
+            cursor: pointer;
+        }
+
+        .lnTabelaItens:hover {
+            background-color: #dfdede;
+        }
+
+        .caixa {
+            border-left: solid 2px;
+            border-bottom: solid 1px;
+        }
+
+        span {
+            font-weight: 700;
+        }
+
+        .glyphicon-trash {
+            color: red;
+        }
+
+
+        .glyphicon-edit {
+            color: blue;
+        }
+
+        .glyphiconAlt {
+            display: inline-block;
+            user-select: none
+        }
+
+        .glyphiconAlt:hover {
+            /* word-spacing: 2px; */
+            /* text-decoration: underline; */
+            border-bottom: 2px solid black;
+            cursor: pointer;
+        }
+
+        .glyphiconAlt>label:hover {
+            /* border-bottom: 1px solid black; */
+            /* word-spacing: 2px; */
+            cursor: pointer;
+        }
+
+        .pulse {
+
+            background: #cca92c;
+
+            box-shadow: 0 0 0 rgba(204, 169, 44, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        .pulse:hover {
+            animation: none;
+        }
+
+        @-webkit-keyframes pulse {
+            0% {
+                -webkit-box-shadow: 0 0 0 0 rgba(204, 169, 44, 0.4);
+            }
+
+            70% {
+                -webkit-box-shadow: 0 0 0 10px rgba(204, 169, 44, 0);
+            }
+
+            100% {
+                -webkit-box-shadow: 0 0 0 0 rgba(204, 169, 44, 0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                -moz-box-shadow: 0 0 0 0 rgba(204, 169, 44, 0.4);
+                box-shadow: 0 0 0 0 rgba(204, 169, 44, 0.4);
+            }
+
+            70% {
+                -moz-box-shadow: 0 0 0 10px rgba(204, 169, 44, 0);
+                box-shadow: 0 0 0 10px rgba(204, 169, 44, 0);
+            }
+
+            100% {
+                -moz-box-shadow: 0 0 0 0 rgba(204, 169, 44, 0);
+                box-shadow: 0 0 0 0 rgba(204, 169, 44, 0);
+            }
+        }
+
+        .v-enter-active {
+            transition: all 0.6s ease-in-out;
+        }
+
+        .v-leave-active {
+            transition: all 0.5s cubic-bezier(1, 0.5, 0.8, 1);
+        }
+
+        .v-enter-from,
+        .v-leave-to {
+            transform: translateX(100px);
+            opacity: 0;
+        }
+
+        .pdg_row1 {
+            padding: 5px 10px;
+            border: 1px solid black;
+            margin-bottom: 5px;
+        }
+
+        .pdg_row {
+            padding: 5px 10px;
+            border: 1px solid black;
+            margin-bottom: 3px;
+        }
+
+        .plus {
+            padding: 5px 9px;
+            border: 1px solid;
+            border-radius: 50px;
+            margin: 5px;
+            font-weight: 700;
+            color: white;
+            background: cornflowerblue;
+            box-shadow: 2px 1px 10px black;
+            cursor: pointer;
+
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="app" class="container-fluid">
+        <div id="projeto" v-if="!exibirListaProjeto">
+            <span class="glyphiconAlt" v-on:click="exibeLista()"><i
+                    class="glyphicon glyphicon-home"></i>&nbsp;Início</span>
+            <br>
+            <div class="row pdg_row1">
+                <div class="col col-sm-12">
+                    <p><span>Nome: </span> {{prjSelecionado.nome}}</p>
+                    <p><span>Descrição: </span>
+                    <div style="border:1px solid black;">
+                        <textarea readonly
+                            style="display: inline-table; width: 100%;border: 0;">  {{prjSelecionado.descricao}} </textarea>
+                    </div>
+                    </p>
+
+                    <div style="display: flex;justify-content: space-between;">
+                        <p><span>Data de início: </span> {{ prjSelecionado.data ? new
+                            Date(prjSelecionado.data.replaceAll('-','/')).toLocaleDateString() :
+                            'Indefinda'}}</p>
+                        <p><span>Total de Horas: </span> {{ totalEsperadoGeral(prjSelecionado)}}</p>
+                        <p><span>Horas diárias: </span> {{tranformaMinutosEmHoras(prjSelecionado.horasDiarias)}}</p>
+                        <p><span>Dias de trabalho: </span> {{calculaDiasDeTrabalho(prjSelecionado)}}</p>
+
+                        <p><span>Dias adicionais: </span> {{prjSelecionado.adicionais}}</p>
+                        <p>({{ prjSelecionado.sabado ? 'sábados' : ''}}
+                            {{ prjSelecionado.domingo ? 'e domingos' : ''}} )
+                        </p>
+                        <p><span>Data de término: </span> {{ prjSelecionado.data ? retornaDia(prjSelecionado) :
+                            'A ser calculada'}}</p>
+                        <p>&nbsp;</p>
+                        <p>&nbsp;</p>
+                    </div>
+                </div>
+            </div>
+            <!-- envolvidos -->
+            <div class="row pdg_row1" v-if="!prjSelecionado.visualizarObservcoes && !prjSelecionado.visualizarTarefas">
+                <div class="col col-sm-12">
+                    <div class="row">
+                        <div class="col col-sm-12">
+                            <div class="glyphiconAlt"
+                                v-on:click="prjSelecionado.visualizarEnvolvido=!prjSelecionado.visualizarEnvolvido">
+                                <i v-bind:class="{ 'glyphicon-remove': prjSelecionado.visualizarEnvolvido, 'glyphicon-user': !prjSelecionado.visualizarEnvolvido }"
+                                    class="glyphicon" alt="Expandir"></i>
+                                <label> Envolvidos ({{prjSelecionado.envolvidos.length}})</label>
+                            </div>
+                            <i title="Adicionar envolvido" v-on:click="abrirModalEnvolvido()"
+                                class="glyphicon glyphicon-plus" v-if="prjSelecionado.visualizarEnvolvido"></i>
+                        </div>
+                    </div>
+
+                    <Transition>
+                        <div class="row" v-if="prjSelecionado.visualizarEnvolvido">
+                            <div class="col col-sm-12">
+                                <div class="row borderBottom hdrTbl">
+                                    <div class="col col-sm-1">&nbsp;</div>
+                                    <div class="col col-sm-2"><label>Tipo</label></div>
+                                    <div class="col col-sm-3"><label>Nome</label></div>
+                                    <div class="col col-sm-3"><label>Email</label></div>
+                                    <div class="col col-sm-3"><label>Telefone</label></div>
+                                </div>
+                                <div class="row borderBottom pdg_row" v-for="envolvido in prjSelecionado.envolvidos">
+                                    <div class="col col-sm-1" style="text-align:center;">
+                                        <i title="Editar envolvido" v-on:click="abrirModalEnvolvido(envolvido)"
+                                            class="glyphicon glyphicon-edit"></i>
+                                        <i title="Excluir envolvido" v-on:click="deleteEnvolvido(envolvido)"
+                                            class="glyphicon glyphicon-trash"></i>
+                                    </div>
+                                    <div class="col col-sm-2">{{envolvido.tipo}}</div>
+                                    <div class="col col-sm-3">{{envolvido.nome}}</div>
+                                    <div class="col col-sm-3">{{envolvido.email}}</div>
+                                    <div class="col col-sm-3">{{envolvido.telefone}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </Transition>
+                </div>
+            </div>
+            <!--  fim envlvidos -->
+            <!-- obserações gerais -->
+            <div class="row pdg_row1" v-if="!prjSelecionado.visualizarEnvolvido && !prjSelecionado.visualizarTarefas">
+                <div class="col col-sm-12">
+                    <div class="row">
+                        <div class="col col-sm-12">
+                            <div class="glyphiconAlt"
+                                v-on:click="prjSelecionado.visualizarObservcoes=!prjSelecionado.visualizarObservcoes">
+                                <i v-bind:class="{ 'glyphicon-remove': prjSelecionado.visualizarObservcoes, 'glyphicon-comment': !prjSelecionado.visualizarObservcoes }"
+                                    class="glyphicon" title="Expandir Observações">
+                                </i>
+                                <label> Observações Gerais({{prjSelecionado.observacoes.length}}) </label>
+                            </div>
+                            <i alt="Adicionar observação" v-on:click="abrirModalObsProjeto()"
+                                class="glyphicon glyphicon-plus" v-if="prjSelecionado.visualizarObservcoes"></i>
+                        </div>
+                    </div>
+                    <transition>
+                        <div class="row" v-if="prjSelecionado.visualizarObservcoes">
+                            <div class="col col-sm-12">
+                                <div class="row borderBottom hdrTbl">
+                                    <div class="col col-sm-1">&nbsp;</div>
+                                    <div class="col col-sm-3"><label>Data</label></div>
+                                    <div class="col col-sm-8"><label>Observação</label></div>
+                                </div>
+                                <div class="row borderBottom pdg_row" v-for="observacao in prjSelecionado.observacoes">
+                                    <div class="col col-sm-1">
+                                        <i class="glyphicon glyphicon-trash"
+                                            v-on:click="deleteObsProjeto(observacao)"></i>
+                                        <i class="glyphicon glyphicon-edit"
+                                            v-on:click="abrirModalObsProjeto(observacao)"></i>
+                                    </div>
+                                    <div class="col col-sm-3">{{ exibirDataLocal(observacao.data) }}</div>
+                                    <div class="col col-sm-8">{{observacao.descricao}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </transition>
+                </div>
+            </div>
+            <!-- fim observações gerais -->
+
+            <!-- tarefas -->
+
+            <div class="row pdg_row1"
+                v-if="!prjSelecionado.visualizarEnvolvido && !prjSelecionado.visualizarObservcoes">
+                <div class="col col-sm-12">
+                    <div class="row">
+                        <div class="col col-sm-12">
+                            <div class="glyphiconAlt"
+                                v-on:click="exibirTarefas(prjSelecionado,prjSelecionado.visualizarTarefas=!prjSelecionado.visualizarTarefas)">
+                                <i v-bind:class="{ 'glyphicon-remove': prjSelecionado.visualizarTarefas, 'glyphicon-tasks': !prjSelecionado.visualizarTarefas }"
+                                    class="glyphicon "></i>
+                                <label>Tarefas({{prjSelecionado.tarefas.length}}) - Estimado: {{
+                                    estimadoGeral(prjSelecionado) }} ,
+                                    Apontamentos: {{ apontamentosGeral(prjSelecionado) }} - Total Real {{
+                                    totalEsperadoGeral(prjSelecionado) }} -
+                                    Restante {{restanteGeral(prjSelecionado)}}</label>
+                            </div>
+                            <i class="glyphicon glyphicon-plus" v-if="prjSelecionado.visualizarTarefas"
+                                v-on:click="abrirModalTarefa()"></i>
+                        </div>
+                    </div>
+                    <transition>
+                        <div v-if="prjSelecionado.visualizarTarefas">
+
+                            <div class="row pdg_row"
+                                v-if="prjSelecionado.visualizarTarefas && (prjSelecionado.indexTrf == index || prjSelecionado.indexTrf==-1)"
+                                v-for="(tarefa,index) in prjSelecionado.tarefas">
+
+                                <div class="col col-sm-12">
+                                    <div class="row" style="padding-top: 5px;">
+
+                                        <div class="col col-sm-4 glyphiconAlt"
+                                            v-on:click="exibirTarefa(tarefa,tarefa.exibir=!tarefa.exibir,index)">
+                                            <i v-bind:class="{ 'glyphicon-remove': tarefa.exibir, 'glyphicon-list-alt': !tarefa.exibir }"
+                                                class="glyphicon"></i>
+
+                                            <label>{{index+1}}: {{tarefa.descricao}}</label>
+                                        </div>
+                                        <div class="col col-sm-7">
+                                            <label style="width: 19%;">Estimado: {{
+                                                tranformaMinutosEmHoras(estimativaTarefa(tarefa.atividades)) }}</label>
+                                            <label style="width: 19%;">Apontado: {{
+                                                tranformaMinutosEmHoras(apontamentosTarefa(tarefa.apontamentos))
+                                                }}</label>
+                                            <label style="width: 19%;">Concluído:
+                                                {{percentualTarfea(tarefa.apontamentos)}}%</label>
+                                            <label style="width: 19%;">Esperado: {{ totalEsperadoTarefa(tarefa)
+                                                }}</label>
+                                            <label style="width: 19%;">Restante: {{ restanteTarefa(tarefa)
+
+                                                }}</label>
+                                        </div>
+                                        <div class="col col-sm-1" style="display: flex; justify-content: end;">
+                                            <i v-if="!tarefa.exibir" class="glyphicon glyphicon-circle-arrow-up"
+                                                v-on:click="modaOrdemAtividade(prjSelecionado.tarefas,'u',index)"></i>
+                                            &nbsp;
+                                            <i v-if="!tarefa.exibir" class="glyphicon glyphicon-circle-arrow-down"
+                                                v-on:click="modaOrdemAtividade(prjSelecionado.tarefas,'d',index)"></i>
+                                            &nbsp;
+                                            <i v-if="!tarefa.exibir" class="glyphicon glyphicon-edit"
+                                                v-on:click="abrirModalTarefa(tarefa)"></i>
+                                            &nbsp;
+                                            <i class="glyphicon glyphicon-trash" v-on:click="deleteTarefa(tarefa)"></i>
+
+                                        </div>
+                                    </div>
+                                    <transition>
+                                        <div v-if="tarefa.exibir">
+
+                                            <div class="row">
+                                                <div class="col col-sm-12" style="padding-left: 30px;">
+                                                    <div class="row">
+                                                        <div class="col col-sm-12">
+                                                            <div v-on:click="exibirAtividades(tarefa,tarefa.exibirAtividades=!tarefa.exibirAtividades)"
+                                                                class="glyphiconAlt">
+                                                                <span class="glyphicon"
+                                                                    v-bind:class="{ 'glyphicon-remove': tarefa.exibirAtividades, 'glyphicon-tasks': !tarefa.exibirAtividades }">
+                                                                </span>
+                                                                <label>
+                                                                    Atividades({{tarefa.atividades.length}})
+                                                                </label>
+                                                            </div>
+                                                            <i class="glyphicon glyphicon-plus"
+                                                                v-if="tarefa.exibirAtividades"
+                                                                v-on:click="abrirModalAtividade(tarefa,null)"></i>
+
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row" v-if="tarefa.exibirAtividades"
+                                                        style="padding: 10px;">
+                                                        <div class="col col-sm-10 caixa">
+                                                            <div class="row borderBottom hdrTbl">
+                                                                <div class="col col-sm-2"><label>&nbsp;</label></div>
+                                                                <div class="col col-sm-7"><label>Descrição</label></div>
+                                                                <div class="col col-sm-2"><label>Estimativa</label>
+                                                                </div>
+                                                                <div class="col col-sm-1"><label>Feito</label></div>
+                                                            </div>
+                                                            <div class="row borderBottom lnTabelaItens"
+                                                                v-for="(atividade,index) in tarefa.atividades">
+                                                                <div class="col col-sm-2">
+                                                                    <i class="glyphicon glyphicon-circle-arrow-up"
+                                                                        v-on:click="modaOrdemAtividade(tarefa.atividades,'u',index)"></i>
+                                                                    <i class="glyphicon glyphicon-circle-arrow-down"
+                                                                        v-on:click="modaOrdemAtividade(tarefa.atividades,'d',index)"></i>
+
+                                                                    <i class="glyphicon glyphicon-edit"
+                                                                        v-on:click="abrirModalAtividade(tarefa,atividade)"></i>
+                                                                    <i class="glyphicon glyphicon-trash"
+                                                                        v-on:click="deleteAtividade(tarefa,atividade)"></i>
+                                                                </div>
+                                                                <div class="col col-sm-7">{{atividade.descricao}}</div>
+                                                                <div class="col col-sm-2">{{
+                                                                    tranformaMinutosEmHoras(atividade.estimado) }}</div>
+                                                                <div class="col col-sm-1" style="text-align: center;">
+                                                                    <i class="glyphicon"
+                                                                        v-on:click="atividade.feito=!atividade.feito; gravarStorage();"
+                                                                        v-bind:class="{ 'glyphicon-check': atividade.feito, 'glyphicon-unchecked': !atividade.feito }"></i>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col col-sm-12" style="padding-left: 30px;">
+                                                    <div class="row">
+                                                        <div class="col col-sm-12">
+                                                            <div v-on:click="exibirApontamentos(tarefa,tarefa.exibirApontamentos=!tarefa.exibirApontamentos)"
+                                                                class="glyphiconAlt">
+
+                                                                <i class="glyphicon"
+                                                                    v-bind:class="{ 'glyphicon-remove': tarefa.exibirApontamentos, 'glyphicon-time': !tarefa.exibirApontamentos }"></i>
+                                                                <label>
+                                                                    Apontamentos({{tarefa.apontamentos.length}})
+                                                                </label>
+                                                            </div>
+                                                            <i class="glyphicon glyphicon-plus"
+                                                                v-if="tarefa.exibirApontamentos"
+                                                                v-on:click="abrirModalApontamento(tarefa,null)"></i>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row" v-if="tarefa.exibirApontamentos"
+                                                        style="padding: 10px;">
+                                                        <div class="col col-sm-8 caixa">
+                                                            <div class="row borderBottom hdrTbl">
+                                                                <div class="col col-sm-1"><label>&nbsp;</label></div>
+                                                                <div class="col col-sm-4"><label>Data</label></div>
+                                                                <div class="col col-sm-2"><label>Tempo</label></div>
+                                                                <div class="col col-sm-5">
+                                                                    <label>Percentual atual da tarefa</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row borderBottom lnTabelaItens"
+                                                                v-for="(apontamento,index) in tarefa.apontamentos">
+                                                                <div class="col col-sm-1">
+                                                                    <i class="glyphicon glyphicon-trash"
+                                                                        v-on:click="deleteApontamento(tarefa,apontamento)"></i>
+                                                                </div>
+                                                                <div class="col col-sm-4">
+                                                                    {{ new
+                                                                    Date(apontamento.data.replaceAll('-','/')).toLocaleDateString()
+                                                                    }}
+                                                                </div>
+                                                                <div class="col col-sm-2">{{
+                                                                    tranformaMinutosEmHoras(apontamento.tempo) }}</div>
+                                                                <div class="col col-sm-5">{{apontamento.percentual}}%
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col col-sm-12" style="padding-left: 30px;">
+                                                    <div class="row">
+                                                        <div class="col col-sm-12">
+                                                            <div v-on:click="exibirObservacao(tarefa,tarefa.exibirObservacoes=!tarefa.exibirObservacoes)"
+                                                                class="glyphiconAlt">
+
+                                                                <i class="glyphicon"
+                                                                    v-bind:class="{ 'glyphicon-remove': tarefa.exibirObservacoes, 'glyphicon-comment': !tarefa.exibirObservacoes }"></i>
+                                                                <label>
+                                                                    Observações({{tarefa.observacoes.length}})
+                                                                </label>
+                                                            </div>
+                                                            <i class="glyphicon glyphicon-plus"
+                                                                v-if="tarefa.exibirObservacoes"
+                                                                v-on:click="abrirModalObsTarefa(tarefa, null)"></i>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row" v-if="tarefa.exibirObservacoes"
+                                                        style="padding: 10px;">
+                                                        <div class="col col-sm-8 caixa">
+                                                            <div class="row borderBottom hdrTbl">
+                                                                <div class="col col-sm-1"><label>&nbsp;</label></div>
+                                                                <div class="col col-sm-3"><label>Data</label></div>
+                                                                <div class="col col-sm-8"><label>Observação</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row borderBottom lnTabelaItens"
+                                                                v-for="observacao in tarefa.observacoes">
+                                                                <div class="col col-sm-1"><label>
+                                                                        <i class="glyphicon glyphicon-trash"
+                                                                            v-on:click="deleteObsTarefa(tarefa,observacao)"></i>
+                                                                    </label></div>
+                                                                <div class="col col-sm-3">{{
+                                                                    exibirDataLocal(observacao.data)}}
+                                                                </div>
+                                                                <div class="col col-sm-8">{{observacao.descricao }}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </transition>
+                                </div>
+                            </div>
+                        </div>
+                    </transition>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="exibirListaProjeto">
+            <div class="row" style="display: flex;justify-content: space-between; margin-top: 15px; font-size: large;padding: 10px 5px;">
+                <div class="col">
+                    <!-- <i class="glyphicon glyphicon-plus-sign" title="novo projeto" ng-click="abrirDiaolgProjeto()"></i> -->
+                    <span class="plus" v-on:click="abrirModalProjeto()"
+                        v-bind:class="{ 'pulse': projetos.length==0}">+</span>
+                    <!-- <button id="btnNovoPrj" ng-click="abrirDiaolgProjeto()" class="btn btn-primary">Novo Projeto</button> -->
+                </div>
+                <div class="col">
+                    <i class="glyphicon glyphicon-tasks" title="projeto"></i>
+                    Projetos
+                </div>
+                <div class="col">
+                    <i class="glyphicon glyphicon-upload" title="Importar projeto" v-on:click="abrirModalImport()"></i>                
+                </div>
+            </div>
+
+            <div class="row pdg_row1" v-for="projeto in projetos">
+                <div class="row hdr">
+                    <div class="col col-sm-11" v-on:click="selecionarProjeto(projeto)">
+                        <i class="glyphicon glyphicon-dashboard " title="Expadir projeto"></i>
+                        <!-- </div>
+                    <div class="col col-sm-10"> -->
+                        <span><span class="nomeProjeto glyphiconAlt">&nbsp; {{projeto.nome}} </span>&nbsp; <i
+                                class="glyphicon glyphicon-tasks"></i> ({{
+                            projeto.tarefas.length }}) &nbsp; <i class="glyphicon glyphicon-user"></i>({{
+                            projeto.envolvidos.length }}) &nbsp; <i
+                                class="glyphicon glyphicon-comment"></i>({{projeto.observacoes.length}}) </span>
+                    </div>
+                    <div class="col col-sm-1" style="display: flex;justify-content: space-between;">
+                        <i title="Editar" v-on:click="abrirModalProjeto(projeto)" class="glyphicon glyphicon-edit"></i>
+                        <i title="Report" v-on:click="abrirModalReport(projeto)" class="glyphicon glyphicon-share"></i>
+                        <i title="Excluir" v-on:click="deleteProjeto(projeto)" class="glyphicon glyphicon-trash"></i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <dialog id="mImport" class="dPrj">
+            <label for="arquivoJson">Selecione o arquivo de dados do projeto(.json):</label>
+            <input type="file" id="arquivoJson" accept=".json" name="arquivoJson">
+            <p>
+                <span>Id: </span>
+                <span id="pidPrjImport"></span>
+            </p>
+            <p id="pNomePrjImprt">
+
+            </p>
+
+            <div class="linha">
+                <button id="btCncPo" class="btn btn-warning" v-on:click="cancelarImportacao()">
+                    <i class="glyphicon glyphicon-remove"></i>
+                    Cancelar</button>
+                <button id="btnSlvPo" class="btn btn-primary" v-on:click="gravarImportacao()">
+                    <i class="glyphicon glyphicon-ok"></i>
+                    Salvar</button>
+            </div>
+        </dialog>
+        
+        <dialog id="mReport" class="dPrj">
+            <div id="divReport">
+                <div class="row pdg_row1">
+                    <div class="col col-sm-12">
+                        <p><span>Id: {{ prjSelecionado.id }}</span></p>
+                        <p><span>Report: </span> {{ exibirDataLocal(new Date()) }}</p>
+                        <p><span>Projeto: </span> {{prjSelecionado.nome}}</p>
+                        <p><span>Descrição: </span> {{prjSelecionado.descricao}} </p>
+
+                        <div style="display: flex;justify-content: space-between;">
+                            <p><span>Data de início: </span> {{ prjSelecionado.data ? new
+                                Date(prjSelecionado.data.replaceAll('-','/')).toLocaleDateString() :
+                                'Indefinda'}}</p>
+                            <p><span>Total de Horas: </span> {{ prjSelecionado ? totalEsperadoGeral(prjSelecionado) :
+                                ''}}
+                            </p>
+                            <p><span>Horas diárias: </span> {{tranformaMinutosEmHoras(prjSelecionado.horasDiarias)}}</p>
+                            <p><span>Dias de trabalho: </span> {{calculaDiasDeTrabalho(prjSelecionado)}}</p>
+
+                            <p><span>Dias adicionais: </span> {{prjSelecionado.adicionais}}</p>
+                            <p>({{ prjSelecionado.sabado ? 'sábados' : ''}}
+                                {{ prjSelecionado.domingo ? 'e domingos' : ''}} )
+                            </p>
+                            <p><span>Data de término: </span> {{ prjSelecionado.data ? retornaDia(prjSelecionado) : 'A ser calculada'}}</p>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- envolvidos -->
+                <div class="row pdg_row1" v-if="prjSelecionado.envolvidos">
+                    <div class="col col-sm-12">
+                        <div class="row">
+                            <div class="col col-sm-12">
+                                <label> Envolvidos ({{prjSelecionado.envolvidos.length}})</label>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col col-sm-12">
+                                <div class="row borderBottom hdrTbl">
+                                    <div class="col col-sm-3"><label>Tipo</label></div>
+                                    <div class="col col-sm-3"><label>Nome</label></div>
+                                    <div class="col col-sm-3"><label>Email</label></div>
+                                    <div class="col col-sm-3"><label>Telefone</label></div>
+                                </div>
+                                <div class="row borderBottom pdg_row" v-for="envolvido in prjSelecionado.envolvidos">
+                                    <div class="col col-sm-3">{{envolvido.tipo}}</div>
+                                    <div class="col col-sm-3">{{envolvido.nome}}</div>
+                                    <div class="col col-sm-3">{{envolvido.email}}</div>
+                                    <div class="col col-sm-3">{{envolvido.telefone}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--  fim envolvidos -->
+
+                <!-- obserações gerais -->
+                <div class="row pdg_row1" v-if="prjSelecionado.observacoes">
+                    <div class="col col-sm-12">
+                        <div class="row">
+                            <div class="col col-sm-12">
+                                <div>
+                                    <label> Observações Gerais({{prjSelecionado.observacoes.length}}) </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col col-sm-12">
+                                <div class="row borderBottom pdg_row" v-for="observacao in prjSelecionado.observacoes">
+                                    <div class="col col-sm-12">{{ exibirDataLocal(observacao.data) }} -
+                                        {{observacao.descricao}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- fim observações gerais -->
+
+
+                <!-- tarefas -->
+
+                <div class="row pdg_row1" v-if="prjSelecionado.tarefas">
+                    <div class="col col-sm-12">
+                        <div class="row">
+                            <div class="col col-sm-12">
+                                <div>
+                                    <label>Tarefas({{prjSelecionado.tarefas.length}}) - Estimado: {{
+                                        estimadoGeral(prjSelecionado) }} ,
+                                        Apontamentos: {{ apontamentosGeral(prjSelecionado) }} - Total Real {{
+                                        totalEsperadoGeral(prjSelecionado) }} -
+                                        Restante {{restanteGeral(prjSelecionado)}}</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="row pdg_row" v-for="(tarefa,index) in prjSelecionado.tarefas">
+
+                                <div class="col col-sm-12">
+                                    <div class="row" style="padding-top: 5px;">
+
+                                        <div class="col col-sm-4">
+                                            <label>{{index+1}}: {{tarefa.descricao}}</label>
+                                        </div>
+                                        <div class="col col-sm-8">
+                                            <label style="width: 19%;">Estimado: {{
+                                                tranformaMinutosEmHoras(estimativaTarefa(tarefa.atividades)) }}</label>
+                                            <label style="width: 19%;">Apontado: {{
+                                                tranformaMinutosEmHoras(apontamentosTarefa(tarefa.apontamentos))
+                                                }}</label>
+                                            <label style="width: 19%;">Concluído:
+                                                {{percentualTarfea(tarefa.apontamentos)}}%</label>
+                                            <label style="width: 19%;">Esperado: {{ totalEsperadoTarefa(tarefa)
+                                                }}</label>
+                                            <label style="width: 19%;">Restante: {{ restanteTarefa(tarefa)
+
+                                                }}</label>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="row">
+                                            <div class="col col-sm-12" style="padding-left: 30px;">
+                                                <div class="row">
+                                                    <div class="col col-sm-12">
+                                                        <div>
+                                                            <label>
+                                                                Observações({{tarefa.observacoes.length}})
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col col-sm-12">
+                                                        <div class="row borderBottom pdg_row"
+                                                            v-for="observacao in tarefa.observacoes">
+                                                            <div class="col col-sm-12">{{observacao.descricao }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- tarefas -->
+            </div>
+            <div>
+                <div class="row" style="display: flex;justify-content: space-between;">
+                    <button class="btn btn-warning" v-on:click="fecharModalReport()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar
+                    </button>
+                    <button class="btn btn-primary" v-on:click="salvarArquivo()">
+                        <i class="glyphicon glyphicon-list-alt"></i>
+                        Exportar Html
+                    </button>
+                    <button class="btn btn-primary" v-on:click="salvarJson()">
+                        <i class="glyphicon glyphicon-floppy-disk"></i>
+                        Exportar Dados
+                    </button>
+                </div>
+            </div>
+
+        </dialog>
+
+
+
+        <!-- mProjeto -->
+        <dialog id="mProjeto" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Projeto</H1>
+                </div>
+
+                <div class="linha">
+                    <label>Projeto</label>
+                    <input maxlength="30" v-model="prjEditar.nome" placeholder="Digite o nome do projeto" type="text">
+                </div>
+                <div class="linha">
+                    <label>Descrição</label>
+                    <textarea v-model="prjEditar.descricao" placeholder="Digite a descrição do projeto" cols="40"
+                        rows="2"></textarea>
+                </div>
+                <fieldset>
+                    <legend>Prazos <span style="font-size: small; font-style: oblique;">(estas informações podem ser
+                            inseridas posteriormente)</span></legend>
+
+                    <div class="linha2" style="justify-content: space-evenly; margin-bottom: 20px; user-select: none">
+                        <div style="width: 45%; justify-content: center;">
+                            <label>Data de inicio: </label>
+                            <input type="date" v-model="prjEditar.data" />
+                        </div>
+
+                        <div style="width: 45%; justify-content: center;">
+                            <label>Incluir: </label>
+                            <label>Sábado</label>
+                            <input type="checkbox" v-model="prjEditar.sabado">
+                            &nbsp;
+                            <label>Domingo </label>
+                            <input type="checkbox" v-model="prjEditar.domingo">
+                        </div>
+
+
+                    </div>
+                    <div class="linha2" style="justify-content: space-evenly; margin-bottom: 20px; user-select: none">
+
+                        <div style="width: 45%; justify-content: center; ">
+                            <label>Horas Diárias: </label>
+                            <i class="glyphicon glyphicon-minus-sign"
+                                v-on:click="prjEditar.horasDiarias=incrementa(Number(prjEditar.horasDiarias),-0.5,24,0)"></i>
+                            <label class="caixaNum" style="font-size: 24px">
+                                {{tranformaMinutosEmHoras(prjEditar.horasDiarias)}}</label>
+                            <i class="glyphicon glyphicon-plus-sign"
+                                v-on:click="prjEditar.horasDiarias=incrementa(Number(prjEditar.horasDiarias),0.5,24,0)"></i>
+                        </div>
+                        <div style="width: 45%; justify-content: center;">
+                            <label>Dias adicionais: </label>
+
+                            <i class="glyphicon glyphicon-minus-sign"
+                                v-on:click="prjEditar.adicionais=incrementa(Number(prjEditar.adicionais),-1,1000,0)"></i>
+                            <label class="caixaNum" style="font-size: 24px"> {{prjEditar.adicionais}}</label>
+                            <i class="glyphicon glyphicon-plus-sign"
+                                v-on:click="prjEditar.adicionais=incrementa(Number(prjEditar.adicionais),1,1000,0)"></i>
+                        </div>
+
+
+                    </div>
+
+                </fieldset>
+                <div class="linha">
+                    <button id="btCncPrj" class="btn btn-warning" v-on:click="cancelarProjeto()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar
+                    </button>
+
+                    <button id="btnSlvPrj" class="btn btn-primary" v-on:click="gravarProjeto()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        Salvar</button>
+                </div>
+            </div>
+        </dialog>
+
+
+        <dialog id="mEnvolvido" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Envolvido</H1>
+                </div>
+
+                <div class="linha">
+                    <label>Tipo</label>
+                    <select class="form-control" v-model="envolvidoEditar.tipo">
+                        <option disabled value="">Escolha um item</option>
+                        <option>Developer</option>
+                        <option>Stackholder</option>
+                        <option>PO</option>
+                    </select>
+
+                </div>
+
+                <div class="linha">
+                    <label>Nome</label>
+                    <input maxlength="30" class="form-control" v-model="envolvidoEditar.nome"
+                        placeholder="Digite o nome" type="text">
+                </div>
+                <div class="linha">
+                    <label>Email</label>
+                    <input maxlength="30" class="form-control" v-model="envolvidoEditar.email"
+                        placeholder="Digite o email" type="text">
+                </div>
+                <div class="linha">
+                    <label>Telefone</label>
+                    <input maxlength="30" class="form-control" v-model="envolvidoEditar.telefone"
+                        placeholder="Digite o telefone" type="text">
+                </div>
+                <div class="linha">
+                    <button id="btCncPo" class="btn btn-warning" v-on:click="cancelarEnvolvido()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar</button>
+                    <button id="btnSlvPo" class="btn btn-primary" v-on:click="gravarEnvolvido()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        Salvar</button>
+                </div>
+            </div>
+        </dialog>
+
+        <dialog id="mObsProjeto" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Observações</H1>
+                </div>
+                <div class="linha">
+                    <label>observacão</label>
+                    <input class="form-control" type="text" v-model="obsProjetoEditar.descricao">
+                </div>
+                <div class="linha">
+                    <button class="btn btn-warning" v-on:click="cancelarObsProjeto()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar
+                    </button>
+                    <button class="btn btn-primary" v-on:click="gravarObsProjeto()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        Salvar
+                    </button>
+                </div>
+            </div>
+        </dialog>
+
+        <dialog id="mTarefa" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Tarefa</H1>
+                </div>
+                <div class="linha">
+                    <label>Descrição da tarefa</label>
+                    <input maxlength="50" type="text" v-model="tarefaEditar.descricao" placeholder="Digite a tarefa">
+                </div>
+                <div class="linha">
+                    <button id="btCncTask" class="btn btn-warning" v-on:click="cancelarTarefa()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar</button>
+                    <button id="btnSlvTask" class="btn btn-primary" v-on:click="gravarTarefa()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        Salvar</button>
+                </div>
+            </div>
+        </dialog>
+
+        <dialog id="mAtividade" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Atividade</H1>
+                </div>
+                <div class="linha">
+                    <label>Descrição da atividade</label>
+                    <input class="form-control" v-model="atividadeEditar.descricao"
+                        placeholder="Digite a descrição da atividade" maxlength="60" type="text">
+                </div>
+                <div>
+                    <label>Estimativa</label>
+                    <br>
+                    <div class="linha2">
+                        <i class="glyphicon glyphicon-minus-sign"
+                            v-on:click="atividadeEditar.estimado=incrementa(Number(atividadeEditar.estimado),-0.5,1000,0)"></i>
+                        <label class="caixaNum" style="font-size: 24px">{{
+                            tranformaMinutosEmHoras(atividadeEditar.estimado) }}</label>
+                        <i class="glyphicon glyphicon-plus-sign"
+                            v-on:click="atividadeEditar.estimado=incrementa(Number(atividadeEditar.estimado),0.5,1000,0)"></i>
+                    </div>
+
+                </div>
+                <div class="linha">
+                    <button id="btCncAtividade" class="btn btn-warning" v-on:click="cancelarAtividade()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar</button>
+                    <button id="btnSlvAtividade" class="btn btn-primary" v-on:click="gravarAtividade()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        Salvar</button>
+                </div>
+            </div>
+        </dialog>
+
+        <dialog id="mApontamento" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Apontamento</H1>
+                </div>
+                <div class="linha">
+                    <label>Data</label>
+                    <input class="form-control" type="date" v-model="apontamentoEditar.data">
+                </div>
+
+                <div>
+                    <label>Tempo</label>
+                    <br>
+                    <div class="linha2">
+
+                        <i class="glyphicon glyphicon-minus-sign"
+                            v-on:click="apontamentoEditar.tempo=incrementa(Number(apontamentoEditar.tempo),-0.5,24,0)"></i>
+                        <label class="caixaNum" style="font-size: 24px">{{
+                            tranformaMinutosEmHoras(apontamentoEditar.tempo)}}</label>
+                        <i class="glyphicon glyphicon-plus-sign"
+                            v-on:click="apontamentoEditar.tempo=incrementa(Number(apontamentoEditar.tempo),0.5,24,0)"></i>
+                    </div>
+                </div>
+
+                <div class="linha">
+                    <label>Percentual atual da tarefa</label>
+                    <br>
+                    <div class="linha2">
+
+                        <i class="glyphicon glyphicon-minus-sign"
+                            v-on:click="apontamentoEditar.percentual=incrementa(apontamentoEditar.percentual,-5,100,0)"></i>
+                        <label class="caixaNum" style="font-size: 24px">{{ apontamentoEditar.percentual }}%</label>
+                        <i class="glyphicon glyphicon-plus-sign"
+                            v-on:click="apontamentoEditar.percentual=incrementa(apontamentoEditar.percentual,5,100,0)"></i>
+                    </div>
+
+
+                </div>
+                <div class="linha">
+                    <button class="btn btn-warning" v-on:click="cancelarApontamento()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar
+                    </button>
+                    <button class="btn btn-primary" v-on:click="gravarApontamento()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        Salvar
+                    </button>
+                </div>
+            </div>
+        </dialog>
+
+
+        <dialog id="mObsTarefa" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Observações</H1>
+                </div>
+                <div class="linha">
+                    <label>observacão</label>
+                    <input class="form-control" type="text" v-model="obsTarefaEditar.descricao">
+                </div>
+                <div class="linha">
+                    <button class="btn btn-warning" v-on:click="cancelarObsTarefa()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar
+                    </button>
+                    <button class="btn btn-primary" v-on:click="gravarObsTarefa()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        Salvar
+                    </button>
+                </div>
+            </div>
+        </dialog>
+
+        <dialog id="mValidacoes" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Validações</H1>
+                </div>
+                <div class="linha">
+
+                    <ul>
+                        <li v-for="error in errors">{{ error }}</li>
+                    </ul>
+                </div>
+                <div class="linha">
+                    <button class="btn btn-primary" onclick="mValidacoes.close()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        OK
+                    </button>
+                </div>
+            </div>
+        </dialog>
+
+
+        <dialog id="mConfirm" class="dPrj">
+            <div class="mPrj">
+                <div class="linha">
+                    <H1>Excluir {{tipo }}?</H1>
+                </div>
+                <div class="linha">
+                    <button class="btn btn-warning" v-on:click="cancelar()">
+                        <i class="glyphicon glyphicon-remove"></i>
+                        Cancelar
+                    </button>
+                    <button class="btn btn-primary" v-on:click="confirmar()">
+                        <i class="glyphicon glyphicon-ok"></i>
+                        Ok
+                    </button>
+                </div>
+            </div>
+        </dialog>
+
+    </div>
+    <script>
+
+        const Tipo = {
+            indefinido: "Indefindo",
+            projeto: 'Projeto',
+            envolvidos: 'Envolvido',
+            observacoes: 'Observação',
+            tarefas: 'Tarefa',
+            atividades: 'Atividade',
+            apontamentos: 'Apontamento',
+            obsTarefa: 'Oservação'
+        };
+
+
+        function readSingleFile(e) {
+
+            var file = e.target.files[0];
+
+            if (!file) {
+                return;
+            }
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var contents = e.target.result;
+                displayContents(contents);
+            };
+            reader.readAsText(file);
+        }
+
+        function displayContents(contents) {
+                
+            const prj = JSON.parse(contents);
+
+            var id = document.getElementById('pidPrjImport')
+            id.textContent = prj.id;
+
+            var element = document.getElementById('pNomePrjImprt');
+            element.innerHTML = "<span>Projeto: " + prj.nome;
+        }
+     
+        function salvar(nome, conteudo,extensao) {
+            let blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
+            saveAs(blob, nome + "."+extensao);
+        }
+
+        function generateUUID() { // Public Domain/MIT
+            var d = new Date().getTime();//Timestamp
+            var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now() * 1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16;//random number between 0 and 16
+                if (d > 0) {//Use timestamp until depleted
+                    r = (d + r) % 16 | 0;
+                    d = Math.floor(d / 16);
+                } else {//Use microseconds since page-load if supported
+                    r = (d2 + r) % 16 | 0;
+                    d2 = Math.floor(d2 / 16);
+                }
+                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        }
+
+        function PrintElem(elem) {
+            var mywindow = window.open('', 'PRINT', 'height=400,width=600');
+
+            mywindow.document.write('<html><head><title>' + document.title + '</title>');
+            mywindow.document.write('</head><body >');
+            mywindow.document.write(elem);
+            mywindow.document.write('</body></html>');
+
+            mywindow.document.close(); // necessary for IE >= 10
+            mywindow.focus(); // necessary for IE >= 10*/
+
+            mywindow.print();
+            mywindow.close();
+
+            return true;
+        }
+
+        function easterDay(y) {
+            var c = Math.floor(y / 100);
+            var n = y - 19 * Math.floor(y / 19);
+            var k = Math.floor((c - 17) / 25);
+            var i = c - Math.floor(c / 4) - Math.floor((c - k) / 3) + 19 * n + 15;
+            i = i - 30 * Math.floor((i / 30));
+            i = i - Math.floor(i / 28) * (1 - Math.floor(i / 28) * Math.floor(29 / (i + 1)) * Math.floor((21 - n) / 11));
+            var j = y + Math.floor(y / 4) + i + 2 - c + Math.floor(c / 4);
+            j = j - 7 * Math.floor(j / 7);
+            var l = i - j;
+            var m = 3 + Math.floor((l + 40) / 44);
+            var d = l + 28 - 31 * Math.floor(m / 4);
+
+            return new Date([y, m, d]);
+        };
+
+        function getHolidaysBr(ano) {
+
+            const pascoa = easterDay(ano).toLocaleDateString();
+
+            const arrayDtPascoa = pascoa.split('/');
+
+            var carnaval1 = new Date(arrayDtPascoa[2], arrayDtPascoa[1] - 1, arrayDtPascoa[0]);
+
+            carnaval1.setDate(carnaval1.getDate() - 48);
+
+            var paixaoCristo = new Date(arrayDtPascoa[2], arrayDtPascoa[1] - 1, arrayDtPascoa[0]);
+
+            paixaoCristo.setDate(paixaoCristo.getDate() - 2);
+
+            var corpusChristi = new Date(arrayDtPascoa[2], arrayDtPascoa[1] - 1, arrayDtPascoa[0]);
+
+            corpusChristi.setDate(corpusChristi.getDate() + 60);
+
+            const feriados = [
+
+                { data: "01/01/" + ano, feriado: 'Ano Novo' },
+                { data: carnaval1.toLocaleDateString(), feriado: 'Carnaval' },
+                { data: paixaoCristo.toLocaleDateString(), feriado: 'Paixão de Cristo' },
+                { data: pascoa, feriado: 'Pascoa' },
+                { data: '21/04/' + ano, feriado: 'Tiradentes' },
+                { data: corpusChristi.toLocaleDateString(), feriado: 'Corpus Chriti' },
+                { data: '01/05/' + ano, feriado: 'Dia do Trabalhador' },
+                { data: '07/09/' + ano, feriado: 'Independencia do Brasil' },
+                { data: '12/10/' + ano, feriado: 'Nossa Senhora' },
+                { data: '02/11/' + ano, feriado: 'Finados' },
+                { data: '15/11/' + ano, feriado: 'Proclamação da Republica' },
+                { data: '25/12/' + ano, feriado: 'Natal' }
+            ]
+            return feriados;
+        }
+
+        const calculaPrazo = (data, diasTrabalho, diasAdicionais, sabado, domingo) => {
+            const diass = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
+
+            const feriados = getHolidaysBr(data.getFullYear());
+
+            let retDatas = [];
+
+            diasTrabalho += diasAdicionais;
+
+            for (let i = 0; i <= diasTrabalho - 1; i++) {
+                const diaSemana = data.getDay();
+
+                let diasSomar = 0;
+
+                if (sabado == false && domingo == false) {
+
+                    if (diaSemana == 5) {
+
+                        diasSomar = 3;
+                    }
+                    else {
+                        diasSomar = 1;
+                    }
+                } else if (sabado && domingo == false) {
+                    if (diaSemana == 6) {
+
+                        diasSomar = 2;
+                    }
+                    else {
+                        diasSomar = 1;
+                    }
+                } else if (sabado && domingo) {
+                    diasSomar = 1;
+                }
+
+                const fer = feriados.find(x => x.data == data.toLocaleDateString());
+
+                if (fer) {
+                    retDatas.push(
+                        {
+                            data: fer.data,
+                            dia: diass[data.getDay()],
+                            feriado: fer.feriado
+                        });
+
+                    data.setDate(data.getDate() + diasSomar);
+                }
+
+                retDatas.push(
+                    {
+                        data: data.toLocaleDateString(),
+                        dia: diass[data.getDay()],
+                        feriado: ''
+                    });
+                data.setDate(data.getDate() + diasSomar);
+            }
+            return retDatas.slice(-1)[0];
+        }
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                errors: [],
+                tipo: Tipo.indefinido,
+                apagar: [],
+                exibirListaProjeto: true,
+                prjSelecionado: [],
+                prjEditar: [],
+
+                envolvidoSelecionado: [],
+                envolvidoEditar: [],
+
+                obsProjetoEditar: [],
+                obsProjetoSelecionado: [],
+
+                tarefaEditar: [],
+                tarefaSelecionado: [],
+
+                atividadeEditar: [],
+                atividadeSelecionado: [],
+
+                apontamentoEditar: [],
+                apontamentoSelecionado: [],
+
+                obsTarefaEditar: [],
+                obsTarefaSelecionado: [],
+
+                projetos: [],
+            },
+            methods: {
+
+                calculaDiasDeTrabalho: function (projeto) {
+
+                    if (projeto.horasDiarias == undefined || projeto.tarefas.length == 0) {
+                        return 0;
+                    }
+
+                    //abraao
+                    let totalEstimdo = this.totalEsperadoGeral(projeto);// this.estimadoGeral(projeto);
+
+
+                    //  alert('totalEstimdo' + totalEstimdo)
+                    var tempo_seg1 = this.tranformaHorasEmMinutos(totalEstimdo);
+                    //alert('tempo_seg1'+ tempo_seg1)
+
+                    const hd = this.tranformaMinutosEmHoras(projeto.horasDiarias);
+
+                    const hh = this.tranformaHorasEmMinutos(hd);
+
+                    //alert('temp'+temp)
+
+                    let h = Math.ceil(tempo_seg1 / hh)
+                    //alert('h'+h)
+
+                    return h;
+                },
+
+                retornaDia: function (projeto) {
+
+                    if (projeto.data == undefined)
+                        return new Date();
+
+                    let dt = new Date(projeto.data.replaceAll('-', '/'))
+
+                    //let dt = new Date(projeto.data);
+
+                    const diasTrabalho = this.calculaDiasDeTrabalho(projeto);
+
+                    const prazo = calculaPrazo(dt, diasTrabalho, parseInt(projeto.adicionais), projeto.sabado, projeto.domingo);
+
+                    if (prazo == undefined) {
+                        return '';
+                    }
+                    else {
+                        return prazo.data;
+                    }
+
+                },
+
+
+                exibirTarefas: function (projeto, flag) {
+                    //prjSelecionado.visualizarTarefas=!prjSelecionado.visualizarTarefas;
+                    //prjSelecionado.indexTrf=-1;
+
+                    projeto.visualizarTarefas = flag;
+                    projeto.indexTrf = -1;
+
+                    projeto.tarefas.forEach((tarefa) => {
+                        this.exibirTarefa(tarefa, false, -1);
+                    });
+
+                },
+                exibirTarefa: function (tarefa, flag, index) {
+                    tarefa.exibir = flag;
+
+                    if (this.prjSelecionado.indexTrf != -1) {
+                        this.prjSelecionado.indexTrf = -1
+                    }
+                    else {
+                        this.prjSelecionado.indexTrf = index;
+                    }
+
+                    this.exibirAtividades(tarefa, false);
+                    this.exibirApontamentos(tarefa, false);
+                    this.exibirObservacao(tarefa, false);
+                },
+                exibirAtividades: function (tarefa, flag) {
+                    tarefa.exibirAtividades = flag;
+                },
+
+                exibirApontamentos: function (tarefa, flag) {
+                    tarefa.exibirApontamentos = flag;
+                },
+
+                exibirObservacao: function (tarefa, flag) {
+                    tarefa.exibirObservacoes = flag;
+                },
+
+                abrirModalReport: function (projeto) {
+                    this.prjSelecionado = projeto;
+                    mReport.showModal();
+                },
+
+                fecharModalReport: function () {
+                    this.prjSelecionado = [];
+                    mReport.close();
+                },
+
+                abrirModalImport:function(){
+                    
+                    mImport.showModal();
+                    document.getElementById('arquivoJson').addEventListener('change', readSingleFile, false);
+                },
+
+                cancelarImportacao:function(){
+                    document.getElementById('arquivoJson').value ='';
+                    document.getElementById('pidPrjImport').innerHTML = '';
+                    document.getElementById('pNomePrjImprt').innerHTML = '';
+
+                    mImport.close();
+                },
+                salvarImportacao:function(){
+                            abraao
+                },
+
+                salvarArquivo: function () {
+                    const data = new Date();
+
+                    const div = document.getElementById('divReport');
+
+                    const conteudo = div.innerHTML;
+
+                    let txtHtml = '<html><head> ' +
+                        ` <meta name="viewport" content="width=device-width, initial-scale=1"> ` +
+                        `<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> ` +
+
+                        '<style>' +
+                        '.nomeProjeto {  width: 50%;  display: inline-flex; } ' +
+                        ' .linha {   width: 100%;   padding: 5px;   display: inline-grid; } ' +
+                        ' .linha2 { display: flex; justify-content: center;  align-items: baseline; } ' +
+                        ' body {   font-family: sans-serif;   padding: 10px; } ' +
+                        ' .lnTabela { border-bottom: solid 1px; border-left: solid 2px; margin: 2px; } ' +
+                        ' .lnTabelaItens { border-bottom: solid 1px; margin: 2px; cursor: pointer; } ' +
+                        ' .caixa { border-left: solid 2px; border-bottom: solid 1px; } ' +
+                        ' span { font-weight: 700; } ' +
+                        ' .pdg_row1 { padding: 5px 10px; border-bottom: 3px solid black; margin-bottom: 5px; } ' +
+                        ' .pdg_row { padding: 5px 10px; border: 1px solid black; margin-bottom: 3px; } ' +
+                        ' </style>' +
+                        '</head><body>' +
+                        conteudo +
+                        '</body></html>';
+
+                    const tt = data.getDate() + '_' + (data.getMonth() + 1) + '_' + data.getFullYear() + '_' + data.getHours() + '_' + data.getMinutes()
+                    salvar('prj_' + this.prjSelecionado.id + '_' + tt, txtHtml,'html');
+
+                    this.fecharModalReport();
+                },
+                salvarJson:function()
+                {
+                   const dados = JSON.stringify(this.prjSelecionado)
+                   const data = new Date();
+
+                   const tt = data.getDate() + '_' + (data.getMonth() + 1) + '_' + data.getFullYear() + '_' + data.getHours() + '_' + data.getMinutes()
+                   salvar('prj_' + this.prjSelecionado.id + '_' + tt+'_json', dados,'json');
+                   this.fecharModalReport();
+                },
+
+                abrirModalProjeto: function (projeto) {
+                    this.errors = [];
+                    if (projeto) {
+
+                        //seta para editar
+                        this.prjEditar = Vue.util.extend({}, projeto);
+
+                        //seta no editar pra quando salvar ter a referencia do projeto
+                        this.prjSelecionado = projeto;
+                    }
+                    else {
+
+                        const prj = { sabado: false, domingo: false, adicionais: 0, horasDiarias: 0, id: generateUUID() };
+
+                        this.prjEditar = Vue.util.extend({}, prj);
+
+                        this.prjSelecionado = [];
+                    }
+
+                    mProjeto.showModal();
+                },
+                cancelarProjeto: function () {
+                    this.prjSelecionado = [];
+                    this.prjEditar = [];
+                    mProjeto.close();
+                },
+                gravarProjeto: function () {
+                    if (this.validaProjeto(this.prjEditar)) {
+
+                        if (this.prjSelecionado.length === undefined) {
+                            Vue.util.extend(this.prjSelecionado, this.prjEditar);
+                        }
+                        else {
+                            this.prjEditar.status = "backlog";
+                            this.prjEditar.visualizarEnvolvido = false;
+                            this.prjEditar.visualizarObservcoes = false;
+                            this.prjEditar.visualizarTarefas = false;
+                            this.prjEditar.observacoes = [];
+                            this.prjEditar.envolvidos = [];
+                            this.prjEditar.tarefas = [];
+
+                            this.projetos.push(Vue.util.extend({}, this.prjEditar));
+                        }
+
+                        this.prjSelecionado = [];
+                        this.prjEditar = [];
+
+                        this.gravarStorage();
+
+                        mProjeto.close();
+                    }
+                },
+
+                validaProjeto: function (projeto) {
+                    this.errors = [];
+
+                    if (projeto.nome && projeto.descricao) {
+
+                        if (projeto.nome.length < 10) {
+                            this.errors.push('O nome do projeto deve ser mair que 10 caracteres');
+                        }
+
+                        if (projeto.descricao.length < 30) {
+                            this.errors.push('A descrição do projeto deve ser mair que 30 caracteres');
+                        }
+
+                        if (this.errors.length == 0) {
+                            return true;
+                        }
+                    }
+
+                    if (!projeto.nome) {
+                        this.errors.push('O nome do projeto deve ser informado');
+                    }
+
+                    if (!projeto.descricao) {
+                        this.errors.push('A descrição do projeto deve ser informada');
+                    }
+
+                    if (this.errors.length > 0) {
+                        mValidacoes.showModal();
+                        return false;
+
+                    } else {
+                        return true;
+                    }
+
+                },
+
+                selecionarProjeto: function (projeto) {
+                    this.exibirListaProjeto = false;
+
+                    // this.prjSelecionado = Vue.util.extend({}, projeto);
+
+                    this.prjSelecionado = projeto;
+
+                    //para ordernar os apontamentos pela data
+
+                    this.prjSelecionado.tarefas.forEach(element => {
+                        element.apontamentos = element.apontamentos.slice().sort((date1, date2) => new Date(date2.data) - new Date(date1.data));
+                    });
+
+                    this.prjSelecionado.observacoes = this.prjSelecionado.observacoes.slice().sort((date1, date2) => new Date(date2.data) - new Date(date1.data));
+
+                    //this.prjSelecionado.tarefas[0].apontamentos = this.prjSelecionado.tarefas[0].apontamentos.sort((date1, date2) => date2.data - date1.data);
+
+                    this.prjSelecionado.visualizarEnvolvido = false;
+                    this.prjSelecionado.visualizarObservcoes = false;
+                    this.prjSelecionado.visualizarTarefas = false;
+                },
+                exibeLista: function () {
+                    this.exibirListaProjeto = true;
+                    this.prjSelecionado = [];
+                },
+                deleteProjeto: function (projeto) {
+                    this.tipo = Tipo.projeto;
+                    mConfirm.showModal();
+
+                    this.apagar = projeto;
+                },
+
+                abrirModalEnvolvido: function (envolvido) {
+
+                    if (envolvido) {
+
+                        //seta para editar
+                        this.envolvidoEditar = Vue.util.extend({}, envolvido);
+
+                        //seta no editar pra quando salvar ter a referencia do projeto
+                        this.envolvidoSelecionado = envolvido;
+                    }
+                    else {
+                        this.envolvidoSelecionado = [];
+                        this.envolvidoEditar = [];
+                    }
+
+                    mEnvolvido.showModal();
+                },
+                cancelarEnvolvido: function () {
+                    this.envolvidoSelecionado = [];
+                    this.envolvidoEditar = [];
+                    mEnvolvido.close();
+                },
+                gravarEnvolvido: function () {
+
+                    if (this.validaEnvolvido(this.envolvidoEditar)) {
+                        if (this.envolvidoSelecionado.length === undefined) {
+                            Vue.util.extend(this.envolvidoSelecionado, this.envolvidoEditar);
+                        }
+                        else {
+                            this.prjSelecionado.envolvidos.push(Vue.util.extend({}, this.envolvidoEditar));
+                        }
+
+                        this.envolvidoSelecionado = [];
+                        this.envolvidoEditar = [];
+                        this.gravarStorage();
+                        mEnvolvido.close();
+                    }
+                },
+                deleteEnvolvido: function (envolvido) {
+
+                    this.tipo = Tipo.envolvidos;
+                    mConfirm.showModal();
+
+                    this.apagar = envolvido;
+
+                },
+
+                validaEnvolvido: function (envolvido) {
+                    this.errors = [];
+
+                    if (envolvido.nome && envolvido.tipo) {
+
+                        if (envolvido.nome.length < 10) {
+                            this.errors.push('O nome do envolvido é no minimo 10');
+                        }
+
+                        if (this.errors.length == 0) {
+                            return true;
+                        }
+                    }
+
+                    if (!envolvido.nome) {
+                        this.errors.push('O nome do envolvido deve ser informado');
+                    }
+
+                    if (!envolvido.tipo) {
+                        this.errors.push('Selecione o tipo de envolvido');
+                    }
+
+                    if (this.errors.length > 0) {
+                        mValidacoes.showModal();
+                        return false;
+
+                    } else {
+                        return true;
+                    }
+                },
+
+                abrirModalObsProjeto: function (observacao) {
+
+                    if (observacao) {
+
+                        //seta para editar
+                        this.obsProjetoEditar = Vue.util.extend({}, observacao);
+
+                        //seta no editar pra quando salvar ter a referencia do projeto
+                        this.obsProjetoSelecionado = observacao;
+                    }
+                    else {
+                        this.obsProjetoSelecionado = [];
+                        this.obsProjetoEditar = [];
+                    }
+
+                    mObsProjeto.showModal();
+                },
+                cancelarObsProjeto: function () {
+                    this.obsProjetoSelecionado = [];
+                    this.obsProjetoEditar = [];
+                    mObsProjeto.close();
+                },
+                gravarObsProjeto: function () {
+
+                    if (this.validaObsProjeto(this.obsProjetoEditar)) {
+                        if (this.obsProjetoSelecionado.length === undefined) {
+                            Vue.util.extend(this.obsProjetoSelecionado, this.obsProjetoEditar);
+                        }
+                        else {
+                            this.obsProjetoEditar.data = new Date().toISOString();
+                            this.obsProjetoEditar.usuario = 1;
+                            this.prjSelecionado.observacoes.push(Vue.util.extend({}, this.obsProjetoEditar));
+
+                            this.prjSelecionado.observacoes = this.prjSelecionado.observacoes.slice().sort((date1, date2) => new Date(date2.data) - new Date(date1.data));
+                        }
+
+                        this.obsProjetoSelecionado = [];
+                        this.obsProjetoEditar = [];
+                        this.gravarStorage();
+                        mObsProjeto.close();
+                    }
+                },
+                deleteObsProjeto: function (observacao) {
+
+                    this.tipo = Tipo.observacoes;
+                    mConfirm.showModal();
+
+                    this.apagar = observacao;
+
+                },
+
+                validaObsProjeto: function (observacao) {
+                    this.errors = [];
+
+                    if (observacao.descricao) {
+
+                        if (observacao.descricao.length < 10) {
+                            this.errors.push('O a observação deve ter no minimo 10 caracteres!');
+                        }
+
+                        if (this.errors.length == 0) {
+                            return true;
+                        }
+                    }
+                    else {
+                        this.errors.push('O a observação deve ser informada!');
+                    }
+
+                    if (this.errors.length > 0) {
+                        mValidacoes.showModal();
+                        return false;
+
+                    } else {
+                        return true;
+                    }
+                },
+
+                abrirModalTarefa: function (tarefa) {
+
+                    if (tarefa) {
+
+                        //seta para editar
+                        this.tarefaEditar = Vue.util.extend({}, tarefa);
+
+                        //seta no editar pra quando salvar ter a referencia do projeto
+                        this.tarefaSelecionado = tarefa;
+                    }
+                    else {
+                        this.tarefaEditar = [];
+                        this.tarefaSelecionado = [];
+                    }
+
+                    mTarefa.showModal();
+                },
+                cancelarTarefa: function () {
+                    this.tarefaEditar = [];
+                    this.tarefaSelecionado = [];
+                    mTarefa.close();
+                },
+                gravarTarefa: function () {
+                    if (this.validaTarefa(this.tarefaEditar)) {
+
+                        if (this.tarefaSelecionado.length === undefined) {
+                            Vue.util.extend(this.tarefaSelecionado, this.tarefaEditar);
+                        }
+                        else {
+                            this.tarefaEditar.exibir = false;
+                            this.tarefaEditar.exibirAtividades = false;
+                            this.tarefaEditar.exibirApontamentos = false;
+                            this.tarefaEditar.exibirObservacoes = false;
+                            this.tarefaEditar.atividades = [];
+                            this.tarefaEditar.apontamentos = [];
+                            this.tarefaEditar.observacoes = [];
+
+                            this.prjSelecionado.tarefas.push(Vue.util.extend({}, this.tarefaEditar));
+                        }
+
+                        this.tarefaSelecionado = [];
+                        this.tarefaEditar = [];
+                        this.gravarStorage();
+                        mTarefa.close();
+                    }
+                },
+                deleteTarefa: function (tarefa) {
+
+                    this.tipo = Tipo.tarefas;
+                    mConfirm.showModal();
+
+                    this.apagar = tarefa;
+
+                },
+
+                validaTarefa: function (tarefa) {
+                    this.errors = [];
+
+                    if (tarefa.descricao) {
+
+                        if (tarefa.descricao.length < 10) {
+                            this.errors.push('O a observação deve ter no minimo 10 caracteres!');
+                        }
+
+                        if (this.errors.length == 0) {
+                            return true;
+                        }
+                    }
+                    else {
+                        this.errors.push('O a observação deve ser informada!');
+                    }
+
+                    if (this.errors.length > 0) {
+                        mValidacoes.showModal();
+                        return false;
+
+                    } else {
+                        return true;
+                    }
+                },
+                abrirModalAtividade: function (tarefa, atividade) {
+
+                    this.tarefaSelecionado = tarefa;
+
+                    if (atividade) {
+                        //seta para editar
+                        this.atividadeEditar = Vue.util.extend({}, atividade);
+
+                        //seta no editar pra quando salvar ter a referencia do projeto
+                        this.atividadeSelecionado = atividade;
+                    }
+                    else {
+
+                        const j = { descricao: "", estimado: 0, feito: false };
+
+                        this.atividadeEditar = Vue.util.extend({}, j);
+                        //this.atividadeEditar = [];
+                        //this.atividadeEditar.estimado = 0;
+                        this.atividadeSelecionado = [];
+                    }
+
+                    mAtividade.showModal();
+                },
+                cancelarAtividade: function () {
+                    this.tarefaSelecionado = [];
+                    this.atividadeEditar = [];
+                    this.atividadeSelecionado = [];
+                    mAtividade.close();
+                },
+                gravarAtividade: function () {
+                    if (this.validaAtividade(this.atividadeEditar)) {
+
+                        if (this.atividadeSelecionado.length === undefined) {
+                            Vue.util.extend(this.atividadeSelecionado, this.atividadeEditar);
+                        }
+                        else {
+                            this.atividadeEditar.feito = false;
+
+                            this.tarefaSelecionado.atividades.push(Vue.util.extend({}, this.atividadeEditar));
+                        }
+
+                        this.tarefaSelecionado = [];
+                        this.atividadeSelecionado = [];
+                        this.atividadeEditar = [];
+                        this.gravarStorage();
+                        mAtividade.close();
+                    }
+                },
+                deleteAtividade: function (tarefa, atividade) {
+                    this.tipo = Tipo.atividades;
+                    mConfirm.showModal();
+
+                    this.tarefaSelecionado = tarefa;
+
+                    this.apagar = atividade;
+
+                },
+
+                validaAtividade: function (atividade) {
+                    this.errors = [];
+
+                    if (atividade.descricao && atividade.estimado) {
+
+                        if (atividade.descricao.length < 10) {
+                            this.errors.push('A descrição da tarefa deve ter no minimo 10 caracteres!');
+                        }
+
+                        if (parseFloat(atividade.estimado) < 0.5) {
+                            this.errors.push('O tempo deve ser maior que 0!');
+                        }
+
+                        if (this.errors.length == 0) {
+                            return true;
+                        }
+                    }
+                    else {
+                        if (!atividade.descricao) {
+                            this.errors.push('A descrição da tarefa deve ter no minimo 10 caracteres!');
+                        }
+                        if (!atividade.estimado) {
+                            this.errors.push('O tempo deve ser ser infomado');
+                        }
+                    }
+
+                    if (this.errors.length > 0) {
+                        mValidacoes.showModal();
+                        return false;
+
+                    } else {
+                        return true;
+                    }
+                },
+
+                abrirModalObsTarefa: function (tarefa, observacao) {
+
+                    this.tarefaSelecionado = tarefa;
+
+                    if (observacao) {
+                        //seta para editar
+                        this.obsTarefaEditar = Vue.util.extend({}, observacao);
+
+                        //seta no editar pra quando salvar ter a referencia do projeto
+                        this.obsTarefaSelecionado = observacao;
+                    }
+                    else {
+
+                        const j = { descricao: "", data: new Date().toISOString() };
+
+                        this.obsTarefaEditar = Vue.util.extend({}, j);
+                        this.obsTarefaSelecionado = [];
+                    }
+
+                    mObsTarefa.showModal();
+                },
+                cancelarObsTarefa: function () {
+                    this.tarefaSelecionado = [];
+                    this.obsTarefaEditar = [];
+                    this.obsTarefaSelecionado = [];
+                    mObsTarefa.close();
+                },
+                gravarObsTarefa: function () {
+
+                    if (this.obsTarefaSelecionado.length === undefined) {
+                        Vue.util.extend(this.obsTarefaSelecionado, this.obsTarefaEditar);
+                    }
+                    else {
+                        this.tarefaSelecionado.observacoes.push(Vue.util.extend({}, this.obsTarefaEditar));
+
+                        this.tarefaSelecionado.observacoes = this.tarefaSelecionado.observacoes.slice().sort((date1, date2) => new Date(date2.data) - new Date(date1.data));
+
+                    }
+
+                    this.tarefaSelecionado = [];
+                    this.obsTarefaEditar = [];
+                    this.obsTarefaSelecionado = [];
+                    this.gravarStorage();
+                    mObsTarefa.close();
+                },
+                deleteObsTarefa: function (tarefa, observacao) {
+
+                    this.tipo = Tipo.obsTarefa;
+                    mConfirm.showModal();
+
+                    this.tarefaSelecionado = tarefa;
+
+                    this.apagar = observacao;
+
+                },
+
+
+                validaObsTarefa: function (observacao) {
+
+                },
+
+                cancelar: function () {
+
+                    this.apagar = [];
+
+                    if (this.tipo == Tipo.atividades || this.tipo == Tipo.apontamentos || this.tipo == Tipo.obsTarefa) {
+                        this.tarefaSelecionado = [];
+                    }
+                    this.tipo = Tipo.indefinido;
+                    mConfirm.close();
+
+                },
+                confirmar: function () {
+
+                    if (this.tipo == Tipo.projeto) {
+                        this.projetos = this.projetos.filter((cc) => cc != this.apagar);
+                    }
+                    if (this.tipo == Tipo.envolvidos) {
+                        this.prjSelecionado.envolvidos = this.prjSelecionado.envolvidos.filter((cc) => cc != this.apagar);
+                    }
+                    if (this.tipo == Tipo.observacoes) {
+                        this.prjSelecionado.observacoes = this.prjSelecionado.observacoes.filter((cc) => cc != this.apagar);
+                    }
+                    if (this.tipo == Tipo.tarefas) {
+                        this.prjSelecionado.tarefas = this.prjSelecionado.tarefas.filter((cc) => cc != this.apagar);
+                    }
+                    if (this.tipo == Tipo.atividades) {
+                        this.tarefaSelecionado.atividades = this.tarefaSelecionado.atividades.filter((cc) => cc != this.apagar);
+
+                        this.tarefaSelecionado = [];
+                    }
+                    if (this.tipo == Tipo.apontamentos) {
+                        this.tarefaSelecionado.apontamentos = this.tarefaSelecionado.apontamentos.filter((cc) => cc != this.apagar);
+
+                        this.tarefaSelecionado = [];
+                    }
+
+                    if (this.tipo == Tipo.obsTarefa) {
+                        this.tarefaSelecionado.observacoes = this.tarefaSelecionado.observacoes.filter((cc) => cc != this.apagar);
+
+                        this.tarefaSelecionado = [];
+                    }
+
+                    this.gravarStorage();
+                    this.tipo = Tipo.indefinido;
+                    this.apagar = [];
+                    mConfirm.close();
+                },
+                modaOrdemAtividade: function (atividades, direcao, posicao) {
+
+                    if (direcao === 'u' && posicao === 0) {
+                        return;
+                    }
+
+                    if (direcao === 'd' && posicao === atividades.length - 1) {
+                        return;
+                    }
+
+                    let novaPos = 0;
+
+                    if (direcao === 'u') {
+                        novaPos = posicao - 1;
+                    }
+                    else {
+                        novaPos = posicao + 1;
+                    }
+
+                    this.moveArrayElement(atividades, posicao, novaPos);
+
+                    this.gravarStorage();
+                },
+                moveArrayElement: function (arr, from, to) {
+                    var el = arr[from];
+                    arr.splice(from, 1);
+                    arr.splice(to, 0, el);
+                },
+
+                abrirModalApontamento: function (tarefa, apontamento) {
+
+                    this.tarefaSelecionado = tarefa;
+
+                    if (apontamento) {
+                        //seta para editar
+                        this.apontamentoEditar = Vue.util.extend({}, apontamento);
+
+                        //seta no editar pra quando salvar ter a referencia do projeto
+                        this.apontamentoSelecionado = apontamento;
+                    }
+                    else {
+
+                        const j = { tempo: 0, percentual: 0, data: null };
+
+                        this.apontamentoEditar = Vue.util.extend({}, j);
+
+                        //this.atividadeEditar = [];
+                        //this.atividadeEditar.estimado = 0;
+                        this.apontamentoSelecionado = [];
+                    }
+
+                    mApontamento.showModal();
+                },
+                cancelarApontamento: function () {
+                    this.tarefaSelecionado = [];
+                    this.apontamentoEditar = [];
+                    this.apontamentoSelecionado = [];
+                    mApontamento.close();
+                },
+                gravarApontamento: function () {
+
+                    if (this.validaApontamento(this.apontamentoEditar)) {
+
+                        if (this.apontamentoSelecionado.length === undefined) {
+                            Vue.util.extend(this.apontamentoSelecionado, this.apontamentoEditar);
+                        }
+                        else {
+                            this.apontamentoEditar.dataInc = new Date();
+
+                            this.tarefaSelecionado.apontamentos.push(Vue.util.extend({}, this.apontamentoEditar));
+                            //ordena pela data
+                            this.tarefaSelecionado.apontamentos = this.tarefaSelecionado.apontamentos.slice().sort((date1, date2) => new Date(date2.dataInc) - new Date(date1.dataInc));
+
+                        }
+
+                        this.tarefaSelecionado = [];
+                        this.apontamentoSelecionado = [];
+                        this.apontamentoEditar = [];
+                        this.gravarStorage();
+                        mApontamento.close();
+                    }
+                },
+                deleteApontamento: function (tarefa, apontamento) {
+
+                    this.tipo = Tipo.apontamentos;
+                    mConfirm.showModal();
+
+                    this.tarefaSelecionado = tarefa;
+
+                    this.apagar = apontamento;
+
+                },
+
+
+                validaApontamento: function (apontamento) {
+                    this.errors = [];
+
+                    if (apontamento.data && apontamento.tempo && apontamento.percentual) {
+
+                        if (Number(apontamento.tempo) < 0.5) {
+                            this.errors.push('Informe tempo maior que 0!');
+                        }
+
+                        if (parseInt(apontamento.percentual) < 1) {
+                            this.errors.push('Infrome o pecneut mair que 0');
+                        }
+
+                        if (this.errors.length == 0) {
+                            return true;
+                        }
+                    }
+                    else {
+                        if (!apontamento.data) {
+                            this.errors.push('Informe a data!');
+                        }
+                        if (!apontamento.tempo) {
+                            this.errors.push('O tempo deve ser ser infomado');
+                        }
+
+                        if (!apontamento.percentual) {
+                            this.errors.push('O percentual deve ser ser infomado');
+                        }
+
+                    }
+
+                    if (this.errors.length > 0) {
+                        mValidacoes.showModal();
+                        return false;
+
+                    } else {
+                        return true;
+                    }
+                },
+
+
+                exibirDataLocal: function (data) {
+                    if (data)
+                        return new Date(data).toLocaleString().substring(0, 16);
+                    else
+                        return '';
+                },
+
+                tranformaMinutosEmHoras: function (minutos) {
+
+                    if (minutos) {
+
+                    } else {
+                        minutos = 0;
+                    }
+
+                    minutos = parseInt(minutos * 60);
+
+                    let conta = minutos / 60;
+
+                    let horas = parseInt(conta);
+
+                    let min = Math.round((conta - horas) * 60);
+
+                    return String(horas).padStart(2, '0') + ':' + String(min).padStart(2, '0');
+                },
+
+                tranformaHorasEmMinutos: function (horas) {
+                    var arrayTempo = String(horas).split(':');
+
+                    var tempo_seg = ((parseInt(arrayTempo[0]) * 60) + parseInt(arrayTempo[1]));
+
+                    return tempo_seg;
+                },
+
+                estimativaTarefa: function (atividades) {
+
+                    return atividades
+                        .map(x => x.estimado)
+                        .reduce((p, c) => {
+                            return (Number(p) + Number(c))
+                        }, 0);
+                },
+                apontamentosTarefa: function (apontamentos) {
+
+                    if (apontamentos.length > 0)
+                        return apontamentos
+                            .map(x => x.tempo)
+                            .reduce((p, c) => {
+                                return Number(p) + Number(c)
+                            }, 0);
+                    else
+                        return 0;
+                },
+
+                percentualTarfea: function (apontamentos) {
+
+                    if (apontamentos.length > 0) {
+                        const apontamento = apontamentos.slice().sort((date1, date2) => date2.data - date1.data);
+                        return apontamento[0].percentual;
+                    }
+                    else {
+                        return 0;
+                    }
+                },
+
+                estimadoGeral: function (projeto) {
+                    let tot = 0.0;
+
+                    projeto.tarefas.forEach((t) => {
+                        if (t.atividades.length > 0) {
+                            tot += this.estimativaTarefa(t.atividades)
+                        }
+                    }
+                    );
+                    return this.tranformaMinutosEmHoras(tot);
+                },
+                apontamentosGeral: function (projeto) {
+
+                    let tot = 0;
+
+                    projeto.tarefas.forEach(t => {
+                        if (t.apontamentos.length > 0)
+                            tot += this.apontamentosTarefa(t.apontamentos);
+                    });
+
+                    return this.tranformaMinutosEmHoras(tot);
+
+                },
+                totalEsperadoGeral: function (projeto) {
+                    let tot = 0;
+
+                    if (projeto.tarefas) {
+
+                        projeto.tarefas.forEach(t => {
+                            if (t.apontamentos.length > 0)
+                                tot += this.apontamentosTarefa(t.apontamentos) / (t.apontamentos[0].percentual / 100);
+                            else
+                                tot += this.estimativaTarefa(t.atividades);
+                        });
+                    }
+
+                    return this.tranformaMinutosEmHoras(tot);
+                },
+                restanteGeral: function (projeto1) {
+                    let tot = 0;
+
+                    if (projeto1.tarefas) {
+
+                        projeto1.tarefas.forEach(tarefa => {
+                            if (tarefa.apontamentos.length > 0)
+                                tot += (this.apontamentosTarefa(tarefa.apontamentos) / (tarefa.apontamentos[0].percentual / 100)) - this.apontamentosTarefa(tarefa.apontamentos);
+                            else
+                                tot += this.estimativaTarefa(tarefa.atividades);
+                        });
+                    }
+
+                    return this.tranformaMinutosEmHoras(tot);
+                },
+
+                restanteTarefa: function (tarefa) {
+                    if (tarefa.apontamentos.length > 0)
+
+                        return this.tranformaMinutosEmHoras(
+                            (this.apontamentosTarefa(tarefa.apontamentos) / (this.percentualTarfea(tarefa.apontamentos) / 100)) -
+                            this.apontamentosTarefa(tarefa.apontamentos))
+                    else
+
+                        return this.tranformaMinutosEmHoras(this.estimativaTarefa(tarefa.atividades));
+                    //return "00:00";
+                },
+                totalEsperadoTarefa: function (tarefa) {
+                    if (tarefa.apontamentos.length > 0)
+                        return this.tranformaMinutosEmHoras(this.apontamentosTarefa(tarefa.apontamentos) / (this.percentualTarfea(tarefa.apontamentos) / 100));
+                    else
+                        return this.tranformaMinutosEmHoras(this.estimativaTarefa(tarefa.atividades));
+                },
+
+                gravarStorage: function () {
+                    localStorage.projetos = JSON.stringify(this.projetos);
+                },
+
+                incrementaHorasDiarias: function () {
+                    this.prjEditar.horasDiarias += 0.5;
+                    //abraao
+                },
+
+                incrementa: function (alvo, vlr, max, min) {
+                    if (alvo) {
+
+                    }
+                    else {
+                        alvo = 0;
+                    }
+
+
+                    let r = alvo + vlr;
+
+                    if (r >= min && r <= max) {
+                        return r;
+                    }
+                    else {
+                        return alvo;
+                    }
+
+
+                }
+
+            },
+            mounted() {
+
+                if (localStorage.projetos) {
+                    this.projetos = JSON.parse(localStorage.projetos);
+                }
+                else {
+                    this.projetos = [];
+                }
+            },
+            watch: {
+
+            }
+        });
+
+
+
+    </script>
+</body>
+
+</html>
