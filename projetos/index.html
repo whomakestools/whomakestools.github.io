@@ -7,7 +7,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projetos</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.13.1/xlsx.full.min.js"></script> 
+
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+    
     <script src="FileServe.js"></script>
     <style>
         @media print {
@@ -302,8 +307,7 @@
                         <p><span>Total de Horas: </span> {{ totalEsperadoGeral(prjSelecionado)}}</p>
                         <p><span>Horas diárias: </span> {{tranformaMinutosEmHoras(prjSelecionado.horasDiarias)}}</p>
                         <p><span>Dias de trabalho: </span> {{calculaDiasDeTrabalho(prjSelecionado)}}</p>
-
-                        <p><span>Dias adicionais: </span> {{prjSelecionado.adicionais}}</p>
+                        <p><span>Dias adicionais: </span>{{ prjSelecionado.adicionais }}</p>
                         <p><span>{{ exibeFimSemana(prjSelecionado) }} </span></p>
                         <p><span>Data de término: </span> {{ prjSelecionado.data ? retornaDia(prjSelecionado) :
                             'A ser calculada'}}</p>
@@ -1185,6 +1189,14 @@
             obsTarefa: 'Oservação'
         };
 
+        function ExportData(data) {
+            filename = 'reports.xlsx';
+
+            var ws = XLSX.utils.json_to_sheet(data);
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "People");
+            XLSX.writeFile(wb, filename);
+        };
 
         function readSingleFile(e) {
 
@@ -1396,7 +1408,7 @@
 
                 calculaDiasDeTrabalho: function (projeto) {
 
-                    if (projeto.horasDiarias == undefined || projeto.tarefas.length == 0) {
+                    if (projeto.horasDiarias == undefined || projeto.horasDiarias === 0 || projeto.tarefas.length == 0) {
                         return 0;
                     }
 
@@ -1407,12 +1419,21 @@
                     const hd = this.tranformaMinutosEmHoras(projeto.horasDiarias);
 
                     const hh = this.tranformaHorasEmMinutos(hd);
-
-                    let h = Math.ceil(tempo_seg1 / hh)
+                  
+                    let h = Math.ceil(tempo_seg1 / hh)                   
 
                     return h;
                 },
+                exibeDiasAdicionais:function(projeto){
+                    let texto = '';
 
+                    if(projeto.adicionais >0)
+                    {
+                        texto = '<span>Dias adicionais: </span>'+projeto.adicionais;
+                    }
+
+                    return texto;
+                },
                 exibeFimSemana:function(projeto){
                     
                     let texto = '';
