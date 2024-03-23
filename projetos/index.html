@@ -304,9 +304,7 @@
                         <p><span>Dias de trabalho: </span> {{calculaDiasDeTrabalho(prjSelecionado)}}</p>
 
                         <p><span>Dias adicionais: </span> {{prjSelecionado.adicionais}}</p>
-                        <p>({{ prjSelecionado.sabado ? 'sábados' : ''}}
-                            {{ prjSelecionado.domingo ? 'e domingos' : ''}} )
-                        </p>
+                        <p><span>{{ exibeFimSemana(prjSelecionado) }} </span></p>
                         <p><span>Data de término: </span> {{ prjSelecionado.data ? retornaDia(prjSelecionado) :
                             'A ser calculada'}}</p>
                         <p>&nbsp;</p>
@@ -644,7 +642,7 @@
                     Projetos
                 </div>
                 <div class="col">
-                    <i class="glyphicon glyphicon-upload" title="Importar projeto" v-on:click="abrirModalImport()"></i>                
+                    <i class="glyphicon glyphicon-upload" style="font-size: 26px;" title="Importar projeto" v-on:click="abrirModalImport()"></i>                
                 </div>
             </div>
 
@@ -711,8 +709,7 @@
                             <p><span>Dias de trabalho: </span> {{calculaDiasDeTrabalho(prjSelecionado)}}</p>
 
                             <p><span>Dias adicionais: </span> {{prjSelecionado.adicionais}}</p>
-                            <p>({{ prjSelecionado.sabado ? 'sábados' : ''}}
-                                {{ prjSelecionado.domingo ? 'e domingos' : ''}} )
+                            <p><span>{{ exibeFimSemana(prjSelecionado) }}</span>
                             </p>
                             <p><span>Data de término: </span> {{ prjSelecionado.data ? retornaDia(prjSelecionado) : 'A ser calculada'}}</p>
 
@@ -875,7 +872,7 @@
 
                 <div class="linha">
                     <label>Projeto</label>
-                    <input maxlength="30" v-model="prjEditar.nome" placeholder="Digite o nome do projeto" type="text">
+                    <input maxlength="50" minlength="5" v-model="prjEditar.nome" placeholder="Digite o nome do projeto" type="text">
                 </div>
                 <div class="linha">
                     <label>Descrição</label>
@@ -1403,24 +1400,42 @@
                         return 0;
                     }
 
-                    //abraao
                     let totalEstimdo = this.totalEsperadoGeral(projeto);// this.estimadoGeral(projeto);
 
-
-                    //  alert('totalEstimdo' + totalEstimdo)
                     var tempo_seg1 = this.tranformaHorasEmMinutos(totalEstimdo);
-                    //alert('tempo_seg1'+ tempo_seg1)
 
                     const hd = this.tranformaMinutosEmHoras(projeto.horasDiarias);
 
                     const hh = this.tranformaHorasEmMinutos(hd);
 
-                    //alert('temp'+temp)
-
                     let h = Math.ceil(tempo_seg1 / hh)
-                    //alert('h'+h)
 
                     return h;
+                },
+
+                exibeFimSemana:function(projeto){
+                    
+                    let texto = '';
+
+                    if(projeto.sabado || projeto.domingo)
+                    {
+                        texto = 'incluido(';
+
+                        if(projeto.sabado)
+                        {
+                            texto +='sabados'
+                        }
+                        if(projeto.domingo)
+                        {
+                            texto += ' e domingos'
+                        }
+
+                        texto +=')'
+
+                    }
+                    
+                    return texto;
+
                 },
 
                 retornaDia: function (projeto) {
@@ -1429,8 +1444,6 @@
                         return new Date();
 
                     let dt = new Date(projeto.data.replaceAll('-', '/'))
-
-                    //let dt = new Date(projeto.data);
 
                     const diasTrabalho = this.calculaDiasDeTrabalho(projeto);
 
@@ -1447,9 +1460,6 @@
 
 
                 exibirTarefas: function (projeto, flag) {
-                    //prjSelecionado.visualizarTarefas=!prjSelecionado.visualizarTarefas;
-                    //prjSelecionado.indexTrf=-1;
-
                     projeto.visualizarTarefas = flag;
                     projeto.indexTrf = -1;
 
@@ -1507,8 +1517,38 @@
 
                     mImport.close();
                 },
-                salvarImportacao:function(){
-                            abraao
+                gravarImportacao:function(){
+
+                    const fileUp = document.getElementById('arquivoJson')
+
+                    const leitor = new FileReader();
+
+                    leitor.addEventListener("load", () => {
+                        const prj = JSON.parse(leitor.result)  
+                    
+                        const i  =  this.projetos.indexOf(this.projetos.filter((cc) => cc.id == prj.id)[0]);
+
+                        if(i>=0)
+                        {
+                            Vue.util.extend(this.projetos[i], prj);
+                        }
+                        else
+                        {
+                             this.projetos.push(prj);                       
+                        }
+                        
+                       this.gravarStorage();
+                       this.cancelarImportacao();
+
+                      },  false, );
+
+                    if (fileUp.files.length>0) {
+                        leitor.readAsText(fileUp.files[0]);
+                    }
+                   
+                    
+
+                    //abraao
                 },
 
                 salvarArquivo: function () {
@@ -1556,7 +1596,6 @@
                 abrirModalProjeto: function (projeto) {
                     this.errors = [];
                     if (projeto) {
-
                         //seta para editar
                         this.prjEditar = Vue.util.extend({}, projeto);
 
@@ -1611,12 +1650,12 @@
 
                     if (projeto.nome && projeto.descricao) {
 
-                        if (projeto.nome.length < 10) {
-                            this.errors.push('O nome do projeto deve ser mair que 10 caracteres');
+                        if (projeto.nome.length < 5) {
+                            this.errors.push('O nome do projeto deve ser mair que 5 caracteres');
                         }
 
-                        if (projeto.descricao.length < 30) {
-                            this.errors.push('A descrição do projeto deve ser mair que 30 caracteres');
+                        if (projeto.descricao.length < 5) {
+                                 this.errors.push('A descrição do projeto deve ser maior que 5 caracteres');
                         }
 
                         if (this.errors.length == 0) {
@@ -1726,8 +1765,8 @@
 
                     if (envolvido.nome && envolvido.tipo) {
 
-                        if (envolvido.nome.length < 10) {
-                            this.errors.push('O nome do envolvido é no minimo 10');
+                        if (envolvido.nome.length < 5) {
+                            this.errors.push('O nome do envolvido é no minimo 5');
                         }
 
                         if (this.errors.length == 0) {
@@ -1808,8 +1847,8 @@
 
                     if (observacao.descricao) {
 
-                        if (observacao.descricao.length < 10) {
-                            this.errors.push('O a observação deve ter no minimo 10 caracteres!');
+                        if (observacao.descricao.length < 5) {
+                            this.errors.push('O a observação deve ter no minimo 5 caracteres!');
                         }
 
                         if (this.errors.length == 0) {
@@ -1889,8 +1928,8 @@
 
                     if (tarefa.descricao) {
 
-                        if (tarefa.descricao.length < 10) {
-                            this.errors.push('O a observação deve ter no minimo 10 caracteres!');
+                        if (tarefa.descricao.length < 5) {
+                            this.errors.push('O a observação deve ter no minimo 5 caracteres!');
                         }
 
                         if (this.errors.length == 0) {
@@ -1972,8 +2011,8 @@
 
                     if (atividade.descricao && atividade.estimado) {
 
-                        if (atividade.descricao.length < 10) {
-                            this.errors.push('A descrição da tarefa deve ter no minimo 10 caracteres!');
+                        if (atividade.descricao.length < 5) {
+                            this.errors.push('A descrição da tarefa deve ter no minimo 5 caracteres!');
                         }
 
                         if (parseFloat(atividade.estimado) < 0.5) {
@@ -2178,6 +2217,7 @@
                         }
                         else {
                             this.apontamentoEditar.dataInc = new Date();
+
                             this.tarefaSelecionado.apontamentos.push(Vue.util.extend({}, this.apontamentoEditar));
                             //ordena pela data
                             this.tarefaSelecionado.apontamentos = this.tarefaSelecionado.apontamentos.slice().sort((date1, date2) => new Date(date2.dataInc) - new Date(date1.dataInc));
