@@ -314,6 +314,9 @@
                         <p>&nbsp;</p>
                         <p>&nbsp;</p>
                     </div>
+                    <div style="display: flex;justify-content: space-between;">
+                        <i class="glyphicon glyphicon-calendar" v-if="prjSelecionado.data" v-on:click="abrirModalDatas()" >Datas</i>
+                        </div>
                 </div>
             </div>
             <!-- envolvidos -->
@@ -672,6 +675,19 @@
 
         </div>
 
+        <dialog id="mDatas">
+            <div v-for="dt in datas">
+                <p>
+                    <span>Data:</span>{{dt.data}}, {{dt.dia}} {{dt.feriado? ', Feriado(' + dt.feriado + ')' : '' }}
+                </p>
+            </div>
+            <div class="linha">
+            <button class="btn btn-warning" v-on:click="fecharModalDatas()">
+                <i class="glyphicon glyphicon-remove"></i>
+                Fechar</button>
+            </div>
+        </dialog>
+
         <dialog id="mImport" class="dPrj">
             <label for="arquivoJson">Selecione o arquivo de dados do projeto(.json):</label>
             <input type="file" id="arquivoJson" accept=".json" name="arquivoJson">
@@ -792,7 +808,7 @@
                             <div class="row pdg_row" v-for="(tarefa,index) in prjSelecionado.tarefas">
 
                                 <div class="col col-sm-12">
-                                    <div class="row" style="padding-top: 5px;">
+                                    <div class="row" style="padding-top: 5px;background: #337ab7;color:white;">
 
                                         <div class="col col-sm-4">
                                             <label>{{index+1}}: {{tarefa.descricao}}</label>
@@ -814,7 +830,7 @@
                                     </div>
 
                                     <div>
-                                        <div class="row">
+                                        <div class="row" v-if="tarefa.observacoes.length>0">
                                             <div class="col col-sm-12" style="padding-left: 30px;">
                                                 <div class="row">
                                                     <div class="col col-sm-12">
@@ -1316,15 +1332,25 @@
         }
 
         const calculaPrazo = (data, diasTrabalho, diasAdicionais, sabado, domingo) => {
-            const diass = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
+            const diass = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
 
-            const feriados = getHolidaysBr(data.getFullYear());
+            let ano = data.getFullYear();
+
+            let feriados = getHolidaysBr(ano);
 
             let retDatas = [];
 
             diasTrabalho += diasAdicionais;
 
             for (let i = 0; i <= diasTrabalho - 1; i++) {
+
+                if(ano!=data.getFullYear())
+                {
+                    ano = data.getFullYear();
+
+                    feriados = getHolidaysBr(ano);
+                }
+
                 const diaSemana = data.getDay();
 
                 let diasSomar = 0;
@@ -1370,8 +1396,8 @@
                         feriado: ''
                     });
                 data.setDate(data.getDate() + diasSomar);
-            }
-            return retDatas.slice(-1)[0];
+            }          
+            return retDatas;
         }
 
         var app = new Vue({
@@ -1403,6 +1429,8 @@
                 obsTarefaSelecionado: [],
 
                 projetos: [],
+
+                datas:[],
             },
             methods: {
 
@@ -1474,11 +1502,10 @@
                         return '';
                     }
                     else {
-                        return prazo.data;
+                        const p =  prazo.slice(-1)[0];
+                        return p.data;
                     }
-
                 },
-
 
                 exibirTarefas: function (projeto, flag) {
                     projeto.visualizarTarefas = flag;
@@ -1514,7 +1541,22 @@
                 exibirObservacao: function (tarefa, flag) {
                     tarefa.exibirObservacoes = flag;
                 },
+                abrirModalDatas:function(){
+                    
+                    let dt = new Date(this.prjSelecionado.data.replaceAll('-', '/'))
 
+                    const diasTrabalho = this.calculaDiasDeTrabalho(this.prjSelecionado);
+
+                    const prazo = calculaPrazo(dt, diasTrabalho, parseInt(this.prjSelecionado.adicionais), this.prjSelecionado.sabado, this.prjSelecionado.domingo);
+
+                    this.datas = prazo; 
+
+                    mDatas.showModal();   
+                },
+                fecharModalDatas:function(){
+                    this.datas = [];
+                    mDatas.close()
+                },
                 abrirModalReport: function (projeto) {
                     this.prjSelecionado = projeto;
                     mReport.showModal();
