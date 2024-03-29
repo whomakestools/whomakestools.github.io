@@ -676,6 +676,9 @@
         </div>
 
         <dialog id="mDatas">
+            <div class="linha">
+                <H1>Datas</H1>
+            </div>
             <div v-for="dt in datas">
                 <p>
                     <span>Data:</span>{{dt.data}}, {{dt.dia}} {{dt.feriado? ', Feriado(' + dt.feriado + ')' : '' }}
@@ -1502,8 +1505,16 @@
                         return '';
                     }
                     else {
-                        const p =  prazo.slice(-1)[0];
-                        return p.data;
+                        if(prazo.length>0)
+                        {
+                            const p =  prazo.slice(-1)[0];
+                            return p.data;
+                        }
+                        else
+                        {
+                            return '';
+                        }
+
                     }
                 },
 
@@ -2348,8 +2359,10 @@
 
 
                 exibirDataLocal: function (data) {
-                    if (data)
-                        return new Date(data).toLocaleString().substring(0, 16);
+                    if (data){
+                        const dt = new Date(data);
+                        return dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString().substring(0,5);
+                    }
                     else
                         return '';
                 },
