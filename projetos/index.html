@@ -677,11 +677,11 @@
 
         <dialog id="mDatas">
             <div class="linha">
-                <H1>Datas</H1>
+                <H1>Datas(dias de trabalho)</H1>
             </div>
-            <div v-for="dt in datas">
+            <div v-for="(dt,index) in datas">
                 <p>
-                    <span>Data:</span>{{dt.data}}, {{dt.dia}} {{dt.feriado? ', Feriado(' + dt.feriado + ')' : '' }}
+                    <span>{{index+1}}</span> - {{dt.data}}, {{dt.dia}} {{dt.feriado? ', Feriado(' + dt.feriado + ')' : '' }}
                 </p>
             </div>
             <div class="linha">
@@ -1382,12 +1382,12 @@
                 const fer = feriados.find(x => x.data == data.toLocaleDateString());
 
                 if (fer) {
-                    retDatas.push(
-                        {
-                            data: fer.data,
-                            dia: diass[data.getDay()],
-                            feriado: fer.feriado
-                        });
+                    // retDatas.push(
+                    //     {
+                    //         data: fer.data,
+                    //         dia: diass[data.getDay()],
+                    //         feriado: fer.feriado
+                    //     });
 
                     data.setDate(data.getDate() + diasSomar);
                 }
