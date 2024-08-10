@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapas</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        @media print {
+          .noprint,.glyphicon {
+            visibility: hidden;
+         }
+         
+        }
+
+        #iAdd,#iOpenCopia{
+            background: #5e6ebb;
+            padding: 5px 10px;
+            color: white;
+            cursor: pointer;
+            font-size: inherit;
+            display: inline-block;
+        }
+
+        #iAdd{
+            border-radius: 10px 0px 0px 10px;
+        }
+
+        #iOpenCopia{
+            border-radius: 0px 10px 10px 0px;
+        }
+
+
+        label {          
+            display: none;
+        }
+
+        .spanModal {
+            padding: 5px 20px;
+            border-bottom: 1px solid;
+            display: inline-block;
+            background: #5e6ebb;
+            color: white;
+            margin: 5px;
+            text-align: center;
+        }
+
+
+        span{
+            padding: 5px 20px;
+            border: 1px solid;
+            display: inline-block;
+            margin: 5px 0px;
+            text-align: center;
+            font-size: initial;
+            font-weight: 600;
+            background: #5e6ebb;
+            color: white;
+            border-radius: 0px 10px 10px 0px;
+        }
+
+        ul:first-child {
+            padding-left: 10px;
+        }
+
+        ul {
+            list-style: none;
+            border-left: solid 1px;
+            margin: 2px;
+            /* padding-left: 10px; */
+        }
+
+        div {
+            display: contents;
+        }
+
+        i:hover {
+            color: brown;
+        }
+
+        i {
+            padding: 5px;
+            /* border-radius: 20px; */
+            /* color: white; */
+            margin-left: 2px;
+            font-weight: 900;
+            font-size: larger;
+            /* line-height: 5px; */
+            cursor: pointer;
+        }
+
+        input {
+            width: 300px;
+        }
+
+        .md {
+            display: grid;
+            width: max-content;
+            padding: 50px;
+        }
+
+        button {
+            /* margin-top: 5px; */
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            font-weight: bolder;
+        }
+
+        .lnBtns {
+            display: flex;
+            justify-content: space-evenly;
+            margin-top: 5px;
+        }
+
+        pre{
+            animation: none;
+            font-size: large;
+            background-color: transparent;
+            border-radius: 0px;
+            border: none;      
+        }
+        body{
+            padding: 10px;
+            font-family: system-ui;
+        }
+  
+    </style>
+</head>
+
+<body>
+    <label class="noprint" id="iAdd"><i>+</i></label>
+    <label class="noprint" id="iOpenCopia" onclick="abrirMCopia()"><i>Vizualizar</i></label>
+    <div style="display: block;" id="app">
+    </div>
+    <dialog class="noprint" id="dForm">
+        <div class="md">
+            <span class="spanModal" id="no"></span><br>
+
+            <div style="display: block;">
+                Texto: <input type="text" id="iDescricao" />
+            </div>
+            <div class="lnBtns">
+                <button onclick="gravar()">Salvar</button>
+                <button onclick="dForm.close(); iel = []; iDescricao.value ='';">Fechar</button>
+            </div>
+
+        </div>
+    </dialog>
+    <dialog id="dCopia">
+        <pre id="txtcop">
+
+        </pre>
+        <div class="lnBtns">
+        <button onclick="dCopia.close();">Fechar</button>
+        </div>
+    </dialog>
+    <script>
+
+        let iel = [];
+
+        let mapas = [];
+     
+        const gravarStorage = () => {
+            localStorage.mapas = JSON.stringify(mapas);
+        };
+
+        const lerStorage = () => {
+            if (localStorage.mapas) {
+                mapas = JSON.parse(localStorage.mapas);
+            }
+            else {
+                mapas = [];
+            }
+        };
+
+        const abrirModal = (idElemento, texto) => {
+            iel = idElemento;
+            const no = document.getElementById('no');
+
+            if (texto.length == 0) {
+                texto = '0';
+            }
+
+            no.textContent = texto;
+            dForm.showModal();
+        };
+
+        const getElementos = (el, jj) => {
+            for (let p of el.children) {
+
+                const h = { descricao: p.children[1].textContent, nos: [] };
+
+                jj.push(h);
+
+                getElementos(p.children[3], h.nos);
+            }
+        }
+
+        const gravarDados = () => {
+            const ul = document.querySelector('ul');
+
+            mapas = [];
+
+            getElementos(ul, mapas);
+
+            gravarStorage();
+
+            renderizar();
+
+        };
+
+        const apagar = (k) => {
+            k.parentElement.removeChild(k);
+            gravarDados();
+        };
+
+        const recursiva3 = (elemento, arr, idx, tx) => {
+
+            const ul = document.createElement('ul');
+
+            arr.forEach((x, i) => {
+
+                //const h = tx + (idx + 1);
+
+                const h = x.descricao;
+
+                const btnDel = document.createElement('i');
+               // btnDel.textContent = '-';
+               btnDel.classList.add('glyphicon');
+               btnDel.classList.add('glyphicon-remove');
+
+                const li = document.createElement('LI');
+                const sp = document.createElement('SPAN');
+                const lbl = document.createElement('label');
+
+                const btnAdd = document.createElement('i');               
+
+                btnAdd.classList.add('glyphicon');
+                btnAdd.classList.add('glyphicon-plus');
+
+                btnAdd.addEventListener('click', () => {
+                    abrirModal(li.children[3], h);
+                });
+
+                btnDel.addEventListener('click', () => {
+                    apagar(li);
+                });
+
+                lbl.textContent = h;
+
+                sp.textContent = x.descricao;
+
+                const dv = document.createElement('div');
+
+                dv.appendChild(btnAdd);
+                dv.appendChild(btnDel);
+
+                li.appendChild(lbl);
+                li.appendChild(sp);
+                li.appendChild(dv);
+
+                ul.appendChild(li);
+                //recursiva3(li, x.nos, 0, h + '.');
+                recursiva3(li, x.nos, 0, 'raiz');
+                idx += 1;
+            });
+            //idx+=1;  
+            elemento.appendChild(ul);
+        };
+
+        const renderizar = () => {
+            lerStorage();
+
+            const app = document.getElementById('app');
+            app.innerHTML = '';
+
+            if (mapas.length == 0) {
+
+            }
+            else {
+
+                recursiva3(app, mapas, 0, '');
+            }
+        };
+
+        renderizar();
+
+        const gravar = () => {
+
+            const texto = document.getElementById('iDescricao');
+
+            const btnRemove = document.createElement('i');
+            btnRemove.textContent = '-';
+
+            const dv = document.createElement('div');
+
+            const sp = document.createElement('span');
+            sp.textContent = texto.value + ' ';
+
+            if (iel.tagName === 'UL') {
+
+                const lbl = document.createElement('label');
+                lbl.textContent = '15';
+
+                const novoLI = document.createElement('li');
+
+                const btnAdd = document.createElement('i');
+                btnAdd.textContent = '+';
+
+                const ul = document.createElement('ul');
+
+                dv.append(btnAdd);
+                dv.append(btnRemove);
+
+                novoLI.append(lbl);
+                novoLI.append(sp);
+
+                novoLI.append(dv);
+                novoLI.append(ul);
+
+                iel.appendChild(novoLI);
+            }
+            else {
+                const ulNovo = document.createElement('UL');
+
+                const novoLI = document.createElement('li');
+
+                const btnAdd = document.createElement('i');
+                btnAdd.textContent = '+';
+
+                dv.appendChild(sp);
+                dv.appendChild(btnAdd);
+                dv.appendChild(btnRemove);
+
+                novoLI.appendChild(dv);
+
+                ulNovo.appendChild(novoLI);
+
+                iel.appendChild(ulNovo);
+            }
+
+            texto.value = '';
+            dForm.close();
+            iel = [];
+
+            gravarDados();
+
+        }
+
+        const rdn = () => {
+            const iAdd = document.getElementById('iAdd');
+
+            const app = document.getElementById('app');
+
+            iAdd.addEventListener('click', () => {
+
+                const pUl = document.querySelector('ul');
+
+                if (pUl) {
+                    abrirModal(pUl, 'Raiz');
+                }
+                else {
+                    const ul = document.createElement('ul');
+                    app.append(ul);
+                    abrirModal(ul, 'Raiz');
+                }
+
+
+            });
+        };
+
+        rdn();
+
+    
+        const ler = (nos,tx) =>{
+            
+            tx += '   ';  
+
+            nos.forEach(x => {
+
+                console.log(tx +'-> ',x.descricao);
+             
+                ler(x.nos,tx);
+           
+            });
+        }
+
+        const ler2 = (nos,tx) =>{
+            
+            tx += '   |';  
+
+            nos.forEach(x => {
+               txtcop.innerHTML += tx +' '+x.descricao + '<br>';
+               ler2(x.nos,tx);
+           
+            });
+        }
+
+        const abrirMCopia = () => {
+
+            const ap = document.getElementById('app')
+
+            txtcop.innerHTML ='';
+
+            var g = JSON.parse(localStorage.mapas);
+
+            ler2(g,'');
+
+            dCopia.showModal();
+        };
+
+    </script>
+
+</body>
+
+</html>
