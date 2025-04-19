@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <title>Custos</title>
+
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --danger: #e63946;
+            --success: #2a9d8f;
+            --background: #f8f9fa;
+            --card: #ffffff;
+            --text: #212529;
+            --border: #dee2e6;
+        }
+
+
+        .btnRemove {
+
+            /* background-color: var(--danger);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center; */
+
+            border-radius: 50%;
+            background-color: var(--danger);
+            border: none;
+            /* background: no-repeat; */
+             color: white; 
+            rotate: 45deg;
+            font-size: 25px;
+            line-height: 20px;
+            padding: 2px 4px;
+
+
+        }
+
+        .btn-Add {
+            background-color: var(--success);
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            border-radius: 6px;
+            color: white;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 35px;
+        }
+
+        .btn:hover,
+        .btn-Add:hover {
+            background-color: var(--primary-light);
+        }
+
+        #app {
+            background-color: var(--background);
+            white-space: nowrap;
+        }
+
+        /* th:first-child {
+            border-left: 1px solid;
+        } */
+
+        tr {
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        tr:hover {
+            background-color: #afd1f8;
+            text-decoration: underline;
+        }
+
+        th {
+            border: 0px;
+        }
+
+        td:first-child {
+            text-align: left;
+        }
+
+        td {
+            /* border-right: 1px solid;
+            border-bottom: 1px solid; */
+            text-align: center;
+        }
+
+        #app {
+            /* width: fit-content; */
+            width: 700px;
+
+        }
+
+        .colDesc {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 150px;
+        }
+
+        @media only screen and (max-width: 400px) {
+            #app {
+                font-size: 14px;
+            }
+        }
+
+
+        @media only screen and (max-width: 700px) {
+            #app {
+                width: 100%;
+            }
+
+            .esconder {
+                display: none;
+            }
+
+            .colDesc {
+                width: 100px;
+            }
+
+            #mdlNovo {
+                margin: 50px auto;
+            }
+
+        }
+
+        dialog::backdrop {
+            background: black;
+            opacity: 0.9;
+        }
+
+        /* * {
+            margin: 0;
+        } */
+
+        button {
+            cursor: pointer;
+        }
+
+        #app {
+            /* min-height: calc(100vh - 10px); */
+            min-height: 100vh;
+            margin: auto;
+            box-shadow: 0 8px 16px rgb(137 125 125 / 90%);
+
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* font-size: smaller; */
+            margin: 0px;
+            line-height: 1.6;
+
+        }
+
+        h1 {
+            text-align: center;
+            padding: 5px;
+            border-bottom: 2px solid;
+            text-transform: uppercase;
+            font-size: x-large;
+            background-color: var(--primary);
+            color: white;
+        }
+
+        label {
+            font-weight: bolder;
+        }
+
+        #resultados {
+            /* background: blue; */
+            background: var(--background);
+            display: flex;
+            justify-content: center;
+        }
+
+        .painel {
+            padding: 10px;
+            border-bottom: 2px solid;
+            background: var(--background);
+            /* margin-bottom: 10px; */
+        }
+
+        .linhaPainel,
+        .linhaPainel2 {
+            display: flex;
+            justify-content: space-between;
+            /* width: 65%; */
+            margin: 0 auto;
+            padding: 5px;
+        }
+
+
+        .cls {
+            display: flex;
+            width: 40%;
+            justify-content: space-between;
+        }
+
+        .inp {
+            background: white;
+            /* width: -webkit-fill-available; */
+            width: 150px;
+            text-align: center;
+            margin: 0 5px;
+            border: 1px solid;
+            font-weight: bolder;
+        }
+
+        .linhaPainelItens {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .coluna {
+            border-left: solid 1px black;
+            border-bottom: solid 1px black;
+            padding: 5px;
+            display: inline-table;
+        }
+
+        button {
+            cursor: pointer;
+            border-radius: 5px;
+            border: 1px solid gray;
+            font-weight: bold;
+            background: white;
+            line-height: 16px;
+        }
+
+        .titulo {
+            text-align: center;
+        }
+
+
+        .modal {
+            display: inline-table;
+            border: 1px solid;
+            background: white;
+            text-align: left;
+            padding: 15px;
+        }
+
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .linha {
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+
+        <div class="header">
+            <div id="parametros">
+                <h1>Calculadora de Custos</h1>
+
+                <div class="painel">
+                    <div class="linhaPainel">
+                        <label>Tipo: <span title="dsfdfsdf">(i)</span></label>
+                        <div class="cls">
+                            <select v-model="tipo"
+                                style="width:  -webkit-fill-available; font-weight: bold; text-align: center;">
+                                <option value="Kg">Kilogramas</option>
+                                <option value="Und." selected>Unidades</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="linhaPainel">
+                        <label>Qtd. ({{tipo}}) produzida:</label>
+                        <div class="cls">
+                            <button class="btn" v-on:click="qtdProduzida = Decrementa(qtdProduzida)">-</button>
+                            <div class="inp">
+                                {{qtdProduzida}} {{tipo}}
+                            </div>
+
+                            <button class="btn" v-on:click="qtdProduzida = Incrementa(qtdProduzida)">+</button>
+                        </div>
+                    </div>
+                    <div class="linhaPainel">
+                        <label>Qtd. ({{tipo}}) por embalagem: </label>
+                        <div class="cls">
+                            <button class="btn" v-on:click="qtdPorEmbalagem= Decrementa(qtdPorEmbalagem)">-</button>
+
+                            <div class="inp">
+                                {{qtdPorEmbalagem}} {{tipo}}
+                            </div>
+                            <button class="btn" v-on:click="qtdPorEmbalagem=Incrementa(qtdPorEmbalagem)">+</button>
+                        </div>
+                    </div>
+                    <div class="linhaPainel">
+                        <label>Percentual de Lucro: </label>
+
+                        <div class="cls">
+                            <button class="btn" v-on:click="percentualLucro-=0.5">-</button>
+                            <div class="inp">
+                                {{percentualLucro}} %
+                            </div>
+                            <button class="btn" v-on:click="percentualLucro+=0.5">+</button>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+            </div>
+            <div id="resultados">
+                <div class="painel">
+                    <div class="linhaPainel2">
+                        <label>Custo Total: &nbsp;</label> R$ {{ custoTotal.toFixed(2) }}
+                    </div>
+                    <div class="linhaPainel2">
+                        <label>Valor Final(+Lucro: {{percentualLucro.toFixed(1)}}%): &nbsp;</label> R$ {{
+                        valorFinal.toFixed(2) }}
+                    </div>
+                    <div class="linhaPainel2">
+                        <label>Valor por {{tipo}}: &nbsp;</label>R$ {{ valorPorUnidade.toFixed(2) }}
+                    </div>
+                    <div class="linhaPainel2">
+                        <label>Valor por Embalagem: &nbsp;</label>R$ {{valorPorEmbalagem.toFixed(2) }}
+                    </div>
+                </div>
+            </div>
+            <div id="itens">
+                <div class="painel">
+                    <div class="linhaPainel">
+                        <button class="btn-Add" v-on:click="AbrirModal()">Adicionar Item</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="painelItens">
+
+            <table style="width: -webkit-fill-available;">
+                <tr style="background-color: var(--primary); color:white;">
+                    <th style="width:20%;">
+                        <!-- <div class="coluna" style="width: 20%;"> -->
+                        Item
+                    </th>
+                    <!-- <div class="coluna" style="width: 15%;"> -->
+                    <th class="esconder">
+                        Preço compra
+                    </th>
+                    <!-- <div class="coluna" style="width: 15%;"> -->
+                    <th class="esconder">
+                        qtd (Emb.)
+                    </th>
+                    <!-- <div class="coluna" style="width: 15%;"> -->
+                    <th>
+                        Preço calculado
+                    </th>
+                    <!-- <div class="coluna" style="width: 15%;"> -->
+                    <th>qtd Usada
+                    </th>
+                    <!-- <div class="coluna" style="width: 15%;"> -->
+                    <th>
+                        Custo
+                    </th>
+                </tr>
+
+                <tr v-for="(item,index) in itens">
+                    <td>
+                        <div class="colDesc">
+                            <label class="esconder">{{index+1}}:</label><label>{{item.descricao}}</label>
+                        </div>
+                    </td>
+                    <td class="esconder">
+                        <label class="esconder">R$ </label><label>{{parseFloat(item.precoCheio).toFixed(2)}}</label>
+                    </td>
+                    <td class="esconder">
+                        <label>{{item.qtdDaUnidade}} {{item.tipoItem}}</label>
+                    </td>
+                    <td>
+                        <label class="esconder">R$ </label><label>{{
+                            parseFloat(item.precoCheio/item.qtdDaUnidade).toFixed(2)}}
+                            ({{item.tipoItem}})</label>
+                    </td>
+                    <td>
+                        <label>{{item.qtdUsada}} {{item.tipoItem}}</label>
+                    </td>
+                    <td style="display: flex; justify-content: space-between;">
+                        <div>
+                            <label class="esconder">R$
+                            </label><label>{{parseFloat((item.precoCheio/item.qtdDaUnidade)*item.qtdUsada).toFixed(2)}}</label>
+                        </div>
+                        <div>
+                            <button class="btnRemove" v-on:click="Excluir(item)">+</button>
+                        </div>
+                    </td>
+                </tr>
+
+
+
+            </table>
+        </div>
+
+
+        <dialog id="mdlNovo">
+            <div class="modal">
+                <div class="linha" style="justify-content: center;">
+                    <H1>Novo Item</H1>
+                </div>
+                <div class="linha" style="display: flex; justify-content: space-between;">
+                    <label>Item</label>
+                    <input maxlength="30" v-model="descricaoItem" placeholder="Digite a descrição do item" type="text">
+                </div>
+                <div class="linha" style="display: flex; justify-content: space-between;">
+                    <label>Tipo:</label>
+
+                    <select v-model="tipoItem" style="width: 115px; font-weight: bold; text-align: center;">
+                        <option value="Kg">Kilograma</option>
+                        <option value="Und." selected>Unidade</option>
+                        <option value="Hr">Horas</option>
+                    </select>
+
+                </div>
+                <div class="linha" style="display: flex; justify-content: space-between;">
+                    <label>Preço de Compra: </label>
+                    <input placeholder="0,00" v-model="precoCheioItem" type="number">
+                </div>
+                <div class="linha" style="display: flex; justify-content: space-between;">
+                    <label>Qtd. comprada: </label>
+                    <input v-model="qtdDaUnidadeItem" type="number">
+                </div>
+                <div class="linha" style="display: flex; justify-content: space-between;">
+                    <label>Qtd. usada: </label>
+                    <input v-model="qtdUsadaItem" type="number">
+                </div>
+
+                <div class="linha" style="justify-content: center; display: flex; padding: 10px;">
+                    <button v-on:click="fecharModal()">
+                        Cancelar
+                    </button>
+
+                    <button v-on:click="gravarItem()">Gravar</button>
+                </div>
+            </div>
+
+            <div class="linha">
+
+            </div>
+
+        </dialog>
+    </div>
+
+    <script>
+        var obj = new Vue({
+            el: '#app',
+            data: {
+                message: 'Hello Vue!',
+                qtdProduzida: 1,
+                qtdPorEmbalagem: 1,
+                percentualLucro: 0,
+                valorFinal: 0,
+                custoTotal: 0,
+                valorPorUnidade: 0,
+                valorPorEmbalagem: 0,
+
+                descricaoItem: '',
+                tipoItem: 'Und.',
+                precoCheioItem: 0.0,
+                qtdDaUnidadeItem: 0.0,
+                qtdUsadaItem: 0.0,
+
+                tipo: 'Und.',
+                itens: [
+                ]
+            },
+            methods: {
+                Incrementa: function (qtd) {
+                    console.log(qtd);
+                    let y = 0;
+                    if (this.tipo === 'Und.') {
+                        return parseFloat((qtd + 1).toFixed(0));
+                    }
+                    else {
+
+                        y = parseFloat(qtd).toFixed(3);
+
+                        let o = parseFloat(qtd);
+
+                        if (o < 1)
+
+                            y = (o + 0.025);
+                        else
+                            y = (o + 0.05);
+
+                        return parseFloat(y).toFixed(3);
+                        // if (qtd < 1)
+
+                        //     return parseFloat((qtd + 0.025).toFixed(3));
+                        // else
+                        //     return parseFloat((qtd + 0.05).toFixed(3));
+                    }
+                },
+                Decrementa: function (qtd) {
+
+                    let y = 0;
+
+                    if (this.tipo === 'Und.') {
+                        if (qtd <= 1) {
+                            return 1;
+                        }
+                        return parseFloat((qtd - 1).toFixed(0));
+                    }
+                    else {
+
+                        y = parseFloat(qtd).toFixed(3);
+
+                        if (qtd <= 1) {
+                            console.log('kjlkj');
+                            if (qtd <= 0.025) {
+                                y = qtd;
+                                console.log('a');
+                            }
+                            else {
+
+                                if (qtd <= 0.050) {
+                                    y = qtd;
+                                }
+                                else {
+                                    console.log('b');
+                                    y = qtd - 0.025;
+                                }
+                            }
+                        }
+                        else {
+                            y = qtd - 0.05
+                        }
+
+                    }
+                    console.log(y);
+                    return parseFloat(y).toFixed(3);
+                },
+                Excluir: function (i) {
+                    this.itens = this.itens.filter((cc) => cc != i);
+                    this.totaliza();
+
+                },
+                totaliza: function () {
+
+                    const total = this.itens.reduce((soma, item) => {
+                        return soma + parseFloat(((item.precoCheio / item.qtdDaUnidade) * item.qtdUsada).toFixed(2));
+                    }, 0);
+
+                    this.custoTotal = total;
+                    this.valorFinal = parseFloat((total * (1 + (this.percentualLucro / 100))).toFixed(2));
+                    this.valorPorUnidade = parseFloat((this.valorFinal / this.qtdProduzida).toFixed(2));
+                    this.valorPorEmbalagem = parseFloat((this.qtdPorEmbalagem * this.valorPorUnidade).toFixed(2));
+                },
+                AbrirModal: function () {
+                    mdlNovo.showModal();
+                },
+                fecharModal: function () {
+
+                    this.descricaoItem = '';
+                    this.tipoItem = 'Und.';
+                    this.precoCheioItem = 0.0;
+                    this.qtdDaUnidadeItem = 0.0;
+                    this.qtdUsadaItem = 0.0;
+
+                    mdlNovo.close();
+                },
+                gravarItem: function () {
+                    const i = {
+                        descricao: this.descricaoItem,
+                        tipoItem: this.tipoItem,
+                        precoCheio: Number(this.precoCheioItem),
+                        qtdDaUnidade: Number(this.qtdDaUnidadeItem),
+                        qtdUsada: Number(this.qtdUsadaItem)
+                    };
+
+                    this.itens.push(i);
+
+                    this.totaliza();
+
+                    this.fecharModal();
+
+                }
+            },
+            mounted() {
+                this.totaliza();
+            },
+            watch: {
+                qtdProduzida(val) {
+
+                    if (val < 0.050) {
+                        this.qtdProduzida = 0.050;
+                        return;
+                    }
+
+                    this.totaliza();
+                },
+                qtdPorEmbalagem(val) {
+
+                    if (val < 0.050) {
+                        this.qtdPorEmbalagem = 0.050;
+                        return;
+                    }
+
+                    this.totaliza();
+                },
+                percentualLucro(val) {
+
+                    if (val < 0) {
+                        this.percentualLucro = 0.0;
+                        return;
+                    }
+
+                    this.totaliza();
+                }
+            }
+        });
+
+
+        const items =
+            [
+                {
+                    item: "Leite Condensado",
+                    precoCheio: 5.65,
+                    qtdDaUnidade: 1,
+                    qtdUsada: 1
+                },
+                {
+                    item: "Creme de Leite",
+                    precoCheio: 3.90,
+                    qtdDaUnidade: 1,
+                    qtdUsada: 1
+
+                },
+                {
+                    item: "Chocolate em Pó",
+                    precoCheio: 12.00,
+                    qtdDaUnidade: 0.5,
+                    qtdUsada: 0.1
+                },
+                {
+                    item: "Gás",
+                    precoCheio: 100.00,
+                    qtdDaUnidade: 40,
+                    qtdUsada: 1
+                },
+                {
+                    item: "Embalagem",
+                    precoCheio: 45.00,
+                    qtdDaUnidade: 300,
+                    qtdUsada: 20
+                },
+                {
+                    item: "Caixa",
+                    precoCheio: 60.00,
+                    qtdDaUnidade: 120,
+                    qtdUsada: 5.0
+                },
+                {
+                    item: "Salário",
+                    precoCheio: 1500.00,
+                    qtdDaUnidade: 220,
+                    qtdUsada: 1
+                }
+            ];
+
+
+
+    </script>
+
+
+</body>
+
+</html>
