@@ -21,7 +21,13 @@
             --border: #dee2e6;
         }
 
-
+        .headerTable{
+            background-color: var(--primary); 
+            color:white;
+            position: sticky;
+            top: 0px;
+            z-index: 2;
+        }
         .btnRemove {
 
             /* background-color: var(--danger);
@@ -49,7 +55,7 @@
             background-color: var(--success);
             display: inline-flex;
             align-items: center;
-            padding: 10px 20px;
+            padding: 5px 10px;
             border-radius: 6px;
             color: white;
         }
@@ -115,9 +121,9 @@
         }
 
         @media only screen and (max-width: 400px) {
-            #app {
+            /* #app {
                 font-size: 14px;
-            }
+            } */
         }
 
 
@@ -140,6 +146,12 @@
 
         }
 
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
         dialog::backdrop {
             background: black;
             opacity: 0.9;
@@ -155,7 +167,7 @@
 
         #app {
             /* min-height: calc(100vh - 10px); */
-            min-height: 100vh;
+            /* min-height: 100vh; */
             margin: auto;
             box-shadow: 0 8px 16px rgb(137 125 125 / 90%);
 
@@ -177,6 +189,7 @@
             font-size: x-large;
             background-color: var(--primary);
             color: white;
+            margin: 0px;
         }
 
         label {
@@ -191,7 +204,7 @@
         }
 
         .painel {
-            padding: 10px;
+            padding:0px 10px;
             border-bottom: 2px solid;
             background: var(--background);
             /* margin-bottom: 10px; */
@@ -206,6 +219,9 @@
             padding: 5px;
         }
 
+        .linhaPainel2 {
+            padding: 2px;
+        }
 
         .cls {
             display: flex;
@@ -221,6 +237,12 @@
             margin: 0 5px;
             border: 1px solid;
             font-weight: bolder;
+        }
+
+        .painelItens{
+            height: 200px;
+            overflow: hidden;
+            overflow-y: overlay;
         }
 
         .linhaPainelItens {
@@ -251,18 +273,12 @@
 
         .modal {
             display: inline-table;
-            border: 1px solid;
             background: white;
             text-align: left;
-            padding: 15px;
         }
 
 
-        .header {
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
+       
 
         .linha {
             padding-bottom: 5px;
@@ -273,13 +289,13 @@
 <body>
     <div id="app">
 
-        <div class="header">
+        <div class="5">
             <div id="parametros">
-                <h1>Calculadora de Custos</h1>
+                <h1 style="border-radius: 20px 20px 0px 0px;" >Calculadora de Custos</h1>
 
                 <div class="painel">
                     <div class="linhaPainel">
-                        <label>Tipo: <span title="dsfdfsdf">(i)</span></label>
+                        <label>Tipo:</label>
                         <div class="cls">
                             <select v-model="tipo"
                                 style="width:  -webkit-fill-available; font-weight: bold; text-align: center;">
@@ -300,7 +316,7 @@
                         </div>
                     </div>
                     <div class="linhaPainel">
-                        <label>Qtd. ({{tipo}}) por embalagem: </label>
+                        <label>Qtd. ({{tipo}}) por emb.: </label>
                         <div class="cls">
                             <button class="btn" v-on:click="qtdPorEmbalagem= Decrementa(qtdPorEmbalagem)">-</button>
 
@@ -355,7 +371,7 @@
         <div class="painelItens">
 
             <table style="width: -webkit-fill-available;">
-                <tr style="background-color: var(--primary); color:white;">
+                <tr class="headerTable">
                     <th style="width:20%;">
                         <!-- <div class="coluna" style="width: 20%;"> -->
                         Item
@@ -370,7 +386,7 @@
                     </th>
                     <!-- <div class="coluna" style="width: 15%;"> -->
                     <th>
-                        Preço calculado
+                        Preço cal.
                     </th>
                     <!-- <div class="coluna" style="width: 15%;"> -->
                     <th>qtd Usada
@@ -381,7 +397,7 @@
                     </th>
                 </tr>
 
-                <tr v-for="(item,index) in itens">
+                <tr v-for="(item,index) in itens" style="font-weight: lighter;">
                     <td>
                         <div class="colDesc">
                             <label class="esconder">{{index+1}}:</label><label>{{item.descricao}}</label>
@@ -439,7 +455,7 @@
                 </div>
                 <div class="linha" style="display: flex; justify-content: space-between;">
                     <label>Preço de Compra: </label>
-                    <input placeholder="0,00" v-model="precoCheioItem" type="number">
+                    <input placeholder="0.00" v-model="precoCheioItem" type="number">
                 </div>
                 <div class="linha" style="display: flex; justify-content: space-between;">
                     <label>Qtd. comprada: </label>
@@ -450,7 +466,7 @@
                     <input v-model="qtdUsadaItem" type="number">
                 </div>
 
-                <div class="linha" style="justify-content: center; display: flex; padding: 10px;">
+                <div class="linha" style="justify-content: space-evenly; display: flex; padding: 10px;">
                     <button v-on:click="fecharModal()">
                         Cancelar
                     </button>
@@ -572,6 +588,11 @@
                     this.valorPorEmbalagem = parseFloat((this.qtdPorEmbalagem * this.valorPorUnidade).toFixed(2));
                 },
                 AbrirModal: function () {
+                    this.descricaoItem = '';
+                    this.tipoItem = 'Und.';
+                    this.precoCheioItem = 0.00;
+                    this.qtdDaUnidadeItem = 0.0;
+                    this.qtdUsadaItem = 0.0;
                     mdlNovo.showModal();
                 },
                 fecharModal: function () {
