@@ -124,8 +124,7 @@
             /* #app {
                 font-size: 14px;
             } */
-        }
-
+        }       
 
         @media only screen and (max-width: 700px) {
             #app {
@@ -243,6 +242,7 @@
             height: 200px;
             overflow: hidden;
             overflow-y: overlay;
+            border: solid 1px;
         }
 
         .linhaPainelItens {
@@ -292,6 +292,7 @@
         <div class="5">
             <div id="parametros">
                 <h1 style="border-radius: 20px 20px 0px 0px;" >Calculadora de Custos</h1>
+                <p>{{altura}}</p>
 
                 <div class="painel">
                     <div class="linhaPainel">
@@ -368,10 +369,10 @@
                 </div>
             </div>
         </div>
-        <div class="painelItens">
+        <div id="pnlItens" class="painelItens" v-bind:style="{ 'height': altura + 'px' }">
 
             <table style="width: -webkit-fill-available;">
-                <tr class="headerTable">
+                <tr id="trHeader" class="headerTable">
                     <th style="width:20%;">
                         <!-- <div class="coluna" style="width: 20%;"> -->
                         Item
@@ -500,6 +501,7 @@
                 precoCheioItem: 0.0,
                 qtdDaUnidadeItem: 0.0,
                 qtdUsadaItem: 0.0,
+                altura:document.documentElement.clientHeight,
 
                 tipo: 'Und.',
                 itens: [
@@ -621,8 +623,19 @@
                     this.fecharModal();
 
                 }
+                ,posiciona:function()
+                {
+                    const  l = document.documentElement.clientHeight;
+                    
+                    const k =  document.getElementById('trHeader');
+
+                    this.altura = l - k.getBoundingClientRect().top;
+
+                    }                   
             },
             mounted() {
+                this.posiciona();
+                //this.altura = document.documentElement.clientHeight;
                 this.totaliza();
             },
             watch: {
@@ -705,6 +718,16 @@
             ];
 
 
+
+        function posicion2a()
+        {
+            const k =  document.getElementById('trHeader');
+            const j =document.documentElement.clientHeight - k.getBoundingClientRect().top;
+
+            const n = document.getElementById('pnlItens');
+
+
+        }
 
     </script>
 
