@@ -14,6 +14,7 @@
             --primary-light: #4895ef;
             --secondary: #3f37c9;
             --danger: #e63946;
+            --danger-light: #fb828c;
             --success: #2a9d8f;
             --background: #f8f9fa;
             --card: #ffffff;
@@ -21,19 +22,20 @@
             --border: #dee2e6;
         }
 
-        .headerTable{
-            background-color: var(--primary); 
-            color:white;
+        .headerTable {
+            background-color: var(--primary);
+            color: white;
             position: sticky;
             top: 0px;
             z-index: 2;
         }
+
         .btnRemove {
 
             border-radius: 50%;
             background-color: var(--danger);
             border: none;
-             color: white; 
+            color: white;
             rotate: 45deg;
             font-size: 25px;
             line-height: 20px;
@@ -49,6 +51,20 @@
             padding: 5px 10px;
             border-radius: 6px;
             color: white;
+        }
+
+        .btn-Cancel {
+            background-color: var(--danger);
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 6px;
+            color: white;
+        }
+
+        .btn-Cancel:hover {
+            background-color: var(--danger-light);
+            color: #212529;
         }
 
         .btn {
@@ -115,7 +131,7 @@
             /* #app {
                 font-size: 14px;
             } */
-        }       
+        }
 
         @media only screen and (max-width: 700px) {
             #app {
@@ -194,7 +210,7 @@
         }
 
         .painel {
-            padding:0px 10px;
+            padding: 0px 10px;
             border-bottom: 2px solid;
             background: var(--background);
             /* margin-bottom: 10px; */
@@ -229,7 +245,7 @@
             font-weight: bolder;
         }
 
-        .painelItens{
+        .painelItens {
             height: 200px;
             overflow: hidden;
             overflow-y: overlay;
@@ -268,7 +284,7 @@
         }
 
 
-       
+
 
         .linha {
             padding-bottom: 5px;
@@ -286,10 +302,11 @@
                     <div class="linhaPainel">
                         <label>Tipo:</label>
                         <div class="cls">
-                            <select v-model="tipo"
+                            <select v-model="tipo" v-on:change="teste()"
                                 style="width:  -webkit-fill-available; font-weight: bold; text-align: center;">
                                 <option value="Kg">Kilogramas</option>
                                 <option value="Und." selected>Unidades</option>
+                                <option value="L" selected>Litros</option>
                             </select>
                         </div>
                     </div>
@@ -359,11 +376,11 @@
                 <tr id="trHeader" class="headerTable">
                     <th style="width:20%;">
                         <!-- <div class="coluna" style="width: 20%;"> -->
-                        Item
+                        Item({{itens.length}})
                     </th>
                     <!-- <div class="coluna" style="width: 15%;"> -->
                     <th class="esconder">
-                        Preço compra
+                        Preço pago
                     </th>
                     <!-- <div class="coluna" style="width: 15%;"> -->
                     <th class="esconder">
@@ -385,7 +402,8 @@
                 <tr v-for="(item,index) in itens" style="font-weight: lighter;">
                     <td>
                         <div class="colDesc">
-                            <label class="esconder">{{index+1}}:</label><label>{{item.descricao}}</label>
+                            <!-- <label class="esconder">{{index+1}}: </label><label>{{item.descricao}}</label> -->
+                            <label>{{index+1}}: </label><label>{{item.descricao}}</label>
                         </div>
                     </td>
                     <td class="esconder">
@@ -420,50 +438,62 @@
 
 
         <dialog id="mdlNovo">
-            <div class="modal">
-                <div class="linha" style="justify-content: center;">
-                    <H1>Novo Item</H1>
-                </div>
-                <div class="linha" style="display: flex; justify-content: space-between;">
-                    <label>Item</label>
-                    <input maxlength="30" v-model="descricaoItem" placeholder="Digite a descrição do item" type="text">
-                </div>
-                <div class="linha" style="display: flex; justify-content: space-between;">
-                    <label>Tipo:</label>
+            <form name="frm">
+                <div class="modal">
+                    <div class="linha" style="justify-content: center;">
+                        <H1>Novo Item</H1>
+                    </div>
+                    <div class="linha" style="display: flex; justify-content: space-between;">
+                        <label>Tipo:</label>
 
-                    <select v-model="tipoItem" style="width: 115px; font-weight: bold; text-align: center;">
-                        <option value="Kg">Kilograma</option>
-                        <option value="Und." selected>Unidade</option>
-                        <option value="Hr">Horas</option>
-                    </select>
+                        <select name="frmSlc" v-model="tipoItem"
+                            style="width: 115px; font-weight: bold; text-align: center;">
+                            <option value="Kg">Kilograma</option>
+                            <option value="Und." selected>Unidades</option>
+                            <option value="L">Litros</option>
+                            <option value="Hr">Horas</option>
+                        </select>
+
+                    </div>
+                    <div class="linha" style="display: flex; justify-content: space-between;">
+                        <label>Item</label>
+                        <input
+                            oninvalid="this.setCustomValidity('Informe a descrição do item com no minimo 5 caracteres')"
+                            oninput="setCustomValidity('')" name="frmDesc" maxlength="30" minlength="5"
+                            v-model="descricaoItem" required placeholder="Digite a descrição do item" type="text">
+                    </div>
+                    <div class="linha" style="display: flex; justify-content: space-between;">
+                        <label>Preço pago: </label>
+                        <input oninvalid="this.setCustomValidity('Informe o preço pago pelo item')"
+                            oninput="setCustomValidity('')" name="frmPreco" placeholder="0.00" step="0.010" min="0.010"
+                            required v-model="precoCheioItem" type="number">
+                    </div>
+                    <div class="linha" style="display: flex; justify-content: space-between;">
+                        <label>Qtd. comprada: </label>
+                        <input oninvalid="this.setCustomValidity('Informe a quantidade comprada')"
+                            oninput="setCustomValidity('')" name="frmQtdPg" placeholder="0.00" step="0.010" min="0.010"
+                            v-model="qtdDaUnidadeItem" required type="number">
+                    </div>
+                    <div class="linha" style="display: flex; justify-content: space-between;">
+                        <label>Qtd. usada: </label>
+                        <input oninvalid="this.setCustomValidity('Informe a quantidade utlizada')"
+                            oninput="setCustomValidity('')" name="frmQtdUsd" placeholder="0.00" step="0.010" min="0.010"
+                            v-model="qtdUsadaItem" required type="number">
+                    </div>
+
+                    <div class="linha" style="justify-content: space-evenly; display: flex; padding: 10px;">
+                        <button class="btn-Cancel" v-on:click="fecharModal()">
+                            Cancelar
+                        </button>
+
+                        <button class="btn-Add" v-on:click="gravarItem()">Gravar</button>
+                    </div>
+                </div>
+
+                <div class="linha">
 
                 </div>
-                <div class="linha" style="display: flex; justify-content: space-between;">
-                    <label>Preço de Compra: </label>
-                    <input placeholder="0.00" v-model="precoCheioItem" type="number">
-                </div>
-                <div class="linha" style="display: flex; justify-content: space-between;">
-                    <label>Qtd. comprada: </label>
-                    <input v-model="qtdDaUnidadeItem" type="number">
-                </div>
-                <div class="linha" style="display: flex; justify-content: space-between;">
-                    <label>Qtd. usada: </label>
-                    <input v-model="qtdUsadaItem" type="number">
-                </div>
-
-                <div class="linha" style="justify-content: space-evenly; display: flex; padding: 10px;">
-                    <button v-on:click="fecharModal()">
-                        Cancelar
-                    </button>
-
-                    <button v-on:click="gravarItem()">Gravar</button>
-                </div>
-            </div>
-
-            <div class="linha">
-
-            </div>
-
+            </form>
         </dialog>
     </div>
 
@@ -472,6 +502,7 @@
             el: '#app',
             data: {
                 message: 'Hello Vue!',
+                tipo: 'Und.',
                 qtdProduzida: 1,
                 qtdPorEmbalagem: 1,
                 percentualLucro: 0,
@@ -485,18 +516,37 @@
                 precoCheioItem: 0.0,
                 qtdDaUnidadeItem: 0.0,
                 qtdUsadaItem: 0.0,
-                altura:document.documentElement.clientHeight,
+                altura: document.documentElement.clientHeight,
 
-                tipo: 'Und.',
+          
                 itens: [
                 ]
             },
             methods: {
+                teste: function()
+                {
+
+                   console.log(this.tipo);
+
+                    if(this.tipo == 'Und.')
+                    {
+                        this.qtdProduzida = Number(this.qtdProduzida).toFixed(0);
+                        this.qtdPorEmbalagem = Number(this.qtdPorEmbalagem).toFixed(0);
+                    }
+                    else
+                    {
+                        this.qtdProduzida = Number(this.qtdProduzida).toFixed(3);
+                        this.qtdPorEmbalagem = Number(this.qtdPorEmbalagem).toFixed(3);
+                    }
+
+                    this.gravaStorage();
+                    this.totaliza();
+                },
                 Incrementa: function (qtd) {
-                    console.log(qtd);
                     let y = 0;
+
                     if (this.tipo === 'Und.') {
-                        return parseFloat((qtd + 1).toFixed(0));
+                        return Number(Number(qtd) + 1).toFixed(0);
                     }
                     else {
 
@@ -505,38 +555,42 @@
                         let o = parseFloat(qtd);
 
                         if (o < 1)
-
+                        {
                             y = (o + 0.025);
+                            return parseFloat(y).toFixed(3);
+                        }
+
                         else
+                        {                      
                             y = (o + 0.05);
+                            return parseFloat(y).toFixed(2);
+                        }
 
-                        return parseFloat(y).toFixed(3);
-                        // if (qtd < 1)
 
-                        //     return parseFloat((qtd + 0.025).toFixed(3));
-                        // else
-                        //     return parseFloat((qtd + 0.05).toFixed(3));
+
                     }
+                 
                 },
                 Decrementa: function (qtd) {
 
+
                     let y = 0;
+
+                    let sz = 3;
 
                     if (this.tipo === 'Und.') {
                         if (qtd <= 1) {
                             return 1;
                         }
-                        return parseFloat((qtd - 1).toFixed(0));
+                        return Number(Number(qtd) - 1).toFixed(0);
                     }
                     else {
 
                         y = parseFloat(qtd).toFixed(3);
 
                         if (qtd <= 1) {
-                            console.log('kjlkj');
                             if (qtd <= 0.025) {
                                 y = qtd;
-                                console.log('a');
                             }
                             else {
 
@@ -544,23 +598,23 @@
                                     y = qtd;
                                 }
                                 else {
-                                    console.log('b');
                                     y = qtd - 0.025;
                                 }
                             }
                         }
                         else {
                             y = qtd - 0.05
+                            sz =2;
                         }
 
                     }
-                    console.log(y);
-                    return parseFloat(y).toFixed(3);
+                 
+                    return parseFloat(y).toFixed(sz);
                 },
                 Excluir: function (i) {
                     this.itens = this.itens.filter((cc) => cc != i);
-                    this.totaliza();
-
+                    
+                    this.gravaStorage();
                 },
                 totaliza: function () {
 
@@ -572,26 +626,46 @@
                     this.valorFinal = parseFloat((total * (1 + (this.percentualLucro / 100))).toFixed(2));
                     this.valorPorUnidade = parseFloat((this.valorFinal / this.qtdProduzida).toFixed(2));
                     this.valorPorEmbalagem = parseFloat((this.qtdPorEmbalagem * this.valorPorUnidade).toFixed(2));
+
+                   
+       
                 },
                 AbrirModal: function () {
                     this.descricaoItem = '';
                     this.tipoItem = 'Und.';
-                    this.precoCheioItem = 0.00;
-                    this.qtdDaUnidadeItem = 0.0;
-                    this.qtdUsadaItem = 0.0;
+                    this.precoCheioItem = null;
+                    this.qtdDaUnidadeItem = null;
+                    this.qtdUsadaItem = null;
                     mdlNovo.showModal();
                 },
                 fecharModal: function () {
 
                     this.descricaoItem = '';
                     this.tipoItem = 'Und.';
-                    this.precoCheioItem = 0.0;
-                    this.qtdDaUnidadeItem = 0.0;
-                    this.qtdUsadaItem = 0.0;
+                    this.precoCheioItem = null;
+                    this.qtdDaUnidadeItem = null;
+                    this.qtdUsadaItem = null;
 
                     mdlNovo.close();
                 },
                 gravarItem: function () {
+
+                    if (this.descricaoItem.length == 0) {
+                        return false;
+                    }
+
+                    if (!this.precoCheioItem > 0) {
+                        return false;
+                    }
+
+                    if (!this.qtdDaUnidadeItem > 0) {
+                        return false;
+                    }
+
+                    if (!this.qtdUsadaItem > 0) {
+                        return false;
+                    }
+
                     const i = {
                         descricao: this.descricaoItem,
                         tipoItem: this.tipoItem,
@@ -602,25 +676,59 @@
 
                     this.itens.push(i);
 
-                    this.totaliza();
+                    this.gravaStorage();
 
                     this.fecharModal();
 
                 }
-                ,posiciona:function()
-                {
-                    const  l = document.documentElement.clientHeight;
-                    
-                    const k =  document.getElementById('trHeader');
+                , posiciona: function () {
+                    const l = document.documentElement.clientHeight;
+
+                    const k = document.getElementById('trHeader');
 
                     this.altura = l - k.getBoundingClientRect().top;
 
-                    }                   
+                },
+                lerStorage: function () {
+                    if (localStorage.prjCustos) {
+                     
+                        const k = JSON.parse(localStorage.prjCustos);
+
+                        this.itens = k.itens;
+                        
+                        this.tipo = k.tipo;
+                        this.qtdProduzida = k.qtdProduzida;
+                        this.qtdPorEmbalagem = k.qtdPorEmbalagem;
+                        this.percentualLucro = k.percentualLucro;
+                    }
+                    else {
+
+                        this.itens = [];
+                        this.tipo = 'Und.';
+                        this.qtdProduzida = 1;
+                        this.qtdPorEmbalagem = 1;
+                        this.percentualLucro=  0;
+                    }
+
+                    this.totaliza()
+                },
+                gravaStorage: function () {
+
+                    const k = {
+                        tipo: this.tipo,
+                        qtdProduzida: this.qtdProduzida,
+                        qtdPorEmbalagem: this.qtdPorEmbalagem,
+                        percentualLucro: this.percentualLucro,
+                        itens: this.itens
+                    }
+
+                    localStorage.prjCustos = JSON.stringify(k);
+                    this.lerStorage();
+                },
             },
             mounted() {
+                this.lerStorage();
                 this.posiciona();
-                //this.altura = document.documentElement.clientHeight;
-                this.totaliza();
             },
             watch: {
                 qtdProduzida(val) {
@@ -629,7 +737,7 @@
                         this.qtdProduzida = 0.050;
                         return;
                     }
-
+                    this.gravaStorage();
                     this.totaliza();
                 },
                 qtdPorEmbalagem(val) {
@@ -638,7 +746,7 @@
                         this.qtdPorEmbalagem = 0.050;
                         return;
                     }
-
+                    this.gravaStorage();
                     this.totaliza();
                 },
                 percentualLucro(val) {
@@ -647,71 +755,12 @@
                         this.percentualLucro = 0.0;
                         return;
                     }
-
+                    this.gravaStorage();
                     this.totaliza();
-                }
+                }              
             }
         });
-
-
-        const items =
-            [
-                {
-                    item: "Leite Condensado",
-                    precoCheio: 5.65,
-                    qtdDaUnidade: 1,
-                    qtdUsada: 1
-                },
-                {
-                    item: "Creme de Leite",
-                    precoCheio: 3.90,
-                    qtdDaUnidade: 1,
-                    qtdUsada: 1
-
-                },
-                {
-                    item: "Chocolate em Pó",
-                    precoCheio: 12.00,
-                    qtdDaUnidade: 0.5,
-                    qtdUsada: 0.1
-                },
-                {
-                    item: "Gás",
-                    precoCheio: 100.00,
-                    qtdDaUnidade: 40,
-                    qtdUsada: 1
-                },
-                {
-                    item: "Embalagem",
-                    precoCheio: 45.00,
-                    qtdDaUnidade: 300,
-                    qtdUsada: 20
-                },
-                {
-                    item: "Caixa",
-                    precoCheio: 60.00,
-                    qtdDaUnidade: 120,
-                    qtdUsada: 5.0
-                },
-                {
-                    item: "Salário",
-                    precoCheio: 1500.00,
-                    qtdDaUnidade: 220,
-                    qtdUsada: 1
-                }
-            ];
-
-
-
-        function posicion2a()
-        {
-            const k =  document.getElementById('trHeader');
-            const j =document.documentElement.clientHeight - k.getBoundingClientRect().top;
-
-            const n = document.getElementById('pnlItens');
-
-
-        }
+     
 
     </script>
 
