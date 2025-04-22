@@ -22,6 +22,30 @@
             --border: #dee2e6;
         }
 
+        .clsEx {
+            display: flex;
+    justify-content: flex-end;
+    padding: 0px 15px;
+        }
+
+        .clsEx>a {
+            text-decoration: none;
+            /* border: 1px solid; */
+            padding: 0px 10px;
+            border-radius: 5px;
+            background: #2a9d8f;
+            color: white;
+            font-weight: 500;
+
+
+            
+
+
+
+
+
+        }
+
         .headerTable {
             background-color: var(--primary);
             color: white;
@@ -127,6 +151,10 @@
             width: 150px;
         }
 
+        .colDesc:hover {
+            color: #e63946;
+        }
+
         @media only screen and (max-width: 400px) {
             /* #app {
                 font-size: 14px;
@@ -163,17 +191,12 @@
             opacity: 0.9;
         }
 
-        /* * {
-            margin: 0;
-        } */
 
         button {
             cursor: pointer;
         }
 
         #app {
-            /* min-height: calc(100vh - 10px); */
-            /* min-height: 100vh; */
             margin: auto;
             box-shadow: 0 8px 16px rgb(137 125 125 / 90%);
 
@@ -181,7 +204,6 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* font-size: smaller; */
             margin: 0px;
             line-height: 1.6;
 
@@ -196,6 +218,7 @@
             background-color: var(--primary);
             color: white;
             margin: 0px;
+            font-size: larger;
         }
 
         label {
@@ -297,7 +320,10 @@
 
         <div class="5">
             <div id="parametros">
-                <h1>Calculadora de Custos</h1>
+                <h1>Calculadora preço de venda</h1>
+                <div class="clsEx">
+                    <a href="guia.html">Exemplos</a>
+                </div>
                 <div class="painel">
                     <div class="linhaPainel">
                         <label>Tipo:</label>
@@ -375,25 +401,19 @@
             <table style="width: -webkit-fill-available;">
                 <tr id="trHeader" class="headerTable">
                     <th style="width:20%;">
-                        <!-- <div class="coluna" style="width: 20%;"> -->
                         Item({{itens.length}})
                     </th>
-                    <!-- <div class="coluna" style="width: 15%;"> -->
                     <th class="esconder">
                         Preço pago
                     </th>
-                    <!-- <div class="coluna" style="width: 15%;"> -->
                     <th class="esconder">
                         qtd (Emb.)
                     </th>
-                    <!-- <div class="coluna" style="width: 15%;"> -->
                     <th>
                         Preço cal.
                     </th>
-                    <!-- <div class="coluna" style="width: 15%;"> -->
                     <th>qtd Usada
                     </th>
-                    <!-- <div class="coluna" style="width: 15%;"> -->
                     <th>
                         Custo
                     </th>
@@ -401,7 +421,7 @@
 
                 <tr v-for="(item,index) in itens" style="font-weight: lighter;">
                     <td>
-                        <div class="colDesc">
+                        <div class="colDesc" v-on:click="Editar(item,index)">
                             <!-- <label class="esconder">{{index+1}}: </label><label>{{item.descricao}}</label> -->
                             <label>{{index+1}}: </label><label>{{item.descricao}}</label>
                         </div>
@@ -410,15 +430,15 @@
                         <label class="esconder">R$ </label><label>{{parseFloat(item.precoCheio).toFixed(2)}}</label>
                     </td>
                     <td class="esconder">
-                        <label>{{item.qtdDaUnidade}} {{item.tipoItem}}</label>
+                        <label>{{item.qtdDaUnidade}} {{item.tipo}}</label>
                     </td>
                     <td>
                         <label class="esconder">R$ </label><label>{{
                             parseFloat(item.precoCheio/item.qtdDaUnidade).toFixed(2)}}
-                            ({{item.tipoItem}})</label>
+                            ({{item.tipo}})</label>
                     </td>
                     <td>
-                        <label>{{item.qtdUsada}} {{item.tipoItem}}</label>
+                        <label>{{item.qtdUsada}} {{item.tipo}}</label>
                     </td>
                     <td style="display: flex; justify-content: space-between;">
                         <div>
@@ -446,7 +466,7 @@
                     <div class="linha" style="display: flex; justify-content: space-between;">
                         <label>Tipo:</label>
 
-                        <select name="frmSlc" v-model="tipoItem"
+                        <select name="frmSlc" v-model="itemEdit.tipo"
                             style="width: 115px; font-weight: bold; text-align: center;">
                             <option value="Kg">Kilograma</option>
                             <option value="Und." selected>Unidades</option>
@@ -460,25 +480,25 @@
                         <input
                             oninvalid="this.setCustomValidity('Informe a descrição do item com no minimo 5 caracteres')"
                             oninput="setCustomValidity('')" name="frmDesc" maxlength="30" minlength="5"
-                            v-model="descricaoItem" required placeholder="Digite a descrição do item" type="text">
+                            v-model="itemEdit.descricao" required placeholder="Digite a descrição do item" type="text">
                     </div>
                     <div class="linha" style="display: flex; justify-content: space-between;">
                         <label>Preço pago: </label>
                         <input oninvalid="this.setCustomValidity('Informe o preço pago pelo item')"
                             oninput="setCustomValidity('')" name="frmPreco" placeholder="0.00" step="0.010" min="0.010"
-                            required v-model="precoCheioItem" type="number">
+                            required v-model="itemEdit.precoCheio" type="number">
                     </div>
                     <div class="linha" style="display: flex; justify-content: space-between;">
                         <label>Qtd. comprada: </label>
                         <input oninvalid="this.setCustomValidity('Informe a quantidade comprada')"
                             oninput="setCustomValidity('')" name="frmQtdPg" placeholder="0.00" step="0.010" min="0.010"
-                            v-model="qtdDaUnidadeItem" required type="number">
+                            v-model="itemEdit.qtdDaUnidade" required type="number">
                     </div>
                     <div class="linha" style="display: flex; justify-content: space-between;">
                         <label>Qtd. usada: </label>
                         <input oninvalid="this.setCustomValidity('Informe a quantidade utlizada')"
                             oninput="setCustomValidity('')" name="frmQtdUsd" placeholder="0.00" step="0.010" min="0.010"
-                            v-model="qtdUsadaItem" required type="number">
+                            v-model="itemEdit.qtdUsada" required type="number">
                     </div>
 
                     <div class="linha" style="justify-content: space-evenly; display: flex; padding: 10px;">
@@ -510,31 +530,39 @@
                 custoTotal: 0,
                 valorPorUnidade: 0,
                 valorPorEmbalagem: 0,
+                indexEdit: -1,
 
-                descricaoItem: '',
-                tipoItem: 'Und.',
-                precoCheioItem: 0.0,
-                qtdDaUnidadeItem: 0.0,
-                qtdUsadaItem: 0.0,
+                // descricaoItem: '',
+                // tipoItem: 'Und.',
+                // precoCheioItem: 0.0,
+                // qtdDaUnidadeItem: 0.0,
+                // qtdUsadaItem: 0.0,
+
                 altura: document.documentElement.clientHeight,
 
-          
+                itemEdit: {
+                    descricao: '',
+                    tipo: 'Und.',
+                    precoCheio: 0.0,
+                    qtdDaUnidade: 0.0,
+                    qtdUsada: 0.0,
+                },
                 itens: [
                 ]
             },
             methods: {
-                teste: function()
-                {
+                Editar: function (item, index) {
+                    this.itemEdit = Vue.util.extend({}, item);
+                    this.indexEdit = index;
+                    mdlNovo.showModal();
+                },
+                teste: function () {
 
-                   console.log(this.tipo);
-
-                    if(this.tipo == 'Und.')
-                    {
+                    if (this.tipo == 'Und.') {
                         this.qtdProduzida = Number(this.qtdProduzida).toFixed(0);
                         this.qtdPorEmbalagem = Number(this.qtdPorEmbalagem).toFixed(0);
                     }
-                    else
-                    {
+                    else {
                         this.qtdProduzida = Number(this.qtdProduzida).toFixed(3);
                         this.qtdPorEmbalagem = Number(this.qtdPorEmbalagem).toFixed(3);
                     }
@@ -554,14 +582,12 @@
 
                         let o = parseFloat(qtd);
 
-                        if (o < 1)
-                        {
+                        if (o < 1) {
                             y = (o + 0.025);
                             return parseFloat(y).toFixed(3);
                         }
 
-                        else
-                        {                      
+                        else {
                             y = (o + 0.05);
                             return parseFloat(y).toFixed(2);
                         }
@@ -569,7 +595,7 @@
 
 
                     }
-                 
+
                 },
                 Decrementa: function (qtd) {
 
@@ -604,16 +630,16 @@
                         }
                         else {
                             y = qtd - 0.05
-                            sz =2;
+                            sz = 2;
                         }
 
                     }
-                 
+
                     return parseFloat(y).toFixed(sz);
                 },
                 Excluir: function (i) {
                     this.itens = this.itens.filter((cc) => cc != i);
-                    
+
                     this.gravaStorage();
                 },
                 totaliza: function () {
@@ -627,54 +653,68 @@
                     this.valorPorUnidade = parseFloat((this.valorFinal / this.qtdProduzida).toFixed(2));
                     this.valorPorEmbalagem = parseFloat((this.qtdPorEmbalagem * this.valorPorUnidade).toFixed(2));
 
-                   
-       
+
+
                 },
                 AbrirModal: function () {
-                    this.descricaoItem = '';
-                    this.tipoItem = 'Und.';
-                    this.precoCheioItem = null;
-                    this.qtdDaUnidadeItem = null;
-                    this.qtdUsadaItem = null;
+                    this.indexEdit = -1;
+                    this.itemEdit.descricao = '';
+                    this.itemEdit.tipo = 'Und.';
+                    this.itemEdit.precoCheio = null;
+                    this.itemEdit.qtdDaUnidade = null;
+                    this.itemEdit.qtdUsada = null;
                     mdlNovo.showModal();
                 },
                 fecharModal: function () {
+                    this.itemEdit.descricao = '';
+                    this.itemEdit.tipo = 'Und.';
+                    this.itemEdit.precoCheio = null;
+                    this.itemEdit.qtdDaUnidade = null;
+                    this.itemEdit.qtdUsada = null;
 
-                    this.descricaoItem = '';
-                    this.tipoItem = 'Und.';
-                    this.precoCheioItem = null;
-                    this.qtdDaUnidadeItem = null;
-                    this.qtdUsadaItem = null;
+                    this.indexEdit = -1;
 
                     mdlNovo.close();
                 },
                 gravarItem: function () {
 
-                    if (this.descricaoItem.length == 0) {
+                    if (this.itemEdit.descricao.length == 0) {
                         return false;
                     }
 
-                    if (!this.precoCheioItem > 0) {
+                    if (!this.itemEdit.precoCheio > 0) {
                         return false;
                     }
 
-                    if (!this.qtdDaUnidadeItem > 0) {
+                    if (!this.itemEdit.qtdDaUnidade > 0) {
                         return false;
                     }
 
-                    if (!this.qtdUsadaItem > 0) {
+                    if (!this.itemEdit.qtdUsada > 0) {
                         return false;
                     }
 
-                    const i = {
-                        descricao: this.descricaoItem,
-                        tipoItem: this.tipoItem,
-                        precoCheio: Number(this.precoCheioItem),
-                        qtdDaUnidade: Number(this.qtdDaUnidadeItem),
-                        qtdUsada: Number(this.qtdUsadaItem)
-                    };
+                    if (this.indexEdit === -1) {
 
-                    this.itens.push(i);
+                        const i = {
+                            descricao: this.itemEdit.descricao,
+                            tipo: this.itemEdit.tipo,
+                            precoCheio: Number(this.itemEdit.precoCheio),
+                            qtdDaUnidade: Number(this.itemEdit.qtdDaUnidade),
+                            qtdUsada: Number(this.itemEdit.qtdUsada)
+                        };
+
+                        this.itens.push(i);
+                    }
+                    else {
+                        this.itens[this.indexEdit].descricao = this.itemEdit.descricao;
+                        this.itens[this.indexEdit].tipo = this.itemEdit.tipo;
+                        this.itens[this.indexEdit].precoCheio = Number(this.itemEdit.precoCheio);
+                        this.itens[this.indexEdit].qtdDaUnidade = Number(this.itemEdit.qtdDaUnidade);
+                        this.itens[this.indexEdit].qtdUsada = Number(this.itemEdit.qtdUsada);
+                    }
+
+                    this.indexEdit = -1;
 
                     this.gravaStorage();
 
@@ -691,11 +731,11 @@
                 },
                 lerStorage: function () {
                     if (localStorage.prjCustos) {
-                     
+
                         const k = JSON.parse(localStorage.prjCustos);
 
                         this.itens = k.itens;
-                        
+
                         this.tipo = k.tipo;
                         this.qtdProduzida = k.qtdProduzida;
                         this.qtdPorEmbalagem = k.qtdPorEmbalagem;
@@ -707,7 +747,7 @@
                         this.tipo = 'Und.';
                         this.qtdProduzida = 1;
                         this.qtdPorEmbalagem = 1;
-                        this.percentualLucro=  0;
+                        this.percentualLucro = 0;
                     }
 
                     this.totaliza()
@@ -757,10 +797,10 @@
                     }
                     this.gravaStorage();
                     this.totaliza();
-                }              
+                }
             }
         });
-     
+
 
     </script>
 
