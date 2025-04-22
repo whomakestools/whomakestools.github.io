@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <title>Document</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --danger: #e63946;
+            --danger-light: #fb828c;
+            --success: #2a9d8f;
+            --background: #f8f9fa;
+            --card: #ffffff;
+            --text: #212529;
+            --border: #dee2e6;
+        }
+
+        .headerTable {
+            background-color: var(--primary);
+            color: white;
+            position: sticky;
+            top: 0px;
+            z-index: 2;
+        }
+
+        .btnRemove {
+
+            border-radius: 50%;
+            background-color: var(--danger);
+            border: none;
+            color: white;
+            rotate: 45deg;
+            font-size: 25px;
+            line-height: 20px;
+            padding: 2px 4px;
+
+
+        }
+
+        .btn-Add {
+            background-color: var(--success);
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 6px;
+            color: white;
+        }
+
+        .btn-Cancel {
+            background-color: var(--danger);
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 6px;
+            color: white;
+        }
+
+        .btn-Cancel:hover {
+            background-color: var(--danger-light);
+            color: #212529;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 35px;
+        }
+
+        .btn:hover,
+        .btn-Add:hover {
+            background-color: var(--primary-light);
+        }
+
+        #app {
+            background-color: var(--background);
+            white-space: nowrap;
+        }
+
+        /* th:first-child {
+            border-left: 1px solid;
+        } */
+
+        tr {
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        tr:hover {
+            background-color: #afd1f8;
+            text-decoration: underline;
+        }
+
+        th {
+            border: 0px;
+        }
+
+        td:first-child {
+            text-align: left;
+        }
+
+        td {
+            /* border-right: 1px solid;
+            border-bottom: 1px solid; */
+            text-align: center;
+        }
+
+        #app {
+            /* width: fit-content; */
+            width: 700px;
+
+        }
+
+        .colDesc {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 150px;
+        }
+
+        .colDesc:hover {
+            color: #e63946;
+        }
+
+        @media only screen and (max-width: 400px) {
+            /* #app {
+                font-size: 14px;
+            } */
+        }
+
+        @media only screen and (max-width: 700px) {
+            #app {
+                width: 100%;
+            }
+
+            .esconder {
+                display: none;
+            }
+
+            .colDesc {
+                width: 100px;
+            }
+
+            #mdlNovo {
+                margin: 50px auto;
+            }
+
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        dialog::backdrop {
+            background: black;
+            opacity: 0.9;
+        }
+
+
+        button {
+            cursor: pointer;
+        }
+
+        #app {
+            margin: auto;
+            box-shadow: 0 8px 16px rgb(137 125 125 / 90%);
+
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0px;
+            line-height: 1.6;
+
+        }
+
+        h1 {
+            text-align: center;
+            padding: 5px;
+            border-bottom: 2px solid;
+            text-transform: uppercase;
+            font-size: x-large;
+            background-color: var(--primary);
+            color: white;
+            margin: 0px;
+            font-size: larger;
+        }
+
+        label {
+            font-weight: bolder;
+        }
+
+        #resultados {
+            /* background: blue; */
+            background: var(--background);
+            display: flex;
+            justify-content: center;
+        }
+
+        .painel {
+            padding: 0px 10px;
+            border-bottom: 2px solid;
+            background: var(--background);
+            /* margin-bottom: 10px; */
+        }
+
+        .linhaPainel,
+        .linhaPainel2 {
+            display: flex;
+            justify-content: space-between;
+            /* width: 65%; */
+            margin: 0 auto;
+            padding: 5px;
+        }
+
+        .linhaPainel2 {
+            padding: 2px;
+        }
+
+        .cls {
+            display: flex;
+            width: 40%;
+            justify-content: space-between;
+        }
+
+        .inp {
+            background: white;
+            /* width: -webkit-fill-available; */
+            width: 150px;
+            text-align: center;
+            margin: 0 5px;
+            border: 1px solid;
+            font-weight: bolder;
+        }
+
+        .painelItens {
+            height: 200px;
+            overflow: hidden;
+            overflow-y: overlay;
+        }
+
+        .linhaPainelItens {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .coluna {
+            border-left: solid 1px black;
+            border-bottom: solid 1px black;
+            padding: 5px;
+            display: inline-table;
+        }
+
+        button {
+            cursor: pointer;
+            border-radius: 5px;
+            border: 1px solid gray;
+            font-weight: bold;
+            background: white;
+            line-height: 16px;
+        }
+
+        .titulo {
+            text-align: center;
+        }
+
+
+        .modal {
+            display: inline-table;
+            background: white;
+            text-align: left;
+        }
+
+
+
+
+        .linha {
+            padding-bottom: 5px;
+        }
+
+        .lista {
+            display: flex;
+            justify-content: space-evenly;
+            border-bottom: 1px solid;
+        }
+
+        .lista>span {
+
+            color: #ffffff;
+            border: 1px solid;
+            padding: 2px 5px;
+            border-radius: 5px;
+            background: #2a9d8f;
+            font-weight: 500;
+            margin-bottom: 3px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <div id="app">
+
+        <div class="5">
+            <div id="parametros">
+                <h1>exemplos</h1>
+                <div class="lista">
+                    <a href="index.html">voltar</a>
+                    <span v-on:click="lerStorage(0)">brigadeiros</span>
+                    <span v-on:click="lerStorage(1)">bolos</span>
+                </div>
+                <div class="painel">
+                    <div class="linhaPainel">
+                        <label>Tipo:</label>
+                        <div class="cls">
+                            <select v-model="tipo" disabled
+                                style="width:  -webkit-fill-available; font-weight: bold; text-align: center;">
+                                <option value="Kg">Kilogramas</option>
+                                <option value="Und." selected>Unidades</option>
+                                <option value="L">Litros</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="linhaPainel">
+                        <label>Qtd. ({{tipo}}) produzida:</label>
+                        <div class="cls">
+                            <button class="btn">-</button>
+                            <div class="inp">
+                                {{qtdProduzida}} {{tipo}}
+                            </div>
+
+                            <button class="btn">+</button>
+                        </div>
+                    </div>
+                    <div class="linhaPainel">
+                        <label>Qtd. ({{tipo}}) por emb.: </label>
+                        <div class="cls">
+                            <button class="btn">-</button>
+
+                            <div class="inp">
+                                {{qtdPorEmbalagem}} {{tipo}}
+                            </div>
+                            <button class="btn">+</button>
+                        </div>
+                    </div>
+                    <div class="linhaPainel">
+                        <label>Percentual de Lucro: </label>
+
+                        <div class="cls">
+                            <button class="btn">-</button>
+                            <div class="inp">
+                                {{percentualLucro}} %
+                            </div>
+                            <button class="btn">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="resultados">
+                <div class="painel">
+                    <div class="linhaPainel2">
+                        <label>Custo Total: &nbsp;</label> R$ {{ custoTotal.toFixed(2) }}
+                    </div>
+                    <div class="linhaPainel2">
+                        <label>Valor Final(+Lucro: {{percentualLucro.toFixed(1)}}%): &nbsp;</label> R$ {{
+                        valorFinal.toFixed(2) }}
+                    </div>
+                    <div class="linhaPainel2">
+                        <label>Valor por {{tipo}}: &nbsp;</label>R$ {{ valorPorUnidade.toFixed(2) }}
+                    </div>
+                    <div class="linhaPainel2">
+                        <label>Valor por Embalagem: &nbsp;</label>R$ {{valorPorEmbalagem.toFixed(2) }}
+                    </div>
+                </div>
+            </div>
+            <div id="itens">
+                <div class="painel">
+                    <div class="linhaPainel">
+                        <button class="btn-Add">Adicionar Item</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="pnlItens" class="painelItens" v-bind:style="{ 'height': altura + 'px' }">
+
+            <table style="width: -webkit-fill-available;">
+                <tr id="trHeader" class="headerTable">
+                    <th style="width:20%;">
+                        Item({{itens.length}})
+                    </th>
+                    <th class="esconder">
+                        Preço pago
+                    </th>
+                    <th class="esconder">
+                        qtd (Emb.)
+                    </th>
+                    <th>
+                        Preço cal.
+                    </th>
+                    <th>qtd Usada
+                    </th>
+                    <th>
+                        Custo
+                    </th>
+                </tr>
+
+                <tr v-for="(item,index) in itens" style="font-weight: lighter;">
+                    <td>
+                        <div class="colDesc" v-on:click="Editar(item,index)">
+                            <label>{{index+1}}: </label><label>{{item.descricao}}</label>
+                        </div>
+                    </td>
+                    <td class="esconder">
+                        <label class="esconder">R$ </label><label>{{parseFloat(item.precoCheio).toFixed(2)}}</label>
+                    </td>
+                    <td class="esconder">
+                        <label>{{item.qtdDaUnidade}} {{item.tipo}}</label>
+                    </td>
+                    <td>
+                        <label class="esconder">R$ </label><label>{{
+                            parseFloat(item.precoCheio/item.qtdDaUnidade).toFixed(2)}}
+                            ({{item.tipo}})</label>
+                    </td>
+                    <td>
+                        <label>{{item.qtdUsada}} {{item.tipo}}</label>
+                    </td>
+                    <td style="display: flex; justify-content: space-between;">
+                        <div>
+                            <label class="esconder">R$
+                            </label><label>{{parseFloat((item.precoCheio/item.qtdDaUnidade)*item.qtdUsada).toFixed(2)}}</label>
+                        </div>
+                        <div>
+                            <button class="btnRemove">+</button>
+                        </div>
+                    </td>
+                </tr>
+
+
+
+            </table>
+        </div>
+
+        <dialog id="mdlNovo">
+            <form name="frm">
+                <div class="modal">
+                    <div class="linha" style="justify-content: center;">
+                        <H1>Novo Item</H1>
+                    </div>
+                    <div class="linha" style="display: flex; justify-content: space-between;">
+                        <label>Tipo:</label>
+
+                        <select name="frmSlc" v-model="itemEdit.tipo" disabled
+                            style="width: 115px; font-weight: bold; text-align: center;">
+                            <option value="Kg">Kilograma</option>
+                            <option value="Und." selected>Unidades</option>
+                            <option value="L">Litros</option>
+                            <option value="Hr">Horas</option>
+                        </select>
+
+                    </div>
+                    <div class="linha" style="display: flex; justify-content: space-between;">
+                        <label>Item</label>
+                        <input name="frmDesc" maxlength="30" minlength="5" disabled v-model="itemEdit.descricao"
+                            required placeholder="Digite a descrição do item" type="text">
+                    </div>
+                    <div class="linha" style="display: flex; justify-content: space-between;">
+                        <label>Preço pago: </label>
+                        <input name="frmPreco" placeholder="0.00" step="0.010" min="0.010" disabled required
+                            v-model="itemEdit.precoCheio" type="number">
+                    </div>
+                    <div class="linha" style="display: flex; justify-content: space-between;">
+                        <label>Qtd. comprada: </label>
+                        <input name="frmQtdPg" placeholder="0.00" step="0.010" min="0.010" disabled
+                            v-model="itemEdit.qtdDaUnidade" required type="number">
+                    </div>
+                    <div class="linha" style="display: flex; justify-content: space-between;">
+                        <label>Qtd. usada: </label>
+                        <input name="frmQtdUsd" placeholder="0.00" step="0.010" min="0.010" disabled
+                            v-model="itemEdit.qtdUsada" required type="number">
+                    </div>
+
+                    <div class="linha" style="justify-content: space-evenly; display: flex; padding: 10px;">
+                        <button class="btn-Cancel" v-on:click="fecharModal()">
+                            Cancelar
+                        </button>
+
+                        <button class="btn-Add" v-on:click="gravarItem()">Gravar</button>
+                    </div>
+                </div>
+
+                <div class="linha">
+
+                </div>
+            </form>
+        </dialog>
+    </div>
+
+    <script>
+        var obj = new Vue({
+            el: '#app',
+            data: {
+                message: 'Hello Vue!',
+                tipo: 'Und.',
+                qtdProduzida: 1,
+                qtdPorEmbalagem: 1,
+                percentualLucro: 0,
+                valorFinal: 0,
+                custoTotal: 0,
+                valorPorUnidade: 0,
+                valorPorEmbalagem: 0,
+                indexEdit: -1,
+
+                altura: document.documentElement.clientHeight,
+
+                itemEdit: {
+                    descricao: '',
+                    tipo: 'Und.',
+                    precoCheio: 0.0,
+                    qtdDaUnidade: 0.0,
+                    qtdUsada: 0.0,
+                },
+                itens: [
+                ],
+
+                exemplos:
+                    [
+                        {
+                            tipo: "Und.",
+                            qtdProduzida: 40,
+                            qtdPorEmbalagem: 4,
+                            percentualLucro: 30.5,
+                            itens: [
+                                {
+                                    descricao: "Leite condensado",
+                                    tipo: "Und.",
+                                    precoCheio: 5.49,
+                                    qtdDaUnidade: 1,
+                                    qtdUsada: 1
+                                },
+                                {
+                                    descricao: "Creme de Leite",
+                                    tipo: "Und.",
+                                    precoCheio: 3.79,
+                                    qtdDaUnidade: 1,
+                                    qtdUsada: 1
+                                },
+                                {
+                                    descricao: "Chocolate em pó",
+                                    tipo: "Kg",
+                                    precoCheio: 35.25,
+                                    qtdDaUnidade: 2.5,
+                                    qtdUsada: 0.15
+                                },
+                                {
+                                    descricao: "Gás",
+                                    tipo: "Hr",
+                                    precoCheio: 110,
+                                    qtdDaUnidade: 40,
+                                    qtdUsada: 1
+                                },
+                                {
+                                    descricao: "Caixa",
+                                    tipo: "Und.",
+                                    precoCheio: 36,
+                                    qtdDaUnidade: 100,
+                                    qtdUsada: 10
+                                },
+                                {
+                                    descricao: "Salário",
+                                    tipo: "Hr",
+                                    precoCheio: 1500,
+                                    qtdDaUnidade: 220,
+                                    qtdUsada: 1
+                                },
+                                {
+                                    descricao: "Granulado",
+                                    tipo: "Kg",
+                                    precoCheio: 20.9,
+                                    qtdDaUnidade: 0.5,
+                                    qtdUsada: 0.25
+                                }
+                            ]
+                        },
+
+                        {
+                            tipo: "Kg",
+                            qtdProduzida: 1.00,
+                            qtdPorEmbalagem: 0.200,
+                            percentualLucro: 59.5,
+                            itens: [
+                                {
+                                    descricao: "Farinha de trigo",
+                                    tipo: "Kg",
+                                    precoCheio: 5.49,
+                                    qtdDaUnidade: 1,
+                                    qtdUsada: 1
+                                },
+                                {
+                                    descricao: "Ovos",
+                                    tipo: "Und.",
+                                    precoCheio: 20,
+                                    qtdDaUnidade: 24.99,
+                                    qtdUsada: 4
+                                },
+                                {
+                                    descricao: "Chocolate em pó",
+                                    tipo: "Kg",
+                                    precoCheio: 35.25,
+                                    qtdDaUnidade: 2.5,
+                                    qtdUsada: 0.15
+                                },
+                                {
+                                    descricao: "Margarina",
+                                    tipo: "Kg",
+                                    precoCheio: 4.6,
+                                    qtdDaUnidade: 0.5,
+                                    qtdUsada: 0.1
+                                },
+                                {
+                                    descricao: "Fermento",
+                                    tipo: "Kg",
+                                    precoCheio: 4.99,
+                                    qtdDaUnidade: 0.1,
+                                    qtdUsada: 0.01
+                                },
+                                {
+                                    descricao: "Leite Condensado",
+                                    tipo: "Und.",
+                                    precoCheio: 4.98,
+                                    qtdDaUnidade: 1,
+                                    qtdUsada: 1
+                                }, {
+                                    descricao: "Leite",
+                                    tipo: "L",
+                                    precoCheio: 5.25,
+                                    qtdDaUnidade: 1,
+                                    qtdUsada: 0.3
+                                }, {
+                                    descricao: "Gás",
+                                    tipo: "Hr",
+                                    precoCheio: 110,
+                                    qtdDaUnidade: 40,
+                                    qtdUsada: 1
+                                },
+                                {
+                                    descricao: "Salário",
+                                    tipo: "Hr",
+                                    precoCheio: 1500,
+                                    qtdDaUnidade: 220,
+                                    qtdUsada: 1
+                                },
+                                {
+                                    descricao: "Embalagens",
+                                    tipo: "Und.",
+                                    precoCheio: 60,
+                                    qtdDaUnidade: 100,
+                                    qtdUsada: 5
+                                }
+                            ]
+                        }
+                    ],
+
+            },
+            methods: {
+                Editar: function (item, index) {
+                    this.itemEdit = Vue.util.extend({}, item);
+                    this.indexEdit = index;
+                    mdlNovo.showModal();
+                },
+
+                totaliza: function () {
+
+                    const total = this.itens.reduce((soma, item) => {
+                        return soma + parseFloat(((item.precoCheio / item.qtdDaUnidade) * item.qtdUsada).toFixed(2));
+                    }, 0);
+
+                    this.custoTotal = total;
+                    this.valorFinal = parseFloat((total * (1 + (this.percentualLucro / 100))).toFixed(2));
+                    this.valorPorUnidade = parseFloat((this.valorFinal / this.qtdProduzida).toFixed(2));
+                    this.valorPorEmbalagem = parseFloat((this.qtdPorEmbalagem * this.valorPorUnidade).toFixed(2));
+
+
+
+                },
+                AbrirModal: function () {
+                    this.indexEdit = -1;
+                    this.itemEdit.descricao = '';
+                    this.itemEdit.tipo = 'Und.';
+                    this.itemEdit.precoCheio = null;
+                    this.itemEdit.qtdDaUnidade = null;
+                    this.itemEdit.qtdUsada = null;
+                    mdlNovo.showModal();
+                },
+                fecharModal: function () {
+                    this.itemEdit.descricao = '';
+                    this.itemEdit.tipo = 'Und.';
+                    this.itemEdit.precoCheio = null;
+                    this.itemEdit.qtdDaUnidade = null;
+                    this.itemEdit.qtdUsada = null;
+
+                    this.indexEdit = -1;
+
+                    mdlNovo.close();
+                },
+                gravarItem: function () {
+
+                    this.fecharModal();
+
+                }
+                , posiciona: function () {
+                    const l = document.documentElement.clientHeight;
+
+                    const k = document.getElementById('trHeader');
+
+                    this.altura = l - k.getBoundingClientRect().top;
+
+                },
+                lerStorage: function (idx) {
+
+                    const k = this.exemplos[idx];
+
+                    this.itens = k.itens;
+
+                    this.tipo = k.tipo;
+                    this.qtdProduzida = k.qtdProduzida;
+                    this.qtdPorEmbalagem = k.qtdPorEmbalagem;
+                    this.percentualLucro = k.percentualLucro;
+
+
+                    this.totaliza()
+                },
+            },
+            mounted() {
+                this.lerStorage(0);
+                this.posiciona();
+            },
+            watch: {
+
+            }
+        });
+
+
+
+
+
+
+
+    </script>
+
+</body>
+
+</html>
