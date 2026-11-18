@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Gestão de Cartões de Crédito</title>
 <style>
-:root{--bg:#f6f7f9;--sf:#fff;--tx:#1b1f24;--mu:#667085;--bd:#e3e6ea;--ac:#4f46e5;--ac2:#eef0ff;--ok:#15803d;--dg:#b42318;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111418;--sf:#1a1f26;--tx:#e8ebef;--mu:#98a2b3;--bd:#2b323c;--ac:#8b85ff;--ac2:#242a45;--ok:#4ade80;--dg:#f87171;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#111418;--sf:#1a1f26;--tx:#e8ebef;--mu:#98a2b3;--bd:#2b323c;--ac:#8b85ff;--ac2:#242a45;--ok:#4ade80;--dg:#f87171;color-scheme:dark}
+:root{--bg:#e8ebf0;--sf:#fff;--tx:#1b1f24;--mu:#667085;--bd:#cdd3dc;--ac:#4f46e5;--ac2:#eef0ff;--ok:#15803d;--dg:#b42318;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b0d11;--sf:#1a1f26;--tx:#e8ebef;--mu:#98a2b3;--bd:#2b323c;--ac:#8b85ff;--ac2:#242a45;--ok:#4ade80;--dg:#f87171;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b0d11;--sf:#1a1f26;--tx:#e8ebef;--mu:#98a2b3;--bd:#2b323c;--ac:#8b85ff;--ac2:#242a45;--ok:#4ade80;--dg:#f87171;color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 .wrap{max-width:980px;margin:0 auto;padding:20px 16px 48px}
@@ -27,7 +27,7 @@ h2{font-size:16px;margin:0 0 10px}
 .kpi.main{background:var(--ac);border-color:var(--ac);color:#fff}
 .kpi.main small{color:#e0e0ff}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
-.card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:14px 16px}
+.card{background:var(--sf);border:1px solid var(--bd);border-left:4px solid var(--ac);border-radius:12px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.18)}
 .card.sel{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac2)}
 .card h3{margin:0;font-size:16px;display:flex;justify-content:space-between;gap:8px}
 .open{font-size:24px;font-weight:700;margin:6px 0}
@@ -54,10 +54,19 @@ input:read-only{opacity:.7}
 .radios{display:flex;gap:16px}
 .radios label{display:flex;align-items:center;gap:6px;color:var(--tx);margin:4px 0}
 .radios input{width:auto}
-.acts{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.acts{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:16px}
 .hint{font-size:12px;color:var(--mu);margin-top:4px}
 .mes{align-items:center}.mes input{width:auto}
 .btn:disabled{opacity:.5;cursor:not-allowed}.btn:disabled:hover{border-color:var(--bd)}
+.tw{position:relative}
+.tbl{-webkit-overflow-scrolling:touch}
+.tw::before,.tw::after{content:"";position:absolute;top:0;bottom:0;width:32px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:1}
+.tw::before{left:0;background:linear-gradient(to right,var(--sf),transparent)}
+.tw::after{right:0;background:linear-gradient(to left,var(--sf),transparent)}
+.tw.cl::before,.tw.cr::after{opacity:1}
+.sb{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;padding:0;border-radius:50%;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-size:22px;line-height:1;cursor:pointer;box-shadow:0 1px 5px rgba(0,0,0,.35);display:none;z-index:2}
+.sl{left:2px}.sr{right:2px}
+.tw.cl .sl,.tw.cr .sr{display:block}
 </style>
 </head>
 <body>
@@ -73,9 +82,11 @@ input:read-only{opacity:.7}
     </div>
   </header>
 
+  <div id="backRow" style="margin-bottom:12px"></div>
   <section class="total" id="totals"></section>
   <section class="grid" id="cards"></section>
   <section id="detail"></section>
+  <div id="arqBar" style="margin-top:28px;text-align:center"></div>
 </div>
 
 <dialog id="dCard"><form method="dialog" onsubmit="return false">
@@ -115,16 +126,16 @@ input:read-only{opacity:.7}
 
 <dialog id="dAsk"><form method="dialog" onsubmit="return false">
   <h2 id="aTit">Atenção</h2>
-  <p id="aTxt" style="margin:0 0 4px"></p>
+  <p id="aTxt" style="margin:0 0 4px;white-space:pre-line"></p>
   <input id="aIn" type="number" min="1" max="31" hidden>
-  <div class="acts"><button class="btn" id="aNo">Cancelar</button><button class="btn pri" id="aYes">Confirmar</button></div>
+  <div class="acts"><button class="btn" id="aNo">Cancelar</button><button class="btn" id="aMid" hidden></button><button class="btn pri" id="aYes">Confirmar</button></div>
 </form></dialog>
 
 <script>
 (function(){
 var KEY="gestao-cartoes-v1", mem=null;
 var S={cards:[],entries:[],payments:[],sel:null};
-function load(){try{var r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r));}catch(e){if(mem)S=mem;}S.mes=nowM();}
+function load(){try{var r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r));}catch(e){if(mem)S=mem;}S.mes=nowM();S.verArq=false;S.sel=null;}
 function save(){mem=S;try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 var $=function(id){return document.getElementById(id)};
 var brl=new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"});
@@ -149,8 +160,10 @@ function stats(cid,m){
 
 function render(){
   $("mSel").value=S.mes;
-  var sc=S.sel?S.cards.filter(function(c){return c.id===S.sel}):S.cards;
-  if(S.sel&&!sc.length){S.sel=null;sc=S.cards;}
+  $("backRow").innerHTML=S.sel?'<button class="btn" data-a="back">← Voltar</button>':(S.verArq?'<h2>Cartões arquivados</h2>':'');
+  var pool=S.cards.filter(function(c){return !!c.arq===!!S.verArq});
+  var sc=S.sel?S.cards.filter(function(c){return c.id===S.sel}):pool;
+  if(S.sel&&!sc.length){S.sel=null;sc=pool;}
   var pm=0,pg=0,ap=0,ab=0;
   sc.forEach(function(c){var s=stats(c.id);pm+=s.mes;pg+=s.pagoMes;ap+=s.apagar;ab+=s.aberto;});
   $("totals").innerHTML=
@@ -158,7 +171,9 @@ function render(){
     '<div class="kpi"><small>Parcelas do mês</small><b>'+brl.format(pm)+'</b></div>'+
     '<div class="kpi"><small>Pago no mês</small><b>'+brl.format(pg)+'</b></div>'+
     (S.sel?'<div class="kpi"><small>Total em aberto do cartão</small><b>'+brl.format(ab)+'</b></div>':'');
-  if(!S.cards.length){$("cards").innerHTML='<div class="empty" style="grid-column:1/-1">Nenhum cartão cadastrado. Clique em “+ Cartão” para começar.</div>';}
+  if(S.verArq&&!S.sel)$("totals").innerHTML="";
+  if(S.verArq&&!sc.length){$("cards").innerHTML='<div class="empty" style="grid-column:1/-1">Nenhum cartão arquivado.</div>';}
+  else if(!sc.length){$("cards").innerHTML='<div class="empty" style="grid-column:1/-1">Nenhum cartão cadastrado. Clique em “+ Cartão” para começar.</div>';}
   else $("cards").innerHTML=sc.map(function(c){
     var s=stats(c.id),pc=s.mes?Math.min(100,s.pagoMes/s.mes*100):(s.pagoMes?100:0);
     return '<div class="card'+(S.sel===c.id?' sel':'')+'"><h3><span>'+esc(c.nome)+(c.final?' <span class="muted">•••• '+esc(c.final)+'</span>':'')+'</span></h3>'+
@@ -167,19 +182,36 @@ function render(){
       '<div class="bar"><i style="width:'+pc+'%"></i></div>'+
       '<div class="meta"><span>Parcelas: '+brl.format(s.mes)+'</span><span>Pago: '+brl.format(s.pagoMes)+'</span></div>'+
       
-      '<div class="row"><button class="btn sm" data-a="entry" data-id="'+c.id+'">+ Lançar</button>'+
-      '<button class="btn sm" data-a="pay" data-id="'+c.id+'"'+(s.mes===0?' disabled title="Sem parcela no mês selecionado"':'')+'>Pagar</button>'+
-      '<button class="btn sm" data-a="det" data-id="'+c.id+'">'+(S.sel===c.id?'← Todos os cartões':'Detalhes')+'</button></div></div>';
+      '<div class="row">'+(c.arq?'':'<button class="btn sm" data-a="entry" data-id="'+c.id+'">+ Lançar</button>')+
+      (c.arq?'':'<button class="btn sm" data-a="pay" data-id="'+c.id+'"'+(s.mes===0?' disabled title="Sem parcela no mês selecionado"':'')+'>Pagar</button>')+
+      '<button class="btn sm" data-a="det" data-id="'+c.id+'">'+(S.sel===c.id?'Fechar':'Detalhes')+'</button>'+(c.arq?'<button class="btn sm" data-a="unarq" data-id="'+c.id+'">Desarquivar</button>':'')+'</div></div>';
   }).join("");
   renderDetail();
+  var na=S.cards.filter(function(c){return c.arq}).length;
+  $("arqBar").innerHTML=(S.sel||(!na&&!S.verArq))?"":(S.verArq?'<button class="btn" data-a="verarq">← Voltar aos cartões ativos</button>':'<button class="btn" data-a="verarq">Ver cartões arquivados ('+na+')</button>');
 }
 
+function setupScroll(){
+  document.querySelectorAll("#detail .tbl").forEach(function(t){
+    var w=document.createElement("div");w.className="tw";
+    t.parentNode.insertBefore(w,t);w.appendChild(t);
+    var l=document.createElement("button"),r=document.createElement("button");
+    l.className="sb sl";r.className="sb sr";l.textContent="‹";r.textContent="›";
+    l.setAttribute("aria-label","Rolar para a esquerda");r.setAttribute("aria-label","Rolar para a direita");
+    l.onclick=function(){t.scrollBy({left:-180,behavior:"smooth"})};
+    r.onclick=function(){t.scrollBy({left:180,behavior:"smooth"})};
+    w.appendChild(l);w.appendChild(r);
+    t._u=function(){var m=t.scrollWidth-t.clientWidth;w.classList.toggle("cl",t.scrollLeft>2);w.classList.toggle("cr",m>2&&t.scrollLeft<m-2);};
+    t.addEventListener("scroll",t._u);t._u();setTimeout(t._u,60);
+  });
+}
+window.addEventListener("resize",function(){document.querySelectorAll("#detail .tbl").forEach(function(t){if(t._u)t._u()})});
 function renderDetail(){
   var c=S.cards.filter(function(x){return x.id===S.sel})[0];
   if(!c){$("detail").innerHTML="";return;}
   var es=S.entries.filter(function(e){var k=mIdx(S.mes)-mIdx(e.inicio);return e.cardId===c.id&&k>=0&&k<e.qtd});
   var ps=S.payments.filter(function(x){return x.cardId===c.id&&refOf(x)===S.mes}).sort(function(a,b){return b.data.localeCompare(a.data)});
-  var h='<div class="panel"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">'+esc(c.nome)+'</h2><span class="row"><button class="btn sm" data-a="due" data-id="'+c.id+'">Alterar vencimento</button><button class="btn sm del" data-a="delcard" data-id="'+c.id+'">Excluir cartão</button></span></div>';
+  var h='<div class="panel"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0">'+esc(c.nome)+'</h2><span class="row"><button class="btn sm" data-a="due" data-id="'+c.id+'">Alterar vencimento</button><button class="btn sm" data-a="'+(c.arq?'unarq':'arq')+'" data-id="'+c.id+'">'+(c.arq?'Desarquivar':'Arquivar')+'</button><button class="btn sm del" data-a="delcard" data-id="'+c.id+'">Excluir cartão</button></span></div>';
   h+='<h2>Lançamentos de '+mFmt(mIdx(S.mes))+'</h2>';
   if(!es.length)h+='<div class="empty">Sem lançamentos neste cartão em '+mFmt(mIdx(S.mes))+'.</div>';
   else h+='<div class="tbl"><table><tr><th>Descrição</th><th class="r">Parcela</th><th class="r">Parcelas</th><th>Início</th><th>Fim</th><th class="r">No mês</th><th class="r">Total</th><th></th></tr>'+
@@ -190,15 +222,15 @@ function renderDetail(){
   else h+='<div class="tbl"><table><tr><th>Data</th><th>Ref.</th><th>Tipo</th><th class="r">Valor</th><th>Obs.</th><th></th></tr>'+
     ps.map(function(x){var d=x.data.split("-").reverse().join("/");
       return '<tr><td>'+d+'</td><td>'+mFmt(mIdx(refOf(x)))+'</td><td><span class="tag'+(x.tipo==="total"?' t':'')+'">'+(x.tipo==="total"?'Total':'Parcial')+'</span></td><td class="r">'+brl.format(x.valor)+'</td><td>'+esc(x.obs||"")+'</td><td><button class="btn sm del" data-a="delp" data-id="'+x.id+'">Excluir</button></td></tr>';}).join("")+'</table></div>';
-  $("detail").innerHTML=h+'</div>';
+  $("detail").innerHTML=h+'</div>';setupScroll();
 }
 
 function fillSelects(sel){
-  var o=S.cards.map(function(c){return '<option value="'+c.id+'">'+esc(c.nome)+'</option>'}).join("");
+  var o=S.cards.filter(function(c){return !c.arq}).map(function(c){return '<option value="'+c.id+'">'+esc(c.nome)+'</option>'}).join("");
   $("eCard").innerHTML=o;$("pCard").innerHTML=o;
   if(sel){$("eCard").value=sel;$("pCard").value=sel;}
 }
-function needCard(){if(!S.cards.length){msg("Cadastre um cartão primeiro.");return false}return true}
+function needCard(){if(!S.cards.some(function(c){return !c.arq})){msg("Cadastre um cartão primeiro.");return false}return true}
 
 function openCard(){$("cName").value="";$("cLast").value="";$("cDue").value="";$("dCard").showModal();$("cName").focus();}
 function openEntry(id){if(!needCard())return;fillSelects(id||S.sel);$("eDesc").value="";$("eVal").value="";$("eQtd").value=1;$("eIni").value=S.mes;sumE();$("dEntry").showModal();}
@@ -249,27 +281,54 @@ document.addEventListener("click",function(e){
   if(a==="entry")openEntry(id);
   else if(a==="pay")openPay(id);
   else if(a==="det"){S.sel=S.sel===id?null:id;render();window.scrollTo(0,0);}
+  else if(a==="back"){S.sel=null;render();window.scrollTo(0,0);}
+  else if(a==="verarq"){S.verArq=!S.verArq;S.sel=null;render();window.scrollTo(0,0);}
+  else if(a==="arq"){ask("Arquivar este cartão? Ele sai da tela principal e dos totais, mas lançamentos e pagamentos são mantidos.",function(){S.cards.forEach(function(x){if(x.id===id)x.arq=true;});S.sel=null;save();render();window.scrollTo(0,0);},{ok:"Arquivar",title:"Arquivar cartão"});}
+  else if(a==="unarq"){S.cards.forEach(function(x){if(x.id===id)x.arq=false;});S.sel=null;S.verArq=S.cards.some(function(x){return x.arq});save();render();}
   else if(a==="due"){var c=S.cards.filter(function(x){return x.id===id})[0];ask("Dia de vencimento do cartão (1 a 31):",function(val){var v=parseInt(val,10);if(v>=1&&v<=31){c.venc=v;save();render();}else msg("Informe um dia entre 1 e 31.");},{input:true,value:c.venc||"",title:"Alterar vencimento",ok:"Salvar"});}
-  else if(a==="dele"){ask("Excluir este lançamento?",function(){S.entries=S.entries.filter(function(x){return x.id!==id});save();render();},{ok:"Excluir"});}
-  else if(a==="delp"){ask("Excluir este pagamento?",function(){S.payments=S.payments.filter(function(x){return x.id!==id});save();render();},{ok:"Excluir"});}
-  else if(a==="delcard"){ask("Excluir o cartão e todos os seus lançamentos e pagamentos?",function(){
+  else if(a==="dele"){ask(delMsg(id)+"\n\n"+txtEntry(S.entries.filter(function(x){return x.id===id})[0])+"\n\nEsta ação não pode ser desfeita.",function(){S.entries=S.entries.filter(function(x){return x.id!==id});save();render();},delOpts(id));}
+  else if(a==="delp"){ask("Excluir este pagamento?\n\n"+txtPay(S.payments.filter(function(x){return x.id===id})[0])+"\n\nEsta ação não pode ser desfeita.",function(){S.payments=S.payments.filter(function(x){return x.id!==id});save();render();},{ok:"Excluir"});}
+  else if(a==="delcard"){ask("Excluir este cartão e todos os seus lançamentos e pagamentos?\n\n"+txtCard(cardOf(id))+"\n\nEsta ação não pode ser desfeita.",function(){
     S.cards=S.cards.filter(function(x){return x.id!==id});
     S.entries=S.entries.filter(function(x){return x.cardId!==id});
     S.payments=S.payments.filter(function(x){return x.cardId!==id});
     S.sel=null;save();render();},{ok:"Excluir"});}
 });
 
-var askYes=null;
+var askYes=null,askMid=null;
 function ask(txt,yes,o){o=o||{};
   $("aTit").textContent=o.title||"Atenção";
   $("aTxt").textContent=txt;
   $("aIn").hidden=!o.input;if(o.input)$("aIn").value=o.value||"";
-  $("aNo").hidden=!!o.info;
+  $("aNo").hidden=!!o.info;$("aMid").hidden=!o.mid;if(o.mid){$("aMid").textContent=o.mid;askMid=o.alt||null;}
   $("aYes").textContent=o.ok||(o.info?"OK":"Confirmar");
   askYes=yes||null;$("dAsk").showModal();if(o.input)$("aIn").focus();
 }
 function msg(t){ask(t,null,{info:true})}
+function cardOf(id){return S.cards.filter(function(x){return x.id===id})[0]}
+function mStr(i){return Math.floor(i/12)+"-"+String(i%12+1).padStart(2,"0")}
+function entOf(id){return S.entries.filter(function(x){return x.id===id})[0]}
+function delMsg(id){var e=entOf(id);return e&&e.qtd>1?"Este lançamento tem "+e.qtd+" parcelas. Excluir somente a parcela de "+mFmt(mIdx(S.mes))+" ou todas as parcelas?":"Excluir este lançamento?"}
+function delOpts(id){var e=entOf(id);if(!e||e.qtd<2)return{ok:"Excluir"};
+  return{ok:"Todas as parcelas",mid:"Só esta parcela ("+mFmt(mIdx(S.mes))+")",alt:function(){delParcela(id)}};}
+function delParcela(id){
+  var e=entOf(id);if(!e)return;
+  var s=mIdx(e.inicio),k=mIdx(S.mes)-s,q=e.qtd;
+  if(k<0||k>=q)return;
+  var rest=q-k-1;
+  if(k===0){e.inicio=mStr(s+1);e.qtd=rest;}
+  else{e.qtd=k;if(rest>0)S.entries.push({id:uid(),cardId:e.cardId,desc:e.desc,valor:e.valor,qtd:rest,inicio:mStr(s+k+1)});}
+  if(e.qtd<1)S.entries=S.entries.filter(function(x){return x!==e});
+  save();render();
+}
+function txtEntry(e){if(!e)return "";var c=cardOf(e.cardId),s=mIdx(e.inicio);
+  return "Cartão: "+(c?c.nome:"—")+"\nDescrição: "+e.desc+"\nParcela: "+brl.format(e.valor)+" x "+e.qtd+" = "+brl.format(r2(e.valor*e.qtd))+"\nCobrança: "+mFmt(s)+" a "+mFmt(s+e.qtd-1);}
+function txtPay(x){if(!x)return "";var c=cardOf(x.cardId);
+  return "Cartão: "+(c?c.nome:"—")+"\nValor: "+brl.format(x.valor)+" ("+(x.tipo==="total"?"total":"parcial")+")\nData: "+x.data.split("-").reverse().join("/")+"\nMês de referência: "+mFmt(mIdx(refOf(x)))+(x.obs?"\nObs.: "+x.obs:"");}
+function txtCard(c){if(!c)return "";var s=stats(c.id),ne=S.entries.filter(function(e){return e.cardId===c.id}).length,np=S.payments.filter(function(x){return x.cardId===c.id}).length;
+  return "Cartão: "+c.nome+(c.final?" (•••• "+c.final+")":"")+(c.venc?"\nVencimento: dia "+c.venc:"")+"\nLançamentos: "+ne+" (total "+brl.format(s.lancado)+")\nPagamentos: "+np+" (total "+brl.format(s.pago)+")\nTotal em aberto: "+brl.format(s.aberto);}
 $("aNo").onclick=function(){$("dAsk").close()};
+$("aMid").onclick=function(){var f=askMid;$("dAsk").close();if(f)f();};
 $("aYes").onclick=function(){var f=askYes,v=$("aIn").value;$("dAsk").close();if(f)f(v);};
 $("aIn").onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();$("aYes").click();}};
 function shiftM(d){var i=mIdx(S.mes)+d;S.mes=Math.floor(i/12)+"-"+String(i%12+1).padStart(2,"0");render();}
