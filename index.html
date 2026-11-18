@@ -5,13 +5,293 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Whomakes Tools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light dark;
+            --bg: #eef1f6;
+            --surface: #ffffff;
+            --ink: #16213a;
+            --muted: #5b6785;
+            --line: #d8deea;
+            --focus: #2f5bff;
+
+            --listas: #2f5bff;
+            --listas-soft: #e3e9ff;
+            --tasks: #0f9d78;
+            --tasks-soft: #d9f3ea;
+            --prazos: #e8590c;
+            --prazos-soft: #ffe6d6;
+            --mapas: #8a3ffc;
+            --mapas-soft: #eddfff;
+            --conta: #d6336c;
+            --conta-soft: #fde1ec;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f1424;
+                --surface: #182038;
+                --ink: #eaeefb;
+                --muted: #9aa6c6;
+                --line: #2a3556;
+                --focus: #7b9bff;
+
+                --listas: #86a0ff;
+                --listas-soft: #232f5c;
+                --tasks: #4fd1a5;
+                --tasks-soft: #17413a;
+                --prazos: #ff9a5c;
+                --prazos-soft: #4a2c1a;
+                --mapas: #c19bff;
+                --mapas-soft: #35224f;
+                --conta: #ff7aa8;
+                --conta-soft: #4d2237;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        a:focus-visible {
+            outline: 3px solid var(--focus);
+            outline-offset: 3px;
+        }
+
+        .page {
+            width: min(1040px, 100% - 3rem);
+            margin-inline: auto;
+            padding-block: 1.5rem 4rem;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding-block: 0.5rem;
+        }
+
+        .brand {
+            font-weight: 800;
+            font-size: 1.125rem;
+            letter-spacing: -0.01em;
+        }
+
+
+        .hero {
+            padding-block: clamp(3rem, 9vw, 6.5rem) clamp(2.5rem, 6vw, 4rem);
+        }
+
+        .hero h1 {
+            font-size: clamp(2.75rem, 9vw, 6rem);
+            font-weight: 800;
+            line-height: 0.98;
+            letter-spacing: -0.04em;
+            max-width: 12ch;
+        }
+
+        .hero p {
+            margin-top: 1.5rem;
+            max-width: 46ch;
+            font-size: clamp(1.0625rem, 2vw, 1.25rem);
+            color: var(--muted);
+        }
+
+        .tools {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1.25rem;
+            list-style: none;
+            padding: 0;
+        }
+
+        .tools li { grid-column: span 2; }
+        .tools li:nth-child(n+4) { grid-column: span 3; }
+
+        .tool {
+            --c: var(--listas);
+            --c-soft: var(--listas-soft);
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: start;
+            gap: 1.25rem;
+            height: 100%;
+            padding: 1.75rem;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .tool:hover {
+            border-color: var(--c);
+            transform: translateY(-3px);
+        }
+
+        .tool-listas { --c: var(--listas); --c-soft: var(--listas-soft); }
+        .tool-tasks  { --c: var(--tasks);  --c-soft: var(--tasks-soft); }
+        .tool-prazos { --c: var(--prazos); --c-soft: var(--prazos-soft); }
+        .tool-mapas  { --c: var(--mapas);  --c-soft: var(--mapas-soft); }
+        .tool-conta  { --c: var(--conta);  --c-soft: var(--conta-soft); }
+
+        .icon {
+            display: grid;
+            place-items: center;
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: var(--c-soft);
+            color: var(--c);
+        }
+
+        .icon svg {
+            width: 28px;
+            height: 28px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .tool h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .tool p {
+            margin-top: 0.375rem;
+            color: var(--muted);
+        }
+
+        footer {
+            margin-top: 4rem;
+            color: var(--muted);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 860px) {
+            .tools li,
+            .tools li:nth-child(n+4) { grid-column: span 3; }
+            .tools li:last-child { grid-column: span 6; }
+        }
+
+        @media (max-width: 640px) {
+            .tools { grid-template-columns: 1fr; }
+            .tools li,
+            .tools li:nth-child(n+4),
+            .tools li:last-child { grid-column: auto; }
+            .tool { padding: 1.25rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { transition: none !important; }
+            html { scroll-behavior: auto; }
+        }
+    </style>
 </head>
 <body>
-    <H1> Whomakes Tools </H1>
-    <a href="./listas/index.html">Listas</a>
-     <a href="./tasks/index.html">Tasks</a>
-     <a href="./prazos/index.html">Tasks</a>
-     <a href="./account/index.html">Tasks</a>
-    <a href="./mapas/index.html">Mapas Mentais</a>
+    <div class="page">
+
+        <main>
+            <section class="hero">
+                <h1>Whomakes Tools</h1>
+                <p>Listas, tarefas, prazos e mapas mentais em um só lugar. Escolha uma ferramenta para começar.</p>
+            </section>
+
+            <nav aria-label="Ferramentas">
+                <ul class="tools">
+                    <li>
+                        <a class="tool tool-listas" href="./listas/index.html">
+                            <span class="icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>
+                            </span>
+                            <span>
+                                <h2>Listas</h2>
+                                <p>Crie e organize listas de qualquer assunto.</p>
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="tool tool-tasks" href="./tasks/index.html">
+                            <span class="icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="m8 12.5 3 3 5-6"/></svg>
+                            </span>
+                            <span>
+                                <h2>Tasks</h2>
+                                <p>Acompanhe o que já foi feito e o que falta fazer.</p>
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="tool tool-prazos" href="./prazos/index.html">
+                            <span class="icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+                            </span>
+                            <span>
+                                <h2>Prazos</h2>
+                                <p>Controle datas de entrega e não perca nenhum vencimento.</p>
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="tool tool-mapas" href="./mapas/index.html">
+                            <span class="icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="4.5" cy="5.5" r="1.8"/><circle cx="19.5" cy="5.5" r="1.8"/><circle cx="12" cy="20" r="1.8"/><path d="M10 10 6 6.8M14 10l4-3.2M12 15v3.2"/></svg>
+                            </span>
+                            <span>
+                                <h2>Mapas Mentais</h2>
+                                <p>Desenhe ideias e conecte pensamentos visualmente.</p>
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="tool tool-conta" href="./account/index.html">
+                            <span class="icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                            </span>
+                            <span>
+                                <h2>Conta</h2>
+                                <p>Consulte e gerencie os dados financeiros.</p>
+                            </span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="tool tool-listas" href="./CardManager/index.html">
+                            <span class="icon" aria-hidden="true">
+                                <svg width="576px" height="576px" viewBox="0 -32 576 576" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M527.9 32H48.1C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48.1 48h479.8c26.6 0 48.1-21.5 48.1-48V80c0-26.5-21.5-48-48.1-48zM54.1 80h467.8c3.3 0 6 2.7 6 6v42H48.1V86c0-3.3 2.7-6 6-6zm467.8 352H54.1c-3.3 0-6-2.7-6-6V256h479.8v170c0 3.3-2.7 6-6 6zM192 332v40c0 6.6-5.4 12-12 12h-72c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h72c6.6 0 12 5.4 12 12zm192 0v40c0 6.6-5.4 12-12 12H236c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h136c6.6 0 12 5.4 12 12z"/></svg>
+                            </span>
+                            <span>
+                                <h2>Card Manager</h2>
+                                <p>Gerencie seus carões de crédito.</p>
+                            </span>
+                        </a>
+                    </li>
+
+                </ul>
+            </nav>
+        </main>
+
+        <footer>Whomakes Tools</footer>
+    </div>
 </body>
 </html>
