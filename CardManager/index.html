@@ -67,6 +67,9 @@ input:read-only{opacity:.7}
 .sb{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;padding:0;border-radius:50%;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-size:22px;line-height:1;cursor:pointer;box-shadow:0 1px 5px rgba(0,0,0,.35);display:none;z-index:2}
 .sl{left:2px}.sr{right:2px}
 .tw.cl .sl,.tw.cr .sr{display:block}
+#dExt{width:min(560px,94vw);max-height:90vh;overflow:auto}
+#extBody td,#extBody th{white-space:normal}
+#extBody h3{font-size:14px;margin:16px 0 8px}
 </style>
 </head>
 <body>
@@ -123,6 +126,10 @@ input:read-only{opacity:.7}
   <label>Observação (opcional)</label><input id="pObs">
   <div class="acts"><button class="btn" data-close>Cancelar</button><button class="btn pri" id="okPay">Salvar</button></div>
 </form></dialog>
+
+<dialog id="dExt"><div id="extBody"></div>
+  <div class="acts"><button class="btn" data-close>Fechar</button></div>
+</dialog>
 
 <dialog id="dAsk"><form method="dialog" onsubmit="return false">
   <h2 id="aTit">Atenção</h2>
@@ -184,7 +191,7 @@ function render(){
       
       '<div class="row">'+(c.arq?'':'<button class="btn sm" data-a="entry" data-id="'+c.id+'">+ Lançar</button>')+
       (c.arq?'':'<button class="btn sm" data-a="pay" data-id="'+c.id+'"'+(s.mes===0?' disabled title="Sem parcela no mês selecionado"':'')+'>Pagar</button>')+
-      '<button class="btn sm" data-a="det" data-id="'+c.id+'">'+(S.sel===c.id?'Fechar':'Detalhes')+'</button>'+(c.arq?'<button class="btn sm" data-a="unarq" data-id="'+c.id+'">Desarquivar</button>':'')+'</div></div>';
+      '<button class="btn sm" data-a="det" data-id="'+c.id+'">'+(S.sel===c.id?'Fechar':'Detalhes')+'</button>'+'<button class="btn sm" data-a="ext" data-id="'+c.id+'">Extrato</button>'+(c.arq?'<button class="btn sm" data-a="unarq" data-id="'+c.id+'">Desarquivar</button>':'')+'</div></div>';
   }).join("");
   renderDetail();
   var na=S.cards.filter(function(c){return c.arq}).length;
@@ -281,6 +288,7 @@ document.addEventListener("click",function(e){
   if(a==="entry")openEntry(id);
   else if(a==="pay")openPay(id);
   else if(a==="det"){S.sel=S.sel===id?null:id;render();window.scrollTo(0,0);}
+  else if(a==="ext"){openExt(id);}
   else if(a==="back"){S.sel=null;render();window.scrollTo(0,0);}
   else if(a==="verarq"){S.verArq=!S.verArq;S.sel=null;render();window.scrollTo(0,0);}
   else if(a==="arq"){ask("Arquivar este cartão? Ele sai da tela principal e dos totais, mas lançamentos e pagamentos são mantidos.",function(){S.cards.forEach(function(x){if(x.id===id)x.arq=true;});S.sel=null;save();render();window.scrollTo(0,0);},{ok:"Arquivar",title:"Arquivar cartão"});}
@@ -308,6 +316,19 @@ function msg(t){ask(t,null,{info:true})}
 function cardOf(id){return S.cards.filter(function(x){return x.id===id})[0]}
 function mStr(i){return Math.floor(i/12)+"-"+String(i%12+1).padStart(2,"0")}
 function entOf(id){return S.entries.filter(function(x){return x.id===id})[0]}
+function openExt(id){
+  var c=cardOf(id);if(!c)return;
+  var m=S.mes,cur=mIdx(m),st=stats(id,m);
+  var es=S.entries.filter(function(e){var k=cur-mIdx(e.inicio);return e.cardId===id&&k>=0&&k<e.qtd});
+  var ps=S.payments.filter(function(x){return x.cardId===id&&refOf(x)===m}).sort(function(a,b){return a.data.localeCompare(b.data)});
+  var h='<h2>Extrato de '+mFmt(cur)+'</h2><div class="muted" style="margin:-6px 0 4px">'+esc(c.nome)+(c.final?' •••• '+esc(c.final):'')+(c.venc?' · vence dia '+c.venc:'')+'</div>';
+  h+='<h3>Lançamentos</h3>';
+  h+=es.length?'<div class="tbl"><table><tr><th>Descrição</th><th class="r">Parcela</th><th class="r">Valor</th></tr>'+es.map(function(e){return '<tr><td>'+esc(e.desc)+'</td><td class="r">'+noMes(e)+'</td><td class="r">'+brl.format(e.valor)+'</td></tr>'}).join('')+'<tr><th colspan="2">Total das parcelas</th><th class="r">'+brl.format(st.mes)+'</th></tr></table></div>':'<div class="empty">Sem lançamentos neste mês.</div>';
+  h+='<h3>Pagamentos</h3>';
+  h+=ps.length?'<div class="tbl"><table><tr><th>Data</th><th>Tipo</th><th class="r">Valor</th></tr>'+ps.map(function(x){return '<tr><td>'+x.data.split('-').reverse().join('/')+'</td><td><span class="tag'+(x.tipo==='total'?' t':'')+'">'+(x.tipo==='total'?'Total':'Parcial')+'</span>'+(x.obs?'<div class="muted" style="font-size:12px">'+esc(x.obs)+'</div>':'')+'</td><td class="r">'+brl.format(x.valor)+'</td></tr>'}).join('')+'<tr><th colspan="2">Total pago</th><th class="r">'+brl.format(st.pagoMes)+'</th></tr></table></div>':'<div class="empty">Nenhum pagamento neste mês.</div>';
+  h+='<div class="total" style="margin:16px 0 0;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))"><div class="kpi"><small>Parcelas</small><b>'+brl.format(st.mes)+'</b></div><div class="kpi"><small>Pago</small><b>'+brl.format(st.pagoMes)+'</b></div><div class="kpi main"><small>A pagar</small><b>'+brl.format(st.apagar)+'</b></div></div>';
+  $("extBody").innerHTML=h;$("dExt").showModal();
+}
 function delMsg(id){var e=entOf(id);return e&&e.qtd>1?"Este lançamento tem "+e.qtd+" parcelas. Excluir somente a parcela de "+mFmt(mIdx(S.mes))+" ou todas as parcelas?":"Excluir este lançamento?"}
 function delOpts(id){var e=entOf(id);if(!e||e.qtd<2)return{ok:"Excluir"};
   return{ok:"Todas as parcelas",mid:"Só esta parcela ("+mFmt(mIdx(S.mes))+")",alt:function(){delParcela(id)}};}
