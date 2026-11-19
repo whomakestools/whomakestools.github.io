@@ -5,12 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <title>Who Makes Tools | Listas</title>
+  <script>
+    try { document.documentElement.dataset.theme = localStorage.getItem('listas-tema') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') } catch (e) {}
+  </script>
   <link rel="stylesheet" href="./css/lista.css">
 </head>
 <body>
   <header class="topbar">
-    <h1>Listas</h1>
-    <button class="btn primary" data-action="nova-lista">+ Nova lista</button>
+    <h1>
+      <svg class="logo" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5.5 10.5 9 4M18.5 10.5 15 4M2.5 10.5h19L19.7 19a2 2 0 0 1-2 1.5H6.3a2 2 0 0 1-2-1.5zM9 14v3M12 14v3M15 14v3"/>
+      </svg>
+      Listas
+    </h1>
+    <div class="topo-acoes">
+      <button type="button" class="icon" id="btnTema" data-action="tema" title="Modo escuro" aria-label="Alternar modo escuro"></button>
+      <button class="btn primary" data-action="nova-lista">+ Nova lista</button>
+    </div>
   </header>
 
   <main id="geral" class="geral"></main>
@@ -59,6 +70,30 @@
         <button class="btn primary">Salvar</button>
       </div>
     </form>
+  </div>
+
+  <!-- Confirmação -->
+  <div class="sheet" id="sheetConfirm" hidden>
+    <div class="card" role="alertdialog" aria-labelledby="confTitulo">
+      <h2 id="confTitulo">Confirmar</h2>
+      <p id="confMsg"></p>
+      <div class="acoes">
+        <button type="button" class="btn" data-action="conf-nao">Cancelar</button>
+        <button type="button" class="btn danger" id="confSim" data-action="conf-sim">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumo da lista -->
+  <div class="sheet" id="sheetResumo" hidden>
+    <div class="card">
+      <h2>Resumo da lista</h2>
+      <pre id="resumoTexto" class="resumo"></pre>
+      <div class="acoes">
+        <button type="button" class="btn" data-action="fechar">Fechar</button>
+        <button type="button" class="btn primary" id="btnCopiar" data-action="copiar">Copiar</button>
+      </div>
+    </div>
   </div>
 
   <script src="https://whomakestools.github.io/leitor/price-scanner.js"></script>

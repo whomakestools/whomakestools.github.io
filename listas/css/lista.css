@@ -1,21 +1,39 @@
 :root {
   --bg: #f4f5f9; --card: #fff; --fg: #1f2330; --mut: #6b7186; --bd: #e3e5ee;
   --pri: #6c5ce7; --danger: #d63a3a; --r: 14px;
+  --l-bg: #5b4bd6; --l-fg: #fff;        /* cabeçalho da lista */
+  --g-bg: #e9e6ff;                      /* cabeçalho do grupo */
+  --ok-bg: #e4f5e9; --ok-bd: #2e9e4f;   /* item com preço */
   --sh: 0 1px 3px #0001, 0 4px 14px #0000000d;
-  color-scheme: light dark;
+  color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root { --bg: #14151c; --card: #1e2029; --fg: #eceef6; --mut: #9aa0b8; --bd: #2c2f3d; --pri: #7d6dff; --danger: #ff6b6b; --sh: none; }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #14151c; --card: #1e2029; --fg: #eceef6; --mut: #9aa0b8; --bd: #2c2f3d; --pri: #7d6dff; --danger: #ff6b6b; --sh: none;
+  --l-bg: #4a3fb5; --g-bg: #2b2849; --ok-bg: #15301f; --ok-bd: #3ec06a;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
 
 .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; max-width: 640px; margin: 0 auto; padding: 14px 16px; background: var(--bg); }
-h1 { margin: 0; font-size: 1.4rem; }
+h1 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.4rem; }
+.logo { width: 28px; height: 28px; color: var(--pri); fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .geral { max-width: 640px; margin: 0 auto; padding: 0 12px 80px; display: grid; gap: 12px; }
 
 .lista, .grupo { background: var(--card); border: 1px solid var(--bd); border-radius: var(--r); box-shadow: var(--sh); }
-.grupo { margin: 4px 8px 8px; border-radius: 10px; box-shadow: none; }
+.lista { overflow: hidden; }
+.grupo { margin: 8px; border-radius: 10px; box-shadow: none; overflow: hidden; }
+
+/* níveis com cores diferentes: lista (roxo escuro) > grupo (roxo claro) > itens */
+.lista > summary { background: var(--l-bg); color: var(--l-fg); flex-wrap: wrap; }
+.lista > summary::before { color: inherit; }
+/* lista aberta: a setinha aponta para a esquerda = voltar para as listas */
+.lista[open] > summary::before { content: "‹"; font-size: 1.9em; transform: none; }
+.lista > summary .acoes-hover { flex-basis: 100%; justify-content: flex-end; margin-top: -4px; }
+.lista > summary .icon { color: #ffffffd9; }
+.lista > summary .icon:hover,
+.lista > summary .icon[data-action^="del"]:hover { background: #ffffff2e; color: #fff; }
+.grupo > summary { background: var(--g-bg); font-weight: 600; }
 
 summary { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; list-style: none; }
 summary::-webkit-details-marker { display: none; }
@@ -36,10 +54,17 @@ details[open] > summary::before { transform: rotate(90deg); }
 .info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .info small { color: var(--mut); }
 .desc { overflow-wrap: anywhere; }
+.item[data-action] { cursor: pointer; }
+.topo-acoes { display: flex; align-items: center; gap: 6px; }
+.item.ok { background: var(--ok-bg); border-left: 4px solid var(--ok-bd); }
+.item.ok strong { color: var(--ok-bd); }
 .vazio { color: var(--mut); text-align: center; padding: 16px; margin: 0; }
 
 .btn { font: inherit; padding: 10px 16px; border: 1px solid var(--bd); border-radius: 10px; background: var(--card); color: var(--fg); cursor: pointer; }
 .btn.primary { background: var(--pri); border-color: transparent; color: #fff; }
+.btn.danger { background: var(--danger); border-color: transparent; color: #fff; }
+.card p { margin: 0; }
+.resumo { margin: 0; max-height: 50vh; overflow: auto; padding: 12px; background: var(--bg); border: 1px solid var(--bd); border-radius: 10px; white-space: pre; font: 13px/1.5 ui-monospace, Menlo, Consolas, monospace; }
 
 summary:focus-visible, .btn:focus-visible, .icon:focus-visible,
 .card input:focus, .card select:focus { outline: 2px solid var(--pri); outline-offset: 1px; }
@@ -54,3 +79,8 @@ summary:focus-visible, .btn:focus-visible, .icon:focus-visible,
 .preco-wrap { display: flex; gap: 8px; }
 .prev { text-align: right; color: var(--mut); }
 .acoes { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* celular: modais sempre no topo da tela */
+@media (max-width: 640px) {
+  .sheet { align-items: start; padding-top: max(12px, env(safe-area-inset-top)); }
+}
