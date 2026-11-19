@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Gestão de Cartões de Crédito</title>
+<meta name="theme-color" content="#4f46e5">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cartões">
 <style>
 :root{--bg:#e8ebf0;--sf:#fff;--tx:#1b1f24;--mu:#667085;--bd:#cdd3dc;--ac:#4f46e5;--ac2:#eef0ff;--ok:#15803d;--dg:#b42318;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b0d11;--sf:#1a1f26;--tx:#e8ebef;--mu:#98a2b3;--bd:#2b323c;--ac:#8b85ff;--ac2:#242a45;--ok:#4ade80;--dg:#f87171;color-scheme:dark}}
@@ -11,7 +18,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 .wrap{max-width:980px;margin:0 auto;padding:20px 16px 48px}
-header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+header{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;margin-bottom:8px}
 h1{font-size:20px;margin:0}
 h2{font-size:16px;margin:0 0 10px}
 .btn{border:1px solid var(--bd);background:var(--sf);color:var(--tx);padding:8px 12px;border-radius:8px;cursor:pointer;font:inherit}
@@ -57,6 +64,26 @@ input:read-only{opacity:.7}
 .acts{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:16px}
 .hint{font-size:12px;color:var(--mu);margin-top:4px}
 .mes{align-items:center}.mes input{width:auto}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding:6px 0 10px;margin-bottom:14px;border-bottom:1px solid var(--bd);box-shadow:0 6px 8px -6px rgba(0,0,0,.25)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+.hd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:1 1 100%}
+.ico{border:0;background:transparent;color:var(--mu);font-size:17px;line-height:1;padding:4px 8px;border-radius:8px;cursor:pointer;opacity:.65}
+.ico:hover{opacity:1;background:var(--ac2)}
+#backRow:not(:empty){margin-bottom:8px}
+textarea{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:12px/1.4 ui-monospace,Consolas,monospace;resize:vertical}
+.top .total{margin-bottom:0}
+.top .kpi{padding:8px 14px}.top .kpi b{font-size:19px}
+body.det header>.row:not(.mes){display:none}
+@media (max-width:640px){
+.mes{flex:1 1 100%;flex-wrap:nowrap}
+.mes input{flex:1 1 auto;min-width:0;height:46px;text-align:center;font-size:16px}
+.mes .btn{width:60px;height:46px;font-size:24px;padding:0}
+header>.row:not(.mes){flex:1 1 100%}
+header>.row:not(.mes) .btn{flex:1;padding:8px 4px;font-size:13px}
+.top .total{grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px}
+.top .kpi{padding:6px 8px}.top .kpi b{font-size:15px}.top .kpi small{font-size:11px}
+h1{font-size:17px}
+}
 .btn:disabled{opacity:.5;cursor:not-allowed}.btn:disabled:hover{border-color:var(--bd)}
 .tw{position:relative}
 .tbl{-webkit-overflow-scrolling:touch}
@@ -74,19 +101,21 @@ input:read-only{opacity:.7}
 </head>
 <body>
 <div class="wrap">
+  <div class="top">
   <header>
-    <h1>Gestão de Cartões de Crédito</h1>
+    <div class="hd"><h1>Gestão de Cartões de Crédito</h1><span style="white-space:nowrap"><button class="ico" id="bBak" title="Backup dos dados" aria-label="Backup dos dados">💾</button><button class="ico" id="bTheme" title="Alternar tema" aria-label="Alternar tema"></button></span></div>
     <div class="row mes"><button class="btn sm" id="mPrev" title="Mês anterior">‹</button><input type="month" id="mSel" aria-label="Mês e ano"><button class="btn sm" id="mNext" title="Próximo mês">›</button></div>
     <div class="row">
-      <button class="btn" id="bTheme" title="Alternar tema"></button>
+      
       <button class="btn" id="bCard">+ Cartão</button>
       <button class="btn" id="bEntry">+ Lançamento</button>
       <button class="btn pri" id="bPay">Registrar pagamento</button>
     </div>
   </header>
 
-  <div id="backRow" style="margin-bottom:12px"></div>
+  <div id="backRow"></div>
   <section class="total" id="totals"></section>
+  </div>
   <section class="grid" id="cards"></section>
   <section id="detail"></section>
   <div id="arqBar" style="margin-top:28px;text-align:center"></div>
@@ -125,6 +154,13 @@ input:read-only{opacity:.7}
   <label>Data</label><input id="pDate" type="date">
   <label>Observação (opcional)</label><input id="pObs">
   <div class="acts"><button class="btn" data-close>Cancelar</button><button class="btn pri" id="okPay">Salvar</button></div>
+</form></dialog>
+
+<dialog id="dBak"><form method="dialog" onsubmit="return false">
+  <h2>Backup dos dados</h2>
+  <p class="hint" style="margin:0 0 8px">Copie o texto abaixo para guardar seus dados. Para restaurar ou migrar para outro aparelho, cole um backup aqui e clique em Importar.</p>
+  <textarea id="bakTxt" rows="8" spellcheck="false"></textarea>
+  <div class="acts"><button class="btn" data-close>Fechar</button><button class="btn" id="bakCopy">Copiar</button><button class="btn pri" id="bakImp">Importar</button></div>
 </form></dialog>
 
 <dialog id="dExt"><div id="extBody"></div>
@@ -191,9 +227,10 @@ function render(){
       
       '<div class="row">'+(c.arq?'':'<button class="btn sm" data-a="entry" data-id="'+c.id+'">+ Lançar</button>')+
       (c.arq?'':'<button class="btn sm" data-a="pay" data-id="'+c.id+'"'+(s.mes===0?' disabled title="Sem parcela no mês selecionado"':'')+'>Pagar</button>')+
-      '<button class="btn sm" data-a="det" data-id="'+c.id+'">'+(S.sel===c.id?'Fechar':'Detalhes')+'</button>'+'<button class="btn sm" data-a="ext" data-id="'+c.id+'">Extrato</button>'+(c.arq?'<button class="btn sm" data-a="unarq" data-id="'+c.id+'">Desarquivar</button>':'')+'</div></div>';
+      '<button class="btn sm" data-a="det" data-id="'+c.id+'">'+(S.sel===c.id?'Fechar':'Detalhes')+'</button>'+'<button class="btn sm" data-a="lan" data-id="'+c.id+'">Lançamentos</button><button class="btn sm" data-a="ext" data-id="'+c.id+'">Extrato</button>'+(c.arq?'<button class="btn sm" data-a="unarq" data-id="'+c.id+'">Desarquivar</button>':'')+'</div></div>';
   }).join("");
   renderDetail();
+  document.body.classList.toggle("det",!!S.sel);
   var na=S.cards.filter(function(c){return c.arq}).length;
   $("arqBar").innerHTML=(S.sel||(!na&&!S.verArq))?"":(S.verArq?'<button class="btn" data-a="verarq">← Voltar aos cartões ativos</button>':'<button class="btn" data-a="verarq">Ver cartões arquivados ('+na+')</button>');
 }
@@ -288,6 +325,8 @@ document.addEventListener("click",function(e){
   if(a==="entry")openEntry(id);
   else if(a==="pay")openPay(id);
   else if(a==="det"){S.sel=S.sel===id?null:id;render();window.scrollTo(0,0);}
+  else if(a==="landone"){openLan(id,b.dataset.v==="1");}
+  else if(a==="lan"){openLan(id);}
   else if(a==="ext"){openExt(id);}
   else if(a==="back"){S.sel=null;render();window.scrollTo(0,0);}
   else if(a==="verarq"){S.verArq=!S.verArq;S.sel=null;render();window.scrollTo(0,0);}
@@ -316,6 +355,29 @@ function msg(t){ask(t,null,{info:true})}
 function cardOf(id){return S.cards.filter(function(x){return x.id===id})[0]}
 function mStr(i){return Math.floor(i/12)+"-"+String(i%12+1).padStart(2,"0")}
 function entOf(id){return S.entries.filter(function(x){return x.id===id})[0]}
+function lanTbl(list,cur){
+  var tot=0;
+  return '<div class="tbl"><table><tr><th>Descrição</th><th class="r">Parcelas</th><th class="r">Total</th></tr>'+list.map(function(e){
+    var s=mIdx(e.inicio),t=r2(e.valor*e.qtd),rest=e.qtd-Math.max(0,Math.min(e.qtd,cur-s));tot+=t;
+    return '<tr><td>'+esc(e.desc)+'<div class="muted" style="font-size:12px">Cobrança: '+mFmt(s)+' a '+mFmt(s+e.qtd-1)+(rest>0?' · restam '+rest:' · concluído')+'</div></td><td class="r">'+e.qtd+' × '+brl.format(e.valor)+'</td><td class="r">'+brl.format(t)+'</td></tr>';}).join('')+
+    '<tr><th colspan="2">Total ('+list.length+')</th><th class="r">'+brl.format(r2(tot))+'</th></tr></table></div>';
+}
+function openLan(id,sd){
+  var c=cardOf(id);if(!c)return;
+  var all=S.entries.filter(function(e){return e.cardId===id}),cur=mIdx(nowM());
+  var es=all.filter(function(e){return mIdx(e.inicio)+e.qtd-1>=cur});
+  var dn=all.filter(function(e){return mIdx(e.inicio)+e.qtd-1<cur}).sort(function(a,b){return (mIdx(b.inicio)+b.qtd)-(mIdx(a.inicio)+a.qtd)});
+  var h='<h2>Lançamentos</h2><div class="muted" style="margin:-6px 0 4px">'+esc(c.nome)+(c.final?' •••• '+esc(c.final):'')+'</div>';
+  if(!all.length)h+='<div class="empty" style="margin-top:12px">Nenhum lançamento cadastrado neste cartão.</div>';
+  else{
+    h+='<h3>Em aberto</h3>'+(es.length?lanTbl(es,cur):'<div class="empty">Nenhum lançamento em aberto.</div>');
+    if(dn.length){
+      h+='<div style="margin-top:14px"><button class="btn sm" data-a="landone" data-id="'+id+'" data-v="'+(sd?0:1)+'">'+(sd?'Ocultar concluídos':'Ver concluídos ('+dn.length+')')+'</button></div>';
+      if(sd)h+='<h3>Concluídos</h3>'+lanTbl(dn,cur);
+    }
+  }
+  $("extBody").innerHTML=h;if(!$("dExt").open)$("dExt").showModal();
+}
 function openExt(id){
   var c=cardOf(id);if(!c)return;
   var m=S.mes,cur=mIdx(m),st=stats(id,m);
@@ -359,15 +421,27 @@ $("mNext").onclick=function(){shiftM(1)};
 
 var TK="gestao-cartoes-tema",dq=window.matchMedia("(prefers-color-scheme: dark)");
 function isDark(){var t=document.documentElement.getAttribute("data-theme");return t?t==="dark":dq.matches}
-function paintTheme(){$("bTheme").textContent=isDark()?"☀️ Claro":"🌙 Escuro"}
+function paintTheme(){$("bTheme").textContent=isDark()?"☀️":"🌙"}
 function setTheme(t){document.documentElement.setAttribute("data-theme",t);try{localStorage.setItem(TK,t)}catch(e){}paintTheme()}
 try{var tm=localStorage.getItem(TK);if(tm)document.documentElement.setAttribute("data-theme",tm)}catch(e){}
 $("bTheme").onclick=function(){setTheme(isDark()?"light":"dark")};
 try{dq.addEventListener("change",paintTheme)}catch(e){}
 paintTheme();
 
+$("bBak").onclick=function(){$("bakTxt").value=JSON.stringify({cards:S.cards,entries:S.entries,payments:S.payments});$("dBak").showModal();$("bakTxt").select();};
+$("bakCopy").onclick=function(){var t=$("bakTxt"),b=this,ok=false;t.select();try{ok=document.execCommand("copy")}catch(e){}
+  if(!ok&&navigator.clipboard){try{navigator.clipboard.writeText(t.value);ok=true}catch(e){}}
+  b.textContent=ok?"Copiado!":"Selecione e copie";setTimeout(function(){b.textContent="Copiar"},1800);};
+$("bakImp").onclick=function(){
+  var d;try{d=JSON.parse($("bakTxt").value)}catch(e){}
+  if(!d||!Array.isArray(d.cards)||!Array.isArray(d.entries)||!Array.isArray(d.payments)){msg("Backup inválido. Cole o texto completo gerado pelo backup.");return}
+  ask("Importar este backup? Os dados atuais ("+S.cards.length+" cartões, "+S.entries.length+" lançamentos, "+S.payments.length+" pagamentos) serão substituídos por "+d.cards.length+" cartões, "+d.entries.length+" lançamentos e "+d.payments.length+" pagamentos.",function(){S.cards=d.cards;S.entries=d.entries;S.payments=d.payments;S.sel=null;S.verArq=false;save();$("dBak").close();render();},{ok:"Importar",title:"Importar backup"});
+};
 load();render();
 })();
+</script>
+<script>
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
 </script>
 </body>
 </html>

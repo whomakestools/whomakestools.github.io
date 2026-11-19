@@ -1,0 +1,21 @@
+GESTÃO DE CARTÕES DE CRÉDITO - WEBAPP OFFLINE (PWA)
+
+Arquivos: index.html, manifest.webmanifest, sw.js e a pasta icons.
+Mantenha todos juntos na mesma pasta.
+
+COMO USAR
+1) Para instalar e usar offline, o app precisa ser aberto por HTTPS ou por localhost.
+   - Hospedagem estática gratuita (GitHub Pages, Netlify, Cloudflare Pages): envie a pasta inteira.
+   - No próprio computador: dentro da pasta, rode  python -m http.server 8080
+     e abra http://localhost:8080
+2) Abra uma vez com internet. O app é guardado no aparelho e passa a abrir sem conexão.
+3) Instale: no Chrome/Edge use o ícone de instalar na barra de endereço; no Android, menu > Instalar app;
+   no iPhone (Safari), Compartilhar > Adicionar à Tela de Início.
+
+SEUS DADOS
+Ficam no navegador de cada aparelho (localStorage) e não são enviados a lugar nenhum.
+Para levar os dados da versão anterior (ou de um aparelho para outro), use o botão de disquete no topo:
+copie o backup na versão antiga, cole na nova e clique em Importar.
+
+ATUALIZAR O APP
+Troque os arquivos e aumente o número da versão em sw.js (const V). Na próxima abertura com internet o app se atualiza.
