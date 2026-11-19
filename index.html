@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,7 +8,9 @@
     <title>Whomakes Tools</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             color-scheme: light dark;
@@ -52,9 +55,14 @@
             }
         }
 
-        * { box-sizing: border-box; margin: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+        }
 
-        html { scroll-behavior: smooth; }
+        html {
+            scroll-behavior: smooth;
+        }
 
         body {
             min-height: 100vh;
@@ -65,7 +73,10 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        a { color: inherit; text-decoration: none; }
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
 
         a:focus-visible {
             outline: 3px solid var(--focus);
@@ -120,8 +131,13 @@
             padding: 0;
         }
 
-        .tools li { grid-column: span 2; }
-        .tools li:nth-child(n+4) { grid-column: span 3; }
+        .tools li {
+            grid-column: span 2;
+        }
+
+        .tools li:nth-child(n+4) {
+            grid-column: span 3;
+        }
 
         .tool {
             --c: var(--listas);
@@ -143,11 +159,30 @@
             transform: translateY(-3px);
         }
 
-        .tool-listas { --c: var(--listas); --c-soft: var(--listas-soft); }
-        .tool-tasks  { --c: var(--tasks);  --c-soft: var(--tasks-soft); }
-        .tool-prazos { --c: var(--prazos); --c-soft: var(--prazos-soft); }
-        .tool-mapas  { --c: var(--mapas);  --c-soft: var(--mapas-soft); }
-        .tool-conta  { --c: var(--conta);  --c-soft: var(--conta-soft); }
+        .tool-listas {
+            --c: var(--listas);
+            --c-soft: var(--listas-soft);
+        }
+
+        .tool-tasks {
+            --c: var(--tasks);
+            --c-soft: var(--tasks-soft);
+        }
+
+        .tool-prazos {
+            --c: var(--prazos);
+            --c-soft: var(--prazos-soft);
+        }
+
+        .tool-mapas {
+            --c: var(--mapas);
+            --c-soft: var(--mapas-soft);
+        }
+
+        .tool-conta {
+            --c: var(--conta);
+            --c-soft: var(--conta-soft);
+        }
 
         .icon {
             display: grid;
@@ -188,25 +223,45 @@
         }
 
         @media (max-width: 860px) {
+
             .tools li,
-            .tools li:nth-child(n+4) { grid-column: span 3; }
-            .tools li:last-child { grid-column: span 6; }
+            .tools li:nth-child(n+4) {
+                grid-column: span 3;
+            }
+
+            .tools li:last-child {
+                grid-column: span 6;
+            }
         }
 
         @media (max-width: 640px) {
-            .tools { grid-template-columns: 1fr; }
+            .tools {
+                grid-template-columns: 1fr;
+            }
+
             .tools li,
             .tools li:nth-child(n+4),
-            .tools li:last-child { grid-column: auto; }
-            .tool { padding: 1.25rem; }
+            .tools li:last-child {
+                grid-column: auto;
+            }
+
+            .tool {
+                padding: 1.25rem;
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
-            * { transition: none !important; }
-            html { scroll-behavior: auto; }
+            * {
+                transition: none !important;
+            }
+
+            html {
+                scroll-behavior: auto;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="page">
 
@@ -219,20 +274,71 @@
             <nav aria-label="Ferramentas">
                 <ul class="tools">
                     <li>
-                        <a class="tool tool-listas" href="./listas/index.html">
+                        <a class="tool tool-listas" href="./CardManager/index.html">
                             <span class="icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>
+                                <svg width="576px" height="576px" viewBox="0 -32 576 576"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M527.9 32H48.1C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48.1 48h479.8c26.6 0 48.1-21.5 48.1-48V80c0-26.5-21.5-48-48.1-48zM54.1 80h467.8c3.3 0 6 2.7 6 6v42H48.1V86c0-3.3 2.7-6 6-6zm467.8 352H54.1c-3.3 0-6-2.7-6-6V256h479.8v170c0 3.3-2.7 6-6 6zM192 332v40c0 6.6-5.4 12-12 12h-72c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h72c6.6 0 12 5.4 12 12zm192 0v40c0 6.6-5.4 12-12 12H236c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h136c6.6 0 12 5.4 12 12z" />
+                                </svg>
                             </span>
                             <span>
-                                <h2>Listas</h2>
-                                <p>Crie e organize listas de qualquer assunto.</p>
+                                <h2>Card Manager</h2>
+                                <p>Gerencie seus carões de crédito.</p>
                             </span>
                         </a>
                     </li>
                     <li>
+                        <a class="tool tool-listas" href="./calcCustos/index.html">
+                            <span class="icon" aria-hidden="true">
+                                <svg viewBox="0 0 32 32" aria-hidden="true">
+                                    <path fill="#f5b83d"
+                                        d="M4 6a2 2 0 0 1 2-2h8.6a2 2 0 0 1 1.4.6l11.4 11.4a2 2 0 0 1 0 2.8l-8.6 8.6a2 2 0 0 1-2.8 0L4.6 14.6A2 2 0 0 1 4 13.2z">
+                                    </path>
+                                    <circle cx="10" cy="10" r="2.3" style="fill: var(--bg);"></circle>
+                                    <g transform="translate(18.5 18.5)" fill="none" stroke="#2b1d00" stroke-width="1.5"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path
+                                            d="M2.4-2.4C1.8-3.3.9-3.6 0-3.6c-1.4 0-2.4.8-2.4 1.9 0 2.8 4.8 1.5 4.8 4.3 0 1-1 1.8-2.4 1.8-1 0-2-.4-2.6-1.4">
+                                        </path>
+                                        <path d="M0-5v10"></path>
+                                    </g>
+                                </svg>
+
+                            </span>
+                            <span>
+                                <h2>Calculadora preço de custo</h2>
+                                <p>Calcule o preço de custos de produção.</p>
+                            </span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="tool tool-mapas" href="./mapas/index.html">
+                            <span class="icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="3" />
+                                    <circle cx="4.5" cy="5.5" r="1.8" />
+                                    <circle cx="19.5" cy="5.5" r="1.8" />
+                                    <circle cx="12" cy="20" r="1.8" />
+                                    <path d="M10 10 6 6.8M14 10l4-3.2M12 15v3.2" />
+                                </svg>
+                            </span>
+                            <span>
+                                <h2>Mapas Mentais</h2>
+                                <p>Desenhe ideias e conecte pensamentos visualmente.</p>
+                            </span>
+                        </a>
+                    </li>
+
+
+                    <li>
                         <a class="tool tool-tasks" href="./tasks/index.html">
                             <span class="icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="m8 12.5 3 3 5-6"/></svg>
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="3.5" y="3.5" width="17" height="17" rx="4" />
+                                    <path d="m8 12.5 3 3 5-6" />
+                                </svg>
                             </span>
                             <span>
                                 <h2>Tasks</h2>
@@ -243,7 +349,10 @@
                     <li>
                         <a class="tool tool-prazos" href="./prazos/index.html">
                             <span class="icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="3.5" y="5" width="17" height="15.5" rx="3" />
+                                    <path d="M3.5 10h17M8 3v4M16 3v4" />
+                                </svg>
                             </span>
                             <span>
                                 <h2>Prazos</h2>
@@ -251,21 +360,14 @@
                             </span>
                         </a>
                     </li>
-                    <li>
-                        <a class="tool tool-mapas" href="./mapas/index.html">
-                            <span class="icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="4.5" cy="5.5" r="1.8"/><circle cx="19.5" cy="5.5" r="1.8"/><circle cx="12" cy="20" r="1.8"/><path d="M10 10 6 6.8M14 10l4-3.2M12 15v3.2"/></svg>
-                            </span>
-                            <span>
-                                <h2>Mapas Mentais</h2>
-                                <p>Desenhe ideias e conecte pensamentos visualmente.</p>
-                            </span>
-                        </a>
-                    </li>
+
                     <li>
                         <a class="tool tool-conta" href="./account/index.html">
                             <span class="icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="12" cy="8" r="4" />
+                                    <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" />
+                                </svg>
                             </span>
                             <span>
                                 <h2>Conta</h2>
@@ -274,18 +376,7 @@
                         </a>
                     </li>
 
-                    <li>
-                        <a class="tool tool-listas" href="./CardManager/index.html">
-                            <span class="icon" aria-hidden="true">
-                                <svg width="576px" height="576px" viewBox="0 -32 576 576" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M527.9 32H48.1C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48.1 48h479.8c26.6 0 48.1-21.5 48.1-48V80c0-26.5-21.5-48-48.1-48zM54.1 80h467.8c3.3 0 6 2.7 6 6v42H48.1V86c0-3.3 2.7-6 6-6zm467.8 352H54.1c-3.3 0-6-2.7-6-6V256h479.8v170c0 3.3-2.7 6-6 6zM192 332v40c0 6.6-5.4 12-12 12h-72c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h72c6.6 0 12 5.4 12 12zm192 0v40c0 6.6-5.4 12-12 12H236c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h136c6.6 0 12 5.4 12 12z"/></svg>
-                            </span>
-                            <span>
-                                <h2>Card Manager</h2>
-                                <p>Gerencie seus carões de crédito.</p>
-                            </span>
-                        </a>
-                    </li>
+
 
                 </ul>
             </nav>
@@ -294,4 +385,5 @@
         <footer>Whomakes Tools</footer>
     </div>
 </body>
+
 </html>
