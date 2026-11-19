@@ -1,71 +1,67 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./css/lista.css" />
-    <title>Who Makes Tools | Listas</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Who Makes Tools | Listas</title>
+  <link rel="stylesheet" href="./css/lista.css">
 </head>
-
 <body>
-    <h2>
-        <i class="fa fa-list-alt" aria-hidden="true"></i>
-        Listas
-    </h2>
+  <header class="topbar">
+    <h1>Listas</h1>
+    <button class="btn primary" data-action="nova-lista">+ Nova lista</button>
+  </header>
 
-    <div id="modal" class="geral" style="display:none">
-    </div>
-    <div id="geral" class="geral">
-    </div>
+  <main id="geral" class="geral"></main>
 
-    <form id="form" class="geral" style="display:none">
-        <div class="form-control">
-            <input type="hidden" id="id">
-            <label for="text">Descrição</label>
-            <input autofocus type="text" id="text" placeholder="Descrição do Item" />
-        </div>
-        <div class="form-control">
-            <label for="unidade">Unidade</label>
-            <select id="unidade">
-                <option>UN</option>
-                <option>KG</option>
-                <option>LT</option>
-                <option>PÇ</option>
-                <option>PC</option>
-                <option>DZ</option>
-                <option>CX</option>
-            </select>
-        </div>
-
-        <div class="form-control">
-            <label for="qtd">Quantidade<br />
-            </label>
-            <input type="number" id="qtd" step="0.001" placeholder="Quantidade do Item" />
-        </div>
-        <div class="form-control">
-            <label for="preco">Preço<br />
-            </label>
-            <input type="number" id="preco" step="0.001" placeholder="Preço do Item" />
-        </div>
-
-        <button id="btn" class="btn btn-add">Salvar</button>
-        <input type="reset" value="Cancelar" class="btn btn-cancelar">
+  <!-- Nome de lista / grupo -->
+  <div class="sheet" id="sheetNome" hidden>
+    <form class="card" id="formNome">
+      <h2 id="nomeTitulo"></h2>
+      <label>Descrição
+        <input type="text" id="nomeInput" maxlength="80" autocomplete="off" required>
+      </label>
+      <div class="acoes">
+        <button type="button" class="btn" data-action="fechar">Cancelar</button>
+        <button class="btn primary">Salvar</button>
+      </div>
     </form>
+  </div>
 
-    <form id="form2" class="geral" style="display:none; padding: 10px;">
-        <h4 id="DescHeader">Novo Grupo</h4>
-        <div class="form-control">
-            <input autofocus type="text" id="iDescricao" placeholder="Descrição" />
+  <!-- Item -->
+  <div class="sheet" id="sheetItem" hidden>
+    <form class="card" id="formItem">
+      <h2 id="itemTitulo"></h2>
+      <label>Descrição
+        <input type="text" id="iDesc" maxlength="120" autocomplete="off" placeholder="Descrição do item" required>
+      </label>
+      <div class="linha">
+        <label>Unidade
+          <select id="iUn">
+            <option>UN</option><option>KG</option><option>LT</option><option>PÇ</option>
+            <option>PC</option><option>DZ</option><option>CX</option>
+          </select>
+        </label>
+        <label>Quantidade
+          <input type="number" id="iQtd" inputmode="decimal" step="any" min="0">
+        </label>
+      </div>
+      <label>Preço
+        <div class="preco-wrap">
+          <input type="number" id="iPreco" inputmode="decimal" step="0.01" min="0" placeholder="0,00">
+          <button type="button" class="btn" id="btnCam" data-action="camera" title="Ler preço pela câmera" aria-label="Ler preço pela câmera">📷</button>
         </div>
-        <button id="btnFrm2" class="btn btn-add">Salvar</button>
-        <input type="reset" value="Cancelar" class="btn btn-cancelar">
+      </label>
+      <div class="prev" id="prev"></div>
+      <div class="acoes">
+        <button type="button" class="btn" data-action="fechar">Cancelar</button>
+        <button class="btn primary">Salvar</button>
+      </div>
     </form>
-    </div>
+  </div>
 
-    <script src="./js/app.js"></script>
-
+  <script src="https://whomakestools.github.io/leitor/price-scanner.js"></script>
+  <script src="./js/app.js"></script>
 </body>
-
 </html>
