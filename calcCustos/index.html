@@ -878,8 +878,9 @@
             margin: 0;
             padding: 14px;
             overflow: auto;
-            background: var(--surface);
-            border: 1px solid var(--line);
+            background: #ffffff;
+            color: #1b2433;
+            border: 1px solid #d9dee8;
             border-radius: 12px;
             font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
             font-size: 0.85rem;
@@ -887,6 +888,46 @@
             white-space: pre-wrap;
             overflow-wrap: anywhere;
             tab-size: 2;
+        }
+
+        /* Título menor para caber os três ícones do topo no celular */
+        .topo h1 {
+            font-size: 1.3rem;
+            line-height: 1.15;
+        }
+
+        .topo h1 span {
+            min-width: 0;
+        }
+
+        /* Campos do modal de empresa */
+        .dialogo input[type="tel"],
+        .dialogo textarea {
+            width: 100%;
+            padding: 0 12px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: var(--surface);
+        }
+
+        .dialogo input[type="tel"] {
+            height: 40px;
+        }
+
+        .dialogo textarea {
+            min-height: 64px;
+            padding: 10px 12px;
+            resize: none;
+        }
+
+        /* Confirmação */
+        .dialogo .texto-apoio {
+            color: var(--ink);
+        }
+
+        .botao--perigo-solido {
+            background: var(--danger);
+            color: var(--primary-ink);
         }
 
         /* Backup */
@@ -948,6 +989,13 @@
                     <span>Calculadora de preço de venda</span>
                 </h1>
                 <div class="topo__acoes">
+                    <button type="button" class="tema" @click="abrirEmpresa" aria-label="Dados da empresa"
+                        title="Dados da empresa">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 9l1-5h14l1 5M4 9v11h16V9M4 9h16M9 20v-6h6v6" />
+                        </svg>
+                    </button>
                     <button type="button" class="tema" @click="abrirBackup" aria-label="Backup: exportar e importar dados"
                         title="Backup dos dados">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1275,7 +1323,7 @@
                 </div>
                 <pre class="txt" tabindex="0">{{ textoResumo }}</pre>
                 <div class="acoes">
-                    <button type="button" class="botao botao--suave" @click="dlgResumo.close()">Fechar</button>
+                    <button type="button" class="botao botao--suave" @click="salvarImagem"><span aria-live="polite">{{ imagemOk ? 'Imagem salva!' : 'Salvar imagem' }}</span></button>
                     <button type="button" class="botao" @click="copiarResumo"><span aria-live="polite">{{ copiado ? 'Copiado!' : 'Copiar texto' }}</span></button>
                 </div>
             </div>
@@ -1302,7 +1350,7 @@
                 </div>
                 <p class="erro" role="alert" v-if="erroImport">{{ erroImport }}</p>
                 <div class="importacao" v-if="importacao">
-                    <p>Arquivo válido com <strong>{{ importacao.length }}</strong> {{ importacao.length === 1 ? 'produto' : 'produtos' }}. Como deseja importar?</p>
+                    <p>Arquivo válido com <strong>{{ importacao.produtos.length }}</strong> {{ importacao.produtos.length === 1 ? 'produto' : 'produtos' }}<span v-if="importacao.empresa"> e dados da empresa</span>. Como deseja importar?</p>
                     <div class="acoes">
                         <button type="button" class="botao" @click="importar('somar')">Adicionar aos existentes</button>
                         <button type="button" class="botao botao--contorno-perigo" @click="importar('substituir')">Substituir tudo</button>
@@ -1311,7 +1359,56 @@
             </div>
         </dialog>
 
-        <!-- Aviso com desfazer -->
+        <!-- ================= Modal: dados da empresa ================= -->
+        <dialog ref="dlgEmpresa" @click="$event.target === dlgEmpresa && dlgEmpresa.close()"
+            aria-labelledby="titulo-empresa">
+            <form class="dialogo" @submit.prevent="gravarEmpresa">
+                <div class="dialogo__topo">
+                    <h2 id="titulo-empresa">Dados da empresa</h2>
+                    <button type="button" class="info-btn" aria-label="Fechar" @click="dlgEmpresa.close()">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                            <path d="M6 6l12 12M18 6L6 18" />
+                        </svg>
+                    </button>
+                </div>
+                <p class="texto-apoio">Aparecem no final do resumo de cada produto.</p>
+                <div class="campo">
+                    <label for="e-nome">Nome da empresa</label>
+                    <input id="e-nome" type="text" maxlength="60" autocomplete="organization"
+                        v-model.trim="empresaEdit.nome">
+                </div>
+                <div class="campo">
+                    <label for="e-tel">Telefone</label>
+                    <input id="e-tel" type="tel" inputmode="tel" maxlength="25" autocomplete="tel"
+                        v-model.trim="empresaEdit.telefone">
+                </div>
+                <div class="campo">
+                    <label for="e-end">Endereço</label>
+                    <textarea id="e-end" rows="2" maxlength="150" autocomplete="street-address"
+                        v-model.trim="empresaEdit.endereco"></textarea>
+                </div>
+                <div class="acoes">
+                    <button type="button" class="botao botao--suave" @click="dlgEmpresa.close()">Cancelar</button>
+                    <button type="submit" class="botao">Gravar</button>
+                </div>
+            </form>
+        </dialog>
+
+        <!-- ================= Modal: confirmação de exclusão ================= -->
+        <dialog ref="dlgConfirma" @click="$event.target === dlgConfirma && dlgConfirma.close()"
+            aria-labelledby="titulo-confirma">
+            <div class="dialogo">
+                <h2 id="titulo-confirma">{{ confirmacao.titulo }}</h2>
+                <p class="texto-apoio">{{ confirmacao.texto }}</p>
+                <div class="acoes">
+                    <button type="button" class="botao botao--suave" @click="dlgConfirma.close()">Cancelar</button>
+                    <button type="button" class="botao botao--perigo-solido" @click="confirmar">{{ confirmacao.rotulo }}</button>
+                </div>
+            </div>
+        </dialog>
+
+        <!-- Aviso (importação e dados da empresa) -->
         <div class="aviso" v-if="aviso" role="status">
             <span>{{ aviso.texto }}</span>
             <button type="button" v-if="aviso.desfazer" @click="desfazer">Desfazer</button>
@@ -1374,21 +1471,38 @@
             };
         }
 
+        function normalizarEmpresa(e) {
+            e = e || {};
+            const t = (v, max) => String(v == null ? '' : v).trim().slice(0, max);
+            return { nome: t(e.nome, 60), endereco: t(e.endereco, 150), telefone: t(e.telefone, 25) };
+        }
+        const temEmpresa = e => !!(e && (e.nome || e.endereco || e.telefone));
+
         function carregar() {
+            const vazio = () => ({ produtos: [], empresa: normalizarEmpresa(null) });
             try {
                 const bruto = localStorage.getItem(CHAVE);
                 if (bruto !== null) {
                     const d = JSON.parse(bruto);
                     const lista = Array.isArray(d && d.produtos) ? d.produtos : [];
-                    return lista.map((p, i) => normalizarProduto(p, 'Produto ' + (i + 1), true));
+                    return {
+                        produtos: lista.map((p, i) => normalizarProduto(p, 'Produto ' + (i + 1), true)),
+                        empresa: normalizarEmpresa(d && d.empresa)
+                    };
                 }
                 const antigo = localStorage.getItem(CHAVE_ANTIGA); // migra o cálculo único anterior
                 if (antigo) {
                     const k = JSON.parse(antigo);
-                    if (k) return [normalizarProduto(k, 'Meu produto', false)];
+                    if (k) return { produtos: [normalizarProduto(k, 'Meu produto', false)], empresa: normalizarEmpresa(null) };
                 }
             } catch (e) { /* dados ilegíveis: começa vazio */ }
-            return [];
+            return vazio();
+        }
+
+        function extrairEmpresa(d) {
+            if (!d || Array.isArray(d) || !d.empresa) return null;
+            const e = normalizarEmpresa(d.empresa);
+            return temEmpresa(e) ? e : null;
         }
 
         function extrairProdutos(d) {
@@ -1417,7 +1531,7 @@
         const rotuloTipo = v => (TIPOS_ITEM.find(t => t.valor === v) || { rotulo: v }).rotulo;
         const moedaTxt = v => fmtMoeda.format(n(v)).replace(/\u00a0/g, ' ');
 
-        function montarResumo(p) {
+        function montarResumo(p, emp) {
             const t = calcular(p);
             const tg = tipoGlobal(p);
             const r = tg.rotulo;
@@ -1446,12 +1560,21 @@
             L.push(linha('Valor final (+' + fmtQtd.format(n(p.percentualLucro)) + '%)', moedaTxt(t.final)));
             L.push(linha('Preço de venda ' + tg.por, moedaTxt(t.porUnidade)));
             L.push(linha('Por embalagem', moedaTxt(t.porEmbalagem)));
+            if (temEmpresa(emp)) {
+                L.push('');
+                L.push('-'.repeat(36));
+                if (emp.nome) L.push('Nome da empresa: ' + emp.nome);
+                if (emp.telefone) L.push('Telefone: ' + emp.telefone);
+                if (emp.endereco) L.push('Endereço: ' + emp.endereco);
+            }
             return L.join('\n');
         }
 
         const app = createApp({
             setup() {
-                const produtos = ref(carregar());
+                const dadosSalvos = carregar();
+                const produtos = ref(dadosSalvos.produtos);
+                const empresa = ref(dadosSalvos.empresa);
                 const atualId = ref(null);
                 const estado = computed(() => produtos.value.find(p => p.id === atualId.value) || null);
 
@@ -1460,6 +1583,11 @@
                 const dlgBackup = ref(null);
                 const arquivo = ref(null);
                 const campoNome = ref(null);
+                const dlgEmpresa = ref(null);
+                const dlgConfirma = ref(null);
+                const empresaEdit = ref(normalizarEmpresa(null));
+                const confirmacao = ref({ titulo: '', texto: '', rotulo: 'Excluir', acao: null });
+                const imagemOk = ref(false);
                 const rolagem = ref(null);
 
                 const indiceEdicao = ref(-1);
@@ -1475,10 +1603,10 @@
                 /* ---------- Persistência ---------- */
                 function salvar() {
                     try {
-                        localStorage.setItem(CHAVE, JSON.stringify({ versao: 2, produtos: produtos.value }));
+                        localStorage.setItem(CHAVE, JSON.stringify({ versao: 2, empresa: empresa.value, produtos: produtos.value }));
                     } catch (e) { /* armazenamento indisponível */ }
                 }
-                watch(produtos, salvar, { deep: true });
+                watch([produtos, empresa], salvar, { deep: true });
                 salvar(); // grava já na primeira carga (conclui a migração do formato antigo)
 
                 /* ---------- Tema ---------- */
@@ -1532,9 +1660,14 @@
                     produtos.value.splice(index + 1, 0, copia);
                 }
                 function excluirProduto(index) {
-                    const [p] = produtos.value.splice(index, 1);
-                    mostrarAviso('Produto removido', () => {
-                        produtos.value.splice(Math.min(index, produtos.value.length), 0, p);
+                    const p = produtos.value[index];
+                    const qtdItens = p.itens.length;
+                    const detalhe = qtdItens === 0 ? ' será removido.'
+                        : qtdItens === 1 ? ' e o seu único item serão removidos.'
+                            : ' e os seus ' + qtdItens + ' itens serão removidos.';
+                    pedirConfirmacao('Excluir produto?', '"' + p.nome + '"' + detalhe + ' Esta ação não pode ser desfeita.', () => {
+                        const i = produtos.value.indexOf(p);
+                        if (i > -1) produtos.value.splice(i, 1);
                     });
                 }
                 function nomePadrao() {
@@ -1656,6 +1789,28 @@
                     fecharModal();
                 }
 
+                /* ---------- Confirmação de exclusão ---------- */
+                function pedirConfirmacao(titulo, texto, acao, rotulo) {
+                    confirmacao.value = { titulo, texto, rotulo: rotulo || 'Excluir', acao };
+                    dlgConfirma.value.showModal();
+                }
+                function confirmar() {
+                    const acao = confirmacao.value.acao;
+                    dlgConfirma.value.close();
+                    if (acao) acao();
+                }
+
+                /* ---------- Dados da empresa ---------- */
+                function abrirEmpresa() {
+                    empresaEdit.value = { ...empresa.value };
+                    dlgEmpresa.value.showModal();
+                }
+                function gravarEmpresa() {
+                    empresa.value = normalizarEmpresa(empresaEdit.value);
+                    dlgEmpresa.value.close();
+                    mostrarAviso('Dados da empresa salvos', null);
+                }
+
                 /* ---------- Aviso com desfazer ---------- */
                 function mostrarAviso(texto, desfazerFn) {
                     aviso.value = { texto, desfazer: desfazerFn || null };
@@ -1669,21 +1824,29 @@
                 }
                 function excluirItem(index) {
                     const prod = estado.value;
-                    const [item] = prod.itens.splice(index, 1);
-                    mostrarAviso('Item removido', () => {
-                        prod.itens.splice(Math.min(index, prod.itens.length), 0, item);
+                    const item = prod.itens[index];
+                    pedirConfirmacao('Excluir item?', '"' + item.descricao + '" será removido deste produto.', () => {
+                        const i = prod.itens.indexOf(item);
+                        if (i > -1) prod.itens.splice(i, 1);
                     });
                 }
                 function excluirDoDialogo() {
-                    const i = indiceEdicao.value;
-                    fecharModal();
-                    excluirItem(i);
+                    const prod = estado.value;
+                    const item = prod.itens[indiceEdicao.value];
+                    if (!item) return;
+                    // a confirmação abre por cima: se cancelar, a edição do item continua
+                    pedirConfirmacao('Excluir item?', '"' + item.descricao + '" será removido deste produto.', () => {
+                        const i = prod.itens.indexOf(item);
+                        if (i > -1) prod.itens.splice(i, 1);
+                        fecharModal();
+                    });
                 }
 
                 /* ---------- Resumo ---------- */
-                const textoResumo = computed(() => estado.value ? montarResumo(estado.value) : '');
+                const textoResumo = computed(() => estado.value ? montarResumo(estado.value, empresa.value) : '');
                 function abrirResumo() {
                     copiado.value = false;
+                    imagemOk.value = false;
                     dlgResumo.value.showModal();
                 }
                 async function copiarResumo() {
@@ -1707,6 +1870,64 @@
                     if (ok) setTimeout(() => { copiado.value = false; }, 2000);
                 }
 
+                function salvarImagem() {
+                    const MAX = 56; // colunas por linha na imagem
+                    const quebrar = linha => {
+                        if (linha.length <= MAX) return [linha];
+                        const indent = linha.match(/^ */)[0];
+                        const saida = [];
+                        let atual = indent;
+                        linha.trim().split(/\s+/).forEach(palavra => {
+                            const candidata = atual.trim() ? atual + ' ' + palavra : atual + palavra;
+                            if (candidata.length > MAX && atual.trim()) {
+                                saida.push(atual);
+                                atual = indent + '  ' + palavra;
+                            } else {
+                                atual = candidata;
+                            }
+                        });
+                        saida.push(atual);
+                        return saida;
+                    };
+                    const linhas = textoResumo.value.split('\n').flatMap(quebrar);
+                    const fonte = '15px ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace';
+                    const escala = 2, margem = 24, alturaLinha = 24;
+
+                    const medidor = document.createElement('canvas').getContext('2d');
+                    medidor.font = fonte;
+                    const maisLarga = Math.max(...linhas.map(l => medidor.measureText(l).width));
+                    const largura = Math.ceil(Math.max(320, maisLarga + margem * 2));
+                    const altura = margem * 2 + linhas.length * alturaLinha;
+
+                    const tela = document.createElement('canvas');
+                    tela.width = largura * escala;
+                    tela.height = altura * escala;
+                    const g = tela.getContext('2d');
+                    g.scale(escala, escala);
+                    g.fillStyle = '#ffffff';              // fundo sempre branco, como a área do resumo
+                    g.fillRect(0, 0, largura, altura);
+                    g.fillStyle = '#1b2433';
+                    g.font = fonte;
+                    g.textBaseline = 'middle';
+                    linhas.forEach((l, i) => g.fillText(l, margem, margem + i * alturaLinha + alturaLinha / 2));
+
+                    const slug = (estado.value.nome || 'produto').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'produto';
+                    tela.toBlob(blob => {
+                        if (!blob) return;
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'resumo-' + slug + '.png';
+                        dlgResumo.value.appendChild(a);
+                        a.click();
+                        a.remove();
+                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                        imagemOk.value = true;
+                        setTimeout(() => { imagemOk.value = false; }, 2000);
+                    }, 'image/png');
+                }
+
                 /* ---------- Backup: exportar / importar ---------- */
                 function abrirBackup() {
                     importacao.value = null;
@@ -1716,6 +1937,7 @@
                 function exportar() {
                     const dados = {
                         app: 'custos', versao: 2, exportadoEm: new Date().toISOString(),
+                        empresa: JSON.parse(JSON.stringify(empresa.value)),
                         produtos: JSON.parse(JSON.stringify(produtos.value))
                     };
                     const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
@@ -1735,22 +1957,27 @@
                     erroImport.value = '';
                     if (!f) return;
                     try {
-                        const lista = extrairProdutos(JSON.parse(await f.text()));
+                        const dados = JSON.parse(await f.text());
+                        const lista = extrairProdutos(dados);
                         if (!lista.length) throw new Error('sem produtos');
-                        importacao.value = lista;
+                        importacao.value = { produtos: lista, empresa: extrairEmpresa(dados) };
                     } catch (err) {
                         erroImport.value = 'Não foi possível ler este arquivo. Use um arquivo .json exportado por este aplicativo.';
                     }
                 }
                 function importar(modo) {
-                    const lista = importacao.value;
-                    if (!lista) return;
+                    if (!importacao.value) return;
+                    const lista = importacao.value.produtos;
+                    const empImportada = importacao.value.empresa;
                     if (modo === 'substituir') {
                         const antes = produtos.value;
+                        const empAntes = { ...empresa.value };
                         produtos.value = lista;
-                        mostrarAviso('Dados importados', () => { produtos.value = antes; });
+                        if (empImportada) empresa.value = empImportada;
+                        mostrarAviso('Dados importados', () => { produtos.value = antes; empresa.value = empAntes; });
                     } else {
                         produtos.value.push(...lista);
+                        if (empImportada && !temEmpresa(empresa.value)) empresa.value = empImportada;
                         mostrarAviso(lista.length + (lista.length === 1 ? ' produto adicionado' : ' produtos adicionados'), null);
                     }
                     importacao.value = null;
@@ -1759,14 +1986,15 @@
 
                 return {
                     produtos, estado, totais, tipoAtual, nomePor, controles, resumoParametros,
-                    dlg, dlgResumo, dlgBackup, arquivo, campoNome, rolagem,
+                    dlg, dlgResumo, dlgBackup, dlgEmpresa, dlgConfirma, arquivo, campoNome, rolagem,
+                    empresaEdit, confirmacao, imagemOk,
                     indiceEdicao, itemEdit, mostrarParametros, mostrarInfo, copiado, importacao, erroImport, aviso,
                     tema, alternarTema, tiposGlobais: TIPOS_GLOBAIS, tiposItem: TIPOS_ITEM,
                     podeCima, podeBaixo, atualizarSetas, rolar,
                     abrir, voltar, novoProduto, duplicar, excluirProduto, nomePadrao, porDe,
                     ajustar, passo, abrirNovo, editar, fecharModal, cliqueNoFundo, gravarItem, excluirItem, excluirDoDialogo,
                     desfazer, textoResumo, abrirResumo, copiarResumo,
-                    abrirBackup, exportar, lerArquivo, importar,
+                    abrirBackup, exportar, lerArquivo, importar, abrirEmpresa, gravarEmpresa, confirmar, salvarImagem,
                     calcular, custoItem, rotuloTipo,
                     moeda: v => fmtMoeda.format(n(v)),
                     qtd: v => fmtQtd.format(n(v)),
