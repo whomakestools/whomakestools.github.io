@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Controle de Atividades</title>
+<script>try{var t=localStorage.getItem('controle-atividades-v1-tema');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 :root{--bg:#f3f4f7;--panel:#fff;--ink:#1c2230;--mute:#667085;--line:#dde1ea;--acc:#2f4bd6;--accbg:#e8ecfd;--onacc:#fff;--bad:#c23b3b;--bar:#e3e7f0;
@@ -33,6 +34,12 @@ button{cursor:pointer}
 .ghost.d:hover{color:var(--bad);border-color:var(--bad)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .sp{flex:1}
+.app.noside{grid-template-columns:1fr}.app.noside aside{display:none}.app.noside main{max-width:1260px;margin:0 auto}
+.ib{display:inline-grid;place-items:center;width:32px;height:32px;padding:0;border:0;border-radius:8px;background:none;color:var(--mute);flex:none;transition:background .15s,color .15s}.ib:hover{background:var(--bg);color:var(--ink)}main .ib:hover{background:var(--panel)}
+.ib svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ahead{display:flex;align-items:center;gap:2px}.net{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mute);padding:6px 10px;border:1px dashed var(--line);border-radius:8px}.net[hidden]{display:none}.net i{width:8px;height:8px;border-radius:50%;background:#f59e0b;flex:none}
+.ahead{margin-right:-6px}.ahead h1{flex:1;min-width:0;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chk{display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:13px}.chk input{width:auto;margin:2px 0 0;flex:none}
 h2{font-size:22px;font-weight:600;margin:0}
 .sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0 20px}
 .sum>div,.act{background:var(--panel);border:1px solid var(--line);border-radius:8px}
@@ -70,6 +77,12 @@ dialog label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;max-height:110px;overflow:auto}.chip{display:inline-flex;align-items:center;background:var(--accbg);border-radius:12px;padding:2px 4px 2px 10px;font-size:13px}.chip button{background:none;border:0;color:var(--mute);padding:0 6px}
+.hlist{list-style:none;margin:0;padding:0;max-height:min(58vh,520px);overflow:auto;border:1px solid var(--line);border-radius:8px}
+.hlist li{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;padding:10px 12px;border-top:1px solid var(--line);font-size:13px}.hlist li:first-child{border-top:0}
+.hlist time{grid-column:1/-1;color:var(--mute);font-size:12px}
+.htag{align-self:start;padding:1px 8px;border-radius:999px;font-size:11.5px;font-weight:600;white-space:nowrap;background:var(--accbg);color:var(--ink)}
+.htag.a{background:color-mix(in srgb,#0ea5e9 18%,var(--panel))}.htag.s{background:color-mix(in srgb,#10b981 18%,var(--panel))}.htag.e{background:color-mix(in srgb,#f59e0b 20%,var(--panel))}.htag.x{background:color-mix(in srgb,var(--bad) 18%,var(--panel))}
+.hbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}.hbar select{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit}
 .hist{max-height:150px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:13px}.hist li{padding:5px 0;border-top:1px solid var(--line)}.hist li:first-child{border-top:0}.hist small{display:block;color:var(--mute)}
 dialog.wide{width:min(920px,calc(100% - 24px))}.pv{max-height:58vh;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:14px;background:var(--bg)}.hint{color:var(--mute);font-size:13px}.acts{flex-wrap:wrap}button:disabled{opacity:.5;cursor:default}
 /* ---------- Mapa mental ---------- */
@@ -114,7 +127,8 @@ dialog.wide{width:min(920px,calc(100% - 24px))}.pv{max-height:58vh;overflow:auto
 <body>
 <div class="app">
   <aside>
-    <h1>Controle de Atividades</h1>
+    <div class="ahead"><h1>Controle de Atividades</h1><button type="button" class="ib" data-a="theme" id="themeBtn"></button><button type="button" class="ib" data-a="side" id="sideBtnA"></button></div>
+    <div class="net" id="net" role="status" hidden><i></i>Sem conexão. O app continua funcionando e salvando neste navegador.</div>
     <div class="row"><button class="btn" data-a="newp">Novo projeto</button><button class="ghost" data-a="impp">Importar projeto</button></div>
     <div class="plist" id="plist"></div>
   </aside>
@@ -135,6 +149,19 @@ const KEY='controle-atividades-v1';
 let S={projects:[],sel:null};
 try{const r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+let SIDE=true;try{SIDE=localStorage.getItem(KEY+'-painel')!=='oculto'}catch(e){}
+const applySide=()=>document.querySelector('.app').classList.toggle('noside',!SIDE);
+const ICO={side:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9.5 4v16"/></svg>',
+  moon:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
+  sun:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'};
+const sideBtn=()=>SIDE?'':`<button type="button" class="ib" data-a="side" aria-expanded="false" title="Abrir painel" aria-label="Abrir painel">${ICO.side}</button>`;
+const isDark=()=>{const t=document.documentElement.dataset.theme;return t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches};
+function paintChrome(){
+  const tb=document.getElementById('themeBtn'),sb=document.getElementById('sideBtnA'),d=isDark();
+  tb.innerHTML=d?ICO.sun:ICO.moon;const tl=d?'Usar tema claro':'Usar tema escuro';tb.title=tl;tb.setAttribute('aria-label',tl);
+  sb.innerHTML=ICO.side;sb.title='Fechar painel';sb.setAttribute('aria-label','Fechar painel');sb.setAttribute('aria-expanded','true');
+}
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',paintChrome)}catch(e){}
 const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=v=>{const n=parseFloat(String(v).replace(',','.'));return isFinite(n)&&n>=0?n:0};
@@ -143,16 +170,48 @@ const pc=n=>Math.round(n)+'%';
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const fdate=s=>s?s.split('-').reverse().join('/'):'';
 const open=new Set();
+/* Feriados nacionais (Lei 662/1949, Lei 6.802/1980, Lei 14.759/2023) e Sexta-feira Santa;
+   Carnaval e Corpus Christi são pontos facultativos (opção do projeto) */
+const isoOf=x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
+function pascoa(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h2=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h2-k)%7,m=Math.floor((a+11*h2+22*l)/451),mo=Math.floor((h2+l-7*m+114)/31),da=((h2+l-7*m+114)%31)+1;return new Date(y,mo-1,da)}
+const FERC=new Map();
+function feriados(y,fac){
+  const k=y+(fac?'f':'');if(FERC.has(k))return FERC.get(k);
+  const r=new Map([['01-01','Confraternização Universal'],['04-21','Tiradentes'],['05-01','Dia do Trabalho'],['09-07','Independência do Brasil'],['10-12','Nossa Senhora Aparecida'],['11-02','Finados'],['11-15','Proclamação da República'],['12-25','Natal']].map(([d,n])=>[y+'-'+d,n]));
+  if(y>=2024)r.set(y+'-11-20','Dia Nacional de Zumbi e da Consciência Negra');
+  const P=pascoa(y),rel=(n,nome)=>{const d=new Date(P);d.setDate(d.getDate()+n);r.set(isoOf(d),nome)};
+  rel(-2,'Sexta-feira Santa');
+  if(fac){rel(-48,'Carnaval (segunda-feira)');rel(-47,'Carnaval (terça-feira)');rel(60,'Corpus Christi')}
+  FERC.set(k,r);return r;
+}
+const feriado=(p,iso)=>p.hol===false?null:feriados(+iso.slice(0,4),p.fac!==false).get(iso)||null;
 function forecast(p,est){
   if(!p.start||!(p.daily>0)||!(est>0))return null;
-  const days=Math.ceil(est/p.daily-1e-9),d=new Date(p.start+'T00:00:00'),iso=x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'),sk=new Set(p.skip||[]),wk=x=>x.getDay()%6===0||sk.has(iso(x));
+  const days=Math.ceil(est/p.daily-1e-9),d=new Date(p.start+'T00:00:00'),sk=new Set(p.skip||[]),hols=[];
+  const wk=x=>{if(x.getDay()%6===0)return true;const i=isoOf(x);if(sk.has(i))return true;const f=feriado(p,i);if(f){hols.push(fdate(i)+' – '+f);return true}return false};
   while(wk(d))d.setDate(d.getDate()+1);
   for(let n=1;n<days;n++){d.setDate(d.getDate()+1);while(wk(d))d.setDate(d.getDate()+1)}
-  return{days,end:iso(d)};
+  return{days,end:isoOf(d),hols};
 }
-const fcCard=(p,est)=>{const f=forecast(p,est);return `<div><span>Término previsto</span><b>${f?fdate(f.end):'—'}</b><span>${f?f.days+' dia(s) útil(eis) · '+h(p.daily)+' por dia'+((p.skip||[]).length?' · '+p.skip.length+' data(s) fora':''):'Informe início e horas por dia em Editar projeto'}</span></div>`};
-const planTxt=(p,est)=>{const f=forecast(p,est);return f?` · Início ${fdate(p.start)} · ${h(p.daily)} por dia · término previsto ${fdate(f.end)} (${f.days} dias úteis${(p.skip||[]).length?`, ${p.skip.length} data(s) desconsiderada(s)`:''})`:''};
+const holTxt=f=>f.hols.length?f.hols.length+' feriado(s) no período':'nenhum feriado no período';
+const fcCard=(p,est)=>{const f=forecast(p,est);return `<div${f&&f.hols.length?` title="${esc('Feriados no período:\n'+f.hols.join('\n'))}"`:''}><span>Término previsto</span><b>${f?fdate(f.end):'—'}</b><span>${f?f.days+' dia(s) útil(eis) · '+h(p.daily)+' por dia'+(p.hol===false?'':' · '+holTxt(f))+((p.skip||[]).length?' · '+p.skip.length+' data(s) fora':''):'Informe início e horas por dia em Editar projeto'}</span></div>`};
+const planTxt=(p,est)=>{const f=forecast(p,est);return f?` · Início ${fdate(p.start)} · ${h(p.daily)} por dia · término previsto ${fdate(f.end)} (${f.days} dias úteis${p.hol===false?'':', '+holTxt(f)+(f.hols.length?': '+f.hols.join('; '):'')}${(p.skip||[]).length?`, ${p.skip.length} data(s) desconsiderada(s)`:''})`:''};
 const skipHtml=l=>l.length?l.map(d=>`<span class="chip">${fdate(d)}<button type="button" data-a="rmskip" data-d="${d}" aria-label="Remover ${fdate(d)}">✕</button></span>`).join(''):'<span class="hint">Nenhuma data desconsiderada.</span>';
+/* ---------- Histórico ---------- */
+const HT={p:'Projeto',a:'Atividade',s:'Subatividade',e:'Apontamento'};
+const logH=(p,t,ch,del)=>{ch=ch.filter(Boolean);if(ch.length)(p.hist=p.hist||[]).push({at:Date.now(),t,del:!!del,ch})};
+const entTxt=e=>fdate(e.date)+' · '+h(e.hours)+' · '+pc(e.pct)+(e.note?' · '+e.note:'');
+let HF='';
+function histList(p){
+  const hs=[...(p.hist||[])].reverse().filter(x=>!HF||(x.t||'p')===HF);
+  return hs.length?`<ul class="hlist">${hs.map(x=>{const t=x.t||'p';return `<li><time datetime="${new Date(x.at).toISOString()}">${new Date(x.at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</time><span class="htag ${x.del?'x':t}">${HT[t]}${x.del?(t==='e'?' excluído':' excluída'):''}</span><div>${x.ch.map(esc).join('<br>')}</div></li>`}).join('')}</ul>`:'<p class="hint">Nenhum registro'+(HF?' deste tipo':'')+' ainda.</p>';
+}
+function histModal(){
+  M=null;HF='';const p=cur(),n=(p.hist||[]).length;
+  mf.innerHTML=`<h4>Histórico · ${esc(p.name)}</h4><div class="hbar"><label for="histF" class="hint">Mostrar</label><select id="histF"><option value="">Tudo</option><option value="p">Projeto</option><option value="a">Atividades</option><option value="s">Subatividades</option><option value="e">Apontamentos</option></select><span class="sp"></span><span class="hint">${n} registro(s)</span></div><div id="histL">${histList(p)}</div><div class="hint">O histórico fica salvo no projeto e vai junto no JSON completo. Ele não aparece no relatório HTML, na impressão nem na planilha.</div><div class="acts"><button type="button" class="btn" data-a="close">Fechar</button></div>`;
+  dlg.classList.add('wide');dlg.showModal();
+}
+document.addEventListener('change',ev=>{if(ev.target.id==='histF'){HF=ev.target.value;document.getElementById('histL').innerHTML=histList(cur())}});
 const histHtml=p=>{const hs=[...(p.hist||[])].reverse();return `<div class="sec" style="margin:4px 0 0"><h3>Histórico de alterações</h3></div>`+(hs.length?`<ul class="hist">${hs.map(x=>`<li><small>${new Date(x.at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</small>${x.ch.map(esc).join('<br>')}</li>`).join('')}</ul>`:'<div class="hint">Nenhuma alteração registrada ainda.</div>')};
 
 function actStats(a){
@@ -176,10 +235,11 @@ function render(){
   if(!cur())S.sel=S.projects[0]?.id||null;
   document.getElementById('plist').innerHTML=S.projects.length?S.projects.map(p=>`<button class="pitem ${p.id===S.sel?'on':''}" data-a="selp" data-p="${p.id}">${esc(p.name)}<small>${p.acts.length} atividade(s) · ${pc(projStats(p).pct)}</small></button>`).join(''):'<div class="empty">Nenhum projeto ainda.</div>';
   const p=cur(),m=document.getElementById('main');
-  if(!p){m.innerHTML='<div class="empty">Crie um projeto para começar.</div>';return}
+  applySide();paintChrome();
+  if(!p){m.innerHTML=`${SIDE?'':`<div class="row" style="margin-bottom:12px">${sideBtn()}</div>`}<div class="empty">Crie um projeto para começar.</div>`;return}
   const t=projStats(p),bal=t.est-t.spent;
-  m.innerHTML=`<div class="row"><h2>${esc(p.name)}</h2><span class="sp"></span>
-  <button class="ghost" data-a="mmap">Mapa mental</button><button class="btn" data-a="export">Exportar</button><button class="ghost" data-a="editp">Editar projeto</button><button class="ghost d" data-a="delp">Excluir</button></div>
+  m.innerHTML=`<div class="row">${sideBtn()}<h2>${esc(p.name)}</h2><span class="sp"></span>
+  <button class="ghost" data-a="hist">Histórico</button><button class="ghost" data-a="mmap">Mapa mental</button><button class="btn" data-a="export">Exportar</button><button class="ghost" data-a="editp">Editar projeto</button><button class="ghost d" data-a="delp">Excluir</button></div>
   <div class="sum">
     <div><span>Estimativa total</span><b>${h(t.est)}</b></div>
     <div><span>Tempo apontado</span><b>${h(t.spent)}</b></div>
@@ -236,7 +296,7 @@ function modal(kind,mode,c={}){
     title=(mode==='new'?'Novo ':'Editar ')+nome;
     if(kind==='a')f=fld('Nome','name',ob.name||'','required autofocus');
     if(kind==='p')M.c.skip=[...(ob.skip||[])].sort();
-    if(kind==='p')f=fld('Nome','name',ob.name||'','required autofocus')+`<div class="g2">${fld('Data de início','start',ob.start||today(),'type="date" required')}${fld('Horas por dia','daily',ob.daily??8,'type="number" min="0.25" step="0.25" required')}</div><div class="hint">O término previsto considera dias úteis (segunda a sexta), exceto as datas abaixo.</div><div><div class="hint" style="margin-bottom:4px">Datas desconsideradas no cálculo (feriados, folgas)</div><div class="row"><input type="date" id="skd" style="flex:1" aria-label="Data a desconsiderar"><button type="button" class="ghost" data-a="addskip">Adicionar data</button></div><div class="chips" id="skl" style="margin-top:8px">${skipHtml(M.c.skip)}</div></div>`+(mode==='edit'?histHtml(ob):'');
+    if(kind==='p')f=fld('Nome','name',ob.name||'','required autofocus')+`<div class="g2">${fld('Data de início','start',ob.start||today(),'type="date" required')}${fld('Horas por dia','daily',ob.daily??8,'type="number" min="0.25" step="0.25" required')}</div><div class="hint">O término previsto considera dias úteis (segunda a sexta), exceto feriados nacionais e as datas abaixo.</div><label class="chk"><input type="checkbox" name="hol" ${ob.hol===false?'':'checked'}><span>Desconsiderar feriados nacionais (Confraternização, Sexta-feira Santa, Tiradentes, Trabalho, Independência, Aparecida, Finados, República, Consciência Negra e Natal)</span></label><label class="chk"><input type="checkbox" name="fac" ${ob.fac===false?'':'checked'}><span>Desconsiderar também Carnaval (segunda e terça) e Corpus Christi, que são pontos facultativos</span></label><div><div class="hint" style="margin-bottom:4px">Outras datas desconsideradas (feriados estaduais e municipais, folgas)</div><div class="row"><input type="date" id="skd" style="flex:1" aria-label="Data a desconsiderar"><button type="button" class="ghost" data-a="addskip">Adicionar data</button></div><div class="chips" id="skl" style="margin-top:8px">${skipHtml(M.c.skip)}</div></div>`;
     if(kind==='s')f=fld('Nome','name',ob.name||'','required autofocus')+fld('Estimativa (horas)','est',ob.est??'','type="number" min="0" step="0.25" required');
     if(kind==='e')f=`<div class="g2">${fld('Data','date',ob.date||today(),'type="date" required')}${fld('Tempo (horas)','hours',ob.hours??'','type="number" min="0" step="0.25" required autofocus')}</div>`+
       fld('Percentual atingido (%)','pct',ob.pct??'','type="number" min="0" max="100" step="1" required')+fld('Observação','note',ob.note||'');
@@ -249,27 +309,31 @@ mf.addEventListener('submit',ev=>{
   if(!M)return;if(M.kind==='imp')return doImport();const {kind,mode,c}=M,d=new FormData(mf),g=n=>(d.get(n)||'').toString().trim();
   if(mode==='del'){
     if(kind==='p')S.projects=S.projects.filter(p=>p.id!==S.sel);
-    else if(kind==='a')cur().acts=cur().acts.filter(x=>x.id!==c.ai);
-    else if(kind==='s'){const a=act(c.ai);a.subs=a.subs.filter(x=>x.id!==c.si)}
-    else{const a=act(c.ai);a.entries=a.entries.filter(x=>x.id!==c.ei)}
+    else if(kind==='a'){const a=act(c.ai);logH(cur(),'a',[a.name+' ('+a.subs.length+' subatividade(s), '+a.entries.length+' apontamento(s))'],1);cur().acts=cur().acts.filter(x=>x.id!==c.ai)}
+    else if(kind==='s'){const a=act(c.ai),u=a.subs.find(x=>x.id===c.si);logH(cur(),'s',[u.name+' ('+h(u.est)+') · atividade '+a.name],1);a.subs=a.subs.filter(x=>x.id!==c.si)}
+    else{const a=act(c.ai),e=a.entries.find(x=>x.id===c.ei);logH(cur(),'e',[entTxt(e)+' · atividade '+a.name],1);a.entries=a.entries.filter(x=>x.id!==c.ei)}
   }else if(kind==='p'){
-    const v={name:g('name'),start:g('start'),daily:num(g('daily'))||8,skip:[...(c.skip||[])].sort()};
-    if(mode==='new'){const p={id:uid(),...v,acts:[],hist:[{at:Date.now(),ch:['Cadastro: início '+fdate(v.start)+', '+h(v.daily)+' por dia'+(v.skip.length?', '+v.skip.length+' data(s) desconsiderada(s)':'')]}]};S.projects.push(p);S.sel=p.id}
+    const v={name:g('name'),start:g('start'),daily:num(g('daily'))||8,skip:[...(c.skip||[])].sort(),hol:d.get('hol')==='on',fac:d.get('fac')==='on'};
+    if(mode==='new'){const p={id:uid(),...v,acts:[],hist:[{at:Date.now(),t:'p',ch:['Cadastro: início '+fdate(v.start)+', '+h(v.daily)+' por dia'+(v.skip.length?', '+v.skip.length+' data(s) desconsiderada(s)':'')]}]};S.projects.push(p);S.sel=p.id}
     else{const p=cur(),ch=[],cmp=(l,a,b)=>{if(a!==b)ch.push(l+': '+(a||'—')+' → '+b)};
-      cmp('Nome',p.name,v.name);cmp('Início',p.start?fdate(p.start):'',fdate(v.start));cmp('Horas por dia',p.daily?h(p.daily):'',h(v.daily));
+      cmp('Nome',p.name,v.name);cmp('Início',p.start?fdate(p.start):'',fdate(v.start));cmp('Horas por dia',p.daily?h(p.daily):'',h(v.daily));const sn=x=>x?'Sim':'Não';cmp('Feriados nacionais',sn(p.hol!==false),sn(v.hol));cmp('Carnaval e Corpus Christi',sn(p.fac!==false),sn(v.fac));
       const oa=p.skip||[],ad=v.skip.filter(x=>!oa.includes(x)),rm=oa.filter(x=>!v.skip.includes(x));
       if(ad.length)ch.push('Datas desconsideradas adicionadas: '+ad.map(fdate).join(', '));
       if(rm.length)ch.push('Datas desconsideradas removidas: '+rm.map(fdate).join(', '));
-      if(ch.length)(p.hist=p.hist||[]).push({at:Date.now(),ch});Object.assign(p,v)}
+      logH(p,'p',ch);Object.assign(p,v)}
   }else if(kind==='a'){
-    if(mode==='new'){const a={id:uid(),name:g('name'),subs:[],entries:[]};cur().acts.push(a);open.add('a:'+a.id)}else act(c.ai).name=g('name');
+    if(mode==='new'){const a={id:uid(),name:g('name'),subs:[],entries:[]};cur().acts.push(a);open.add('a:'+a.id);logH(cur(),'a',['Criada: '+a.name])}
+    else{const a=act(c.ai),nv=g('name');if(a.name!==nv)logH(cur(),'a',['Renomeada: '+a.name+' → '+nv]);a.name=nv}
   }else if(kind==='s'){
     const a=act(c.ai);
-    if(mode==='new')a.subs.push({id:uid(),name:g('name'),est:num(g('est'))});
-    else{const u=a.subs.find(x=>x.id===c.si);u.name=g('name');u.est=num(g('est'))}
+    if(mode==='new'){const u={id:uid(),name:g('name'),est:num(g('est'))};a.subs.push(u);logH(cur(),'s',['Criada: '+u.name+' ('+h(u.est)+') · atividade '+a.name])}
+    else{const u=a.subs.find(x=>x.id===c.si),nv=g('name'),ne=num(g('est'));logH(cur(),'s',[u.name!==nv&&'Nome: '+u.name+' → '+nv,u.est!==ne&&'Estimativa de '+nv+': '+h(u.est)+' → '+h(ne)].map(x=>x&&x+' · atividade '+a.name));u.name=nv;u.est=ne}
   }else{
     const a=act(c.ai),v={date:g('date'),hours:num(g('hours')),pct:Math.min(100,num(g('pct'))),note:g('note')};
-    if(mode==='new')a.entries.push({id:uid(),...v});else Object.assign(a.entries.find(x=>x.id===c.ei),v);
+    if(mode==='new'){a.entries.push({id:uid(),...v});logH(cur(),'e',['Novo: '+entTxt(v)+' · atividade '+a.name])}
+    else{const e=a.entries.find(x=>x.id===c.ei),cg=[];
+      if(e.date!==v.date)cg.push('Data: '+fdate(e.date)+' → '+fdate(v.date));if(e.hours!==v.hours)cg.push('Tempo: '+h(e.hours)+' → '+h(v.hours));if(e.pct!==v.pct)cg.push('Percentual: '+pc(e.pct)+' → '+pc(v.pct));if(e.note!==v.note)cg.push('Observação: '+(e.note||'—')+' → '+(v.note||'—'));
+      if(cg.length)logH(cur(),'e',['Apontamento de '+fdate(e.date)+' · atividade '+a.name+':',...cg]);Object.assign(e,v)}
   }
   save();dlg.close();render();
 });
@@ -298,6 +362,8 @@ dlg.addEventListener('close',()=>{dlg.classList.remove('wide');M=null});
 const dif=(est,spent)=>{const d=spent-est,sg=d>0?"+":d<0?"−":"";return sg+h(Math.abs(d))+(est>0?` (${sg}${Math.abs(Math.round(d/est*100))}%)`:"")};
 const sit=(a,s)=>s.pct>=100?'Concluída':(s.pct===0&&!a.entries.length)?'Não iniciada':(s.est>0&&s.spent>s.est)?'Acima da estimativa':'Em andamento';
 const proj=(pct,spent)=>pct>0?h(spent/(pct/100)):'—';
+/* nome do arquivo: nome_do_projeto_ddmmaa_hhmm (data e hora da exportação) */
+const fileBase=p=>{const d=new Date(),z=n=>String(n).padStart(2,"0");return (p.name.normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/gi,"_").replace(/^_+|_+$/g,"").toLowerCase()||"projeto")+"_"+z(d.getDate())+z(d.getMonth()+1)+String(d.getFullYear()).slice(-2)+"_"+z(d.getHours())+z(d.getMinutes())};
 const slug=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase()||'projeto';
 function reportBody(p){
   const t=projStats(p),bal=t.est-t.spent;let rows='',ents=[];
@@ -396,8 +462,8 @@ function printReport(){
   finally{document.title=t}
 }
 async function copyText(a){
-  const p=cur(),msg=document.getElementById('msg'),n=slug(p.name);
-  const k={'copy-html':['HTML',reportHtml(p),'relatorio-'+n+'.html'],'copy-json':['JSON',projJson(p),'projeto-'+n+'.json'],'copy-csv':['CSV',csv(p).replace(/^\ufeff/,''),'planilha-'+n+'.csv']}[a];
+  const p=cur(),msg=document.getElementById('msg'),n=fileBase(p);
+  const k={'copy-html':['HTML',reportHtml(p),n+'.html'],'copy-json':['JSON',projJson(p),n+'.json'],'copy-csv':['CSV',csv(p).replace(/^\ufeff/,''),n+'.csv']}[a];
   const ok=k[0]+' copiado. Cole em um editor de texto e salve como '+k[2]+'.';
   try{await navigator.clipboard.writeText(k[1]);msg.textContent=ok;return}catch(e){}
   const ta=document.getElementById('cpy');ta.hidden=false;ta.value=k[1];ta.focus();ta.select();
@@ -410,8 +476,8 @@ function normProject(o){
   if(o&&o.projeto)o=o.projeto;
   if(!o||typeof o!=='object'||typeof o.name!=='string'||!o.name.trim()||!Array.isArray(o.acts))throw new Error('O JSON não parece ser um projeto exportado deste app.');
   const str=v=>String(v??''),arr=v=>Array.isArray(v)?v:[];
-  return{id:uid(),name:o.name.trim(),start:isoD(o.start),daily:num(o.daily)||8,skip:[...new Set(arr(o.skip).map(isoD).filter(Boolean))].sort(),
-    hist:arr(o.hist).filter(x=>x&&Array.isArray(x.ch)).map(x=>({at:Number(x.at)||Date.now(),ch:x.ch.map(str)})),
+  return{id:uid(),name:o.name.trim(),start:isoD(o.start),daily:num(o.daily)||8,hol:o.hol!==false,fac:o.fac!==false,skip:[...new Set(arr(o.skip).map(isoD).filter(Boolean))].sort(),
+    hist:arr(o.hist).filter(x=>x&&Array.isArray(x.ch)).map(x=>({at:Number(x.at)||Date.now(),t:HT[x.t]?x.t:'p',del:!!x.del,ch:x.ch.map(str)})),
     acts:o.acts.map(a=>({id:uid(),name:str(a&&a.name),
       subs:arr(a&&a.subs).map(u=>({id:uid(),name:str(u&&u.name),est:num(u&&u.est)})),
       entries:arr(a&&a.entries).map(e=>({id:uid(),date:isoD(e&&e.date),hours:num(e&&e.hours),pct:Math.min(100,num(e&&e.pct)),note:str(e&&e.note)}))}))};
@@ -431,7 +497,7 @@ function doImport(){
   try{
     const p=normProject(JSON.parse(t));
     if(S.projects.some(x=>x.name===p.name))p.name+=' (importado)';
-    p.hist.push({at:Date.now(),ch:['Projeto importado de JSON']});
+    p.hist.push({at:Date.now(),t:'p',ch:['Projeto importado de JSON']});
     S.projects.push(p);S.sel=p.id;save();dlg.close();render();
   }catch(e){msg.textContent=e instanceof SyntaxError?'JSON inválido. Verifique o conteúdo.':e.message}
 }
@@ -447,8 +513,8 @@ function browserSave(fn,data){
   l.href=u;l.download=fn;l.style.display="none";document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),10000);
 }
 async function download(a){
-  const p=cur(),n=slug(p.name),msg=document.getElementById("msg");
-  let f;try{f={"dl-html":()=>["andamento-"+n+".html",reportHtml(p)],"dl-csv":()=>["andamento-"+n+".csv",csv(p)],"dl-json":()=>["projeto-"+n+".json",projJson(p)],"dl-xlsx":()=>["andamento-"+n+".xlsx",xlsx(p)]}[a]()}
+  const p=cur(),n=fileBase(p),msg=document.getElementById("msg");
+  let f;try{f={"dl-html":()=>[n+".html",reportHtml(p)],"dl-csv":()=>[n+".csv",csv(p)],"dl-json":()=>[n+".json",projJson(p)],"dl-xlsx":()=>[n+".xlsx",xlsx(p)]}[a]()}
   catch(e){msg.textContent="Não foi possível gerar o arquivo.";return}
   if(DL){
     try{await DL.save({filename:f[0],data:f[1]});msg.textContent="Arquivo pronto: "+f[0]}
@@ -538,6 +604,9 @@ document.addEventListener('click',ev=>{
   const b=ev.target.closest('[data-a]');if(!b)return;
   const a=b.dataset.a,D=b.dataset;
   if(a==='close')return dlg.close();
+  if(a==='theme'){const t=isDark()?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem(KEY+'-tema',t)}catch(e){}return paintChrome()}
+  if(a==='side'){SIDE=!SIDE;try{localStorage.setItem(KEY+'-painel',SIDE?'visivel':'oculto')}catch(e){}return render()}
+  if(a==='hist')return histModal();
   if(a==='mmap')return mmOpen();
   if(a==='export')return exportModal();
   if(a==='impp')return importModal();
@@ -552,6 +621,12 @@ document.addEventListener('click',ev=>{
   const mode=a.startsWith('new')?'new':a.startsWith('edit')?'edit':'del';
   modal(kind,mode,{ai:D.ai,si:D.si,ei:D.ei});
 });
+/* ---------- Funcionamento offline (sem instalação: não há manifesto) ---------- */
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)&&!window.claude){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})});
+}
+const netUI=()=>{document.getElementById('net').hidden=navigator.onLine};
+window.addEventListener('online',netUI);window.addEventListener('offline',netUI);netUI();
 render();
 </script>
 </body>
