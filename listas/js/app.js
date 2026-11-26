@@ -7,7 +7,7 @@ const $ = s => document.querySelector(s)
 
 const geral = $('#geral')
 const sheetNome = $('#sheetNome'), sheetItem = $('#sheetItem'), nomeInput = $('#nomeInput')
-const sheetConfirm = $('#sheetConfirm'), sheetResumo = $('#sheetResumo')
+const sheetConfirm = $('#sheetConfirm'), sheetResumo = $('#sheetResumo'), sheetOrc = $('#sheetOrc')
 const f = { desc: $('#iDesc'), un: $('#iUn'), qtd: $('#iQtd'), preco: $('#iPreco') }
 
 let dados = ler()
@@ -34,6 +34,7 @@ const P = {
   trash: 'M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14',
   doc: 'M7 3h8l4 4v14H7zM15 3v4h4M10 12h6M10 16h6',
   undo: 'M3 12a9 9 0 1 0 3-6.7M3 4v5h5',
+  wallet: 'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7V6a2 2 0 0 1 2-2h12M16 14h2',
   moon: 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z',
   sun: 'M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1'
 }
@@ -61,12 +62,29 @@ const grupoHTML = (g, L, G) => {
   </details>`
 }
 
+const orc = l => Number(l.orcamento) || 0 // valor para gastar da lista
+
+const saldoHTML = l => {
+  if (!(orc(l) > 0)) return ''
+  const saldo = orc(l) - totalLista(l)
+  return `<small class="saldo${saldo < 0 ? ' neg' : ''}">Para gastar ${brl.format(orc(l))} · ${saldo < 0 ? 'estourou ' + brl.format(-saldo) : 'saldo ' + brl.format(saldo)}</small>`
+}
+
+const orcHTML = (l, L) => {
+  if (!(orc(l) > 0)) return ''
+  const gasto = totalLista(l), pct = gasto / orc(l) * 100
+  const nivel = pct > 100 ? 'estouro' : pct >= 80 ? 'alerta' : 'ok'
+  return `<div class="orc ${nivel}" data-action="edit-orc" data-l="${L}" tabindex="0" title="Alterar valor para gastar">
+    <div class="orc-txt"><span>Gasto ${brl.format(gasto)}</span><span>de ${brl.format(orc(l))} · ${Math.round(pct)}%</span></div>
+    <div class="orc-bar"><i style="width:${Math.min(100, pct)}%"></i></div></div>`
+}
+
 const listaHTML = (l, L) => {
   const r = `data-l="${L}"`
   return `<details class="lista" data-k="${L}" ${L === listaAberta ? 'open' : ''}>
-    <summary><span class="nome">${esc(l.descricao)}</span><strong class="total">${brl.format(totalLista(l))}</strong>
-      <span class="acoes-hover">${iconBtn('novo-grupo', 'Novo grupo', P.plus, r)}${iconBtn('resumo', 'Resumo da lista', P.doc, r)}${iconBtn('zerar-lista', 'Zerar preços da lista', P.undo, r)}${iconBtn('edit-lista', 'Renomear lista', P.edit, r)}${iconBtn('del-lista', 'Excluir lista', P.trash, r)}</span></summary>
-    <div class="grupos">${l.grupos.map((g, G) => grupoHTML(g, L, G)).join('') || '<p class="vazio">Sem grupos. Use + para adicionar.</p>'}</div>
+    <summary><span class="nome">${esc(l.descricao)}${saldoHTML(l)}</span><strong class="total">${brl.format(totalLista(l))}</strong>
+      <span class="acoes-hover">${iconBtn('novo-grupo', 'Novo grupo', P.plus, r)}${iconBtn('edit-orc', 'Valor para gastar', P.wallet, r)}${iconBtn('resumo', 'Resumo da lista', P.doc, r)}${iconBtn('zerar-lista', 'Zerar preços da lista', P.undo, r)}${iconBtn('edit-lista', 'Renomear lista', P.edit, r)}${iconBtn('del-lista', 'Excluir lista', P.trash, r)}</span></summary>
+    ${orcHTML(l, L)}<div class="grupos">${l.grupos.map((g, G) => grupoHTML(g, L, G)).join('') || '<p class="vazio">Sem grupos. Use + para adicionar.</p>'}</div>
   </details>`
 }
 
@@ -91,12 +109,13 @@ geral.addEventListener('toggle', e => {
 
 /* ---------- formulários ---------- */
 const fechar = () => {
-  sheetNome.hidden = sheetItem.hidden = sheetResumo.hidden = sheetConfirm.hidden = true
+  ;[sheetNome, sheetItem, sheetResumo, sheetConfirm, sheetOrc].forEach(sh => { if (sh) sh.hidden = true })
   if (resolveConf) { resolveConf(false); resolveConf = null }
 }
 
 // Modal de confirmação do app (substitui o confirm() do navegador). Retorna Promise<boolean>.
 function confirmar(msg, label = 'Excluir') {
+  if (!sheetConfirm) return Promise.resolve(window.confirm(msg)) // index.html antigo, sem o modal
   return new Promise(res => {
     resolveConf = res
     $('#confMsg').textContent = msg
@@ -119,6 +138,20 @@ $('#formNome').addEventListener('submit', e => {
   const v = nomeInput.value.trim()
   if (!v) return
   aoSalvarNome(v); gravar(); fechar()
+})
+
+let refOrc = null
+function abrirOrc(L) {
+  refOrc = L
+  $('#oVal').value = orc(dados[L]) > 0 ? orc(dados[L]) : ''
+  sheetOrc.hidden = false
+  if (!matchMedia('(pointer: coarse)').matches) $('#oVal').focus()
+}
+$('#formOrc').addEventListener('submit', e => {
+  e.preventDefault()
+  const v = Number($('#oVal').value) || 0
+  dados[refOrc].orcamento = v > 0 ? v : 0
+  gravar(); fechar()
 })
 
 const prev = () => { $('#prev').textContent = 'Total: ' + brl.format((+f.qtd.value || 0) * (+f.preco.value || 0)) }
@@ -175,11 +208,13 @@ function resumoTexto(l) {
     }))
     const w = k => Math.max(0, ...rows.filter(r => r[k] != null).map(r => r[k].length))
     const [wd, wq, wu, wp, wt] = ['d', 'q', 'u', 'p', 't'].map(w)
-    rows.forEach(r => out.push((`${r.d.padEnd(wd)} ${r.q.padStart(wq)} ${r.u.padEnd(wu)}` +
-      (r.p == null ? '' : ` × R$ ${r.p.padStart(wp)} = R$ ${r.t.padStart(wt)}`)).trimEnd()))
+    rows.forEach(r => out.push(`${r.d.padEnd(wd)} ${r.q.padStart(wq)} ${r.u.padEnd(wu)}` +
+      (r.p == null ? ' × sem preço' : ` × R$ ${r.p.padStart(wp)} = R$ ${r.t.padStart(wt)}`)))
     if (rows.length) out.push('')
   })
   out.push(`## TOTAL: ${brl.format(totalLista(l))}`)
+  const sem = l.grupos.reduce((a, g) => a + g.itens.filter(it => !temPreco(it)).length, 0)
+  if (sem) out.push(`(${sem} ${sem > 1 ? 'itens sem preço' : 'item sem preço'})`)
   return out.join('\n').replace(/\u00a0/g, ' ')
 }
 
@@ -196,6 +231,7 @@ async function copiar() {
 
 const acoes = {
   'nova-lista': () => abrirNome('Nova lista', '', v => { dados.push({ descricao: v, grupos: [] }); listaAberta = dados.length - 1 }),
+  'edit-orc': ({ L }) => abrirOrc(L),
   'edit-lista': ({ L }) => abrirNome('Renomear lista', dados[L].descricao, v => { dados[L].descricao = v }),
   'del-lista': ({ L }) => excluir(`Excluir a lista “${dados[L].descricao}”?`, () => { dados.splice(L, 1); listaAberta = null }),
   'novo-grupo': ({ L }) => abrirNome('Novo grupo', '', v => { dados[L].grupos.push({ descricao: v, itens: [] }); listaAberta = L }),
@@ -204,8 +240,8 @@ const acoes = {
   'novo-item': ({ L, G }) => abrirItem(L, G, -1),
   'edit-item': ({ L, G, I }) => abrirItem(L, G, I),
   'del-item': ({ L, G, I }) => excluir('Excluir este item?', () => dados[L].grupos[G].itens.splice(I, 1)),
-  'zerar-lista': ({ L }) => executar(`Zerar os preços de todos os itens da lista “${dados[L].descricao}”?`, 'Zerar preços',
-    () => dados[L].grupos.forEach(g => g.itens.forEach(it => { it.preco = 0 })), false),
+  'zerar-lista': ({ L }) => executar(`Zerar os preços dos itens e o valor para gastar da lista “${dados[L].descricao}”?`, 'Zerar preços',
+    () => { dados[L].orcamento = 0; dados[L].grupos.forEach(g => g.itens.forEach(it => { it.preco = 0 })) }, false),
   resumo: ({ L }) => { $('#resumoTexto').textContent = resumoTexto(dados[L]); $('#btnCopiar').textContent = 'Copiar'; sheetResumo.hidden = false },
   copiar,
   'conf-sim': () => { const r = resolveConf; resolveConf = null; sheetConfirm.hidden = true; r?.(true) },
@@ -237,7 +273,7 @@ document.addEventListener('click', e => {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && !document.querySelector('.ps-ov')) fechar()
-  if (e.key === 'Enter' && e.target.matches?.('.item[data-action]')) e.target.click()
+  if (e.key === 'Enter' && e.target.matches?.('[data-action][tabindex="0"]')) e.target.click()
 })
 
 iconeTema()

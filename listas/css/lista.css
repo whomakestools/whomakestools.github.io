@@ -84,3 +84,15 @@ summary:focus-visible, .btn:focus-visible, .icon:focus-visible,
 @media (max-width: 640px) {
   .sheet { align-items: start; padding-top: max(12px, env(safe-area-inset-top)); }
 }
+
+/* valor para gastar da lista */
+.lista > summary .nome small.saldo { display: block; font-weight: 400; font-size: .8rem; opacity: .9; }
+.lista > summary .nome small.saldo.neg { color: #ffc2c2; opacity: 1; }
+.orc { --orc-cor: var(--ok-bd); margin: 8px; padding: 10px 12px; background: var(--card); border: 1px solid var(--bd); border-radius: 10px; cursor: pointer; }
+.orc.alerta { --orc-cor: #d99a00; }
+.orc.estouro { --orc-cor: var(--danger); }
+.orc-txt { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 8px; margin-bottom: 8px; font-size: .9rem; }
+.orc-txt span:last-child { color: var(--mut); }
+.orc-bar { height: 8px; border-radius: 99px; background: var(--bd); overflow: hidden; }
+.orc-bar i { display: block; height: 100%; border-radius: inherit; background: var(--orc-cor); transition: width .25s; }
+.dica { font-size: .85rem; color: var(--mut); }

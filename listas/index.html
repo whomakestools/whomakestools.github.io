@@ -8,7 +8,7 @@
   <script>
     try { document.documentElement.dataset.theme = localStorage.getItem('listas-tema') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') } catch (e) {}
   </script>
-  <link rel="stylesheet" href="./css/lista.css">
+  <link rel="stylesheet" href="./css/lista.css?v=7">
 </head>
 <body>
   <header class="topbar">
@@ -72,6 +72,21 @@
     </form>
   </div>
 
+  <!-- Valor para gastar -->
+  <div class="sheet" id="sheetOrc" hidden>
+    <form class="card" id="formOrc">
+      <h2>Valor para gastar</h2>
+      <label>Valor (R$)
+        <input type="number" id="oVal" inputmode="decimal" step="0.01" min="0" placeholder="0,00">
+      </label>
+      <p class="dica">Deixe em branco ou 0 para remover.</p>
+      <div class="acoes">
+        <button type="button" class="btn" data-action="fechar">Cancelar</button>
+        <button class="btn primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+
   <!-- Confirmação -->
   <div class="sheet" id="sheetConfirm" hidden>
     <div class="card" role="alertdialog" aria-labelledby="confTitulo">
@@ -97,6 +112,6 @@
   </div>
 
   <script src="https://whomakestools.github.io/leitor/price-scanner.js"></script>
-  <script src="./js/app.js"></script>
+  <script src="./js/app.js?v=7"></script>
 </body>
 </html>
