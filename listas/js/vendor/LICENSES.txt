@@ -1,0 +1,6 @@
+Bibliotecas de terceiros embutidas (para o app funcionar offline):
+
+- qrcode-generator 2.0.4 (qrcode.min.js) - Kazuhiko Arase - licença MIT
+  https://github.com/kazuhikoarase/qrcode-generator
+- jsQR 1.4.0 (jsQR.min.js) - Cosmo Wolfe - licença Apache-2.0
+  https://github.com/cozmo/jsQR

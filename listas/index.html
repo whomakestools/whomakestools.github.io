@@ -12,7 +12,7 @@
   <script>
     try { document.documentElement.dataset.theme = localStorage.getItem('listas-tema') || 'dark' } catch (e) { document.documentElement.dataset.theme = 'dark' } // padrão: modo escuro
   </script>
-  <link rel="stylesheet" href="./css/lista.css?v=12">
+  <link rel="stylesheet" href="./css/lista.css?v=13">
 </head>
 <body>
   <header class="topbar">
@@ -24,6 +24,7 @@
     </h1>
     <div class="topo-acoes">
       <button type="button" class="icon" id="btnTema" data-action="tema" title="Modo escuro" aria-label="Alternar modo escuro"></button>
+      <button type="button" class="icon" data-action="importar" title="Importar lista (QR Code)" aria-label="Importar lista por QR Code"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"/></svg></button>
       <button class="btn primary" data-action="nova-lista">+ Nova lista</button>
     </div>
     <input type="search" id="filtro" class="filtro" placeholder="Filtrar listas pelo nome…" autocomplete="off" aria-label="Filtrar">
@@ -80,6 +81,28 @@
     </form>
   </div>
 
+  <!-- Compartilhar lista (QR Code) -->
+  <div class="sheet" id="sheetQR" hidden>
+    <div class="card qr">
+      <h2 id="qrTitulo">Compartilhar lista</h2>
+      <div id="qrBox" class="qr-box" title="Toque para ampliar"><canvas id="qrCanvas"></canvas></div>
+      <p id="qrInfo" class="dica"></p>
+      <div class="acoes"><button type="button" class="btn" data-action="fechar">Fechar</button></div>
+    </div>
+  </div>
+
+  <!-- Importar lista (ler QR Code) -->
+  <div class="sheet" id="sheetScan" hidden>
+    <div class="card qr">
+      <h2>Importar lista</h2>
+      <video id="scanVideo" class="scan-video" playsinline muted></video>
+      <p id="scanMsg" class="dica"></p>
+      <div class="acoes"><button type="button" class="btn" data-action="fechar">Cancelar</button></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
   <!-- Valor para gastar -->
   <div class="sheet" id="sheetOrc" hidden>
     <form class="card" id="formOrc">
@@ -124,6 +147,6 @@
     if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}))
   </script>
   <script src="https://whomakestools.github.io/leitor/price-scanner.js"></script>
-  <script src="./js/app.js?v=12"></script>
+  <script src="./js/app.js?v=13"></script>
 </body>
 </html>

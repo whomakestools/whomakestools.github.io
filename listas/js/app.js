@@ -7,7 +7,7 @@ const $ = s => document.querySelector(s)
 
 const geral = $('#geral')
 const sheetNome = $('#sheetNome'), sheetItem = $('#sheetItem'), nomeInput = $('#nomeInput')
-const sheetConfirm = $('#sheetConfirm'), sheetResumo = $('#sheetResumo'), sheetOrc = $('#sheetOrc')
+const sheetConfirm = $('#sheetConfirm'), sheetResumo = $('#sheetResumo'), sheetOrc = $('#sheetOrc'), sheetQR = $('#sheetQR'), sheetScan = $('#sheetScan')
 const f = { desc: $('#iDesc'), un: $('#iUn'), qtd: $('#iQtd'), preco: $('#iPreco') }
 
 let dados = ler()
@@ -57,6 +57,7 @@ const P = {
   doc: 'M7 3h8l4 4v14H7zM15 3v4h4M10 12h6M10 16h6',
   undo: 'M3 12a9 9 0 1 0 3-6.7M3 4v5h5',
   wallet: 'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7V6a2 2 0 0 1 2-2h12M16 14h2',
+  qr: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z',
   moon: 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z',
   sun: 'M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1'
 }
@@ -124,7 +125,7 @@ const listaHTML = (l, L) => {
   const add = l.semGrupo ? iconBtn('novo-item', 'Novo item', P.plus, `${r} data-g="0"`) : iconBtn('novo-grupo', 'Novo grupo', P.plus, r)
   return `<details class="lista" data-k="${L}" ${L === listaAberta ? 'open' : ''}>
     <summary><span class="nome">${esc(l.descricao)}${contHTML(l)}${saldoHTML(l)}</span><strong class="total">${brl.format(totalLista(l))}</strong>
-      <span class="acoes-hover">${add}${iconBtn('edit-orc', 'Valor para gastar', P.wallet, r)}${iconBtn('resumo', 'Resumo da lista', P.doc, r)}${iconBtn('zerar-lista', 'Zerar preços da lista', P.undo, r)}${iconBtn('edit-lista', 'Renomear lista', P.edit, r)}${iconBtn('del-lista', 'Excluir lista', P.trash, r)}</span></summary>
+      <span class="acoes-hover">${add}${iconBtn('edit-orc', 'Valor para gastar', P.wallet, r)}${iconBtn('compartilhar', 'Compartilhar lista (QR Code)', P.qr, r)}${iconBtn('resumo', 'Resumo da lista', P.doc, r)}${iconBtn('zerar-lista', 'Zerar preços da lista', P.undo, r)}${iconBtn('edit-lista', 'Renomear lista', P.edit, r)}${iconBtn('del-lista', 'Excluir lista', P.trash, r)}</span></summary>
     ${orcHTML(l, L)}${corpoLista(l, L)}
   </details>`
 }
@@ -152,7 +153,8 @@ geral.addEventListener('toggle', e => {
 
 /* ---------- formulários ---------- */
 const fechar = () => {
-  ;[sheetNome, sheetItem, sheetResumo, sheetConfirm, sheetOrc].forEach(sh => { if (sh) sh.hidden = true })
+  ;[sheetNome, sheetItem, sheetResumo, sheetConfirm, sheetOrc, sheetQR, sheetScan].forEach(sh => { if (sh) sh.hidden = true })
+  pararCamera(); qrAtual = null; qrFull = false; $('#qrBox').classList.remove('full')
   if (resolveConf) { resolveConf(false); resolveConf = null }
 }
 
@@ -280,6 +282,173 @@ async function copiar() {
   setTimeout(() => { b.textContent = 'Copiar' }, 1500)
 }
 
+/* ---------- compartilhar / importar por QR Code ----------
+   Texto do QR Code:  ###id##valor para gastar (opcional)#descrição|tipo|quantidade#descrição|tipo|quantidade...
+   Exemplo:           ###efa81cb888e5##1500,00#batata|kg|2,566#leite em pó|pc|2#macarrão|un|2
+   Os caracteres % # | dentro da descrição são escapados (%25 %23 %7C). Preços não vão no QR Code. */
+const QR_MAX = 2953 // bytes: capacidade máxima de um QR Code (versão 40, correção de erro L)
+const UNIDADES = ['UN', 'KG', 'LT', 'PÇ', 'PC', 'DZ', 'CX']
+let qrAtual = null, qrFull = false, camStream = null, camTimer = null, camBusy = false
+const scanCanvas = document.createElement('canvas')
+
+const scriptsCarregados = {}
+const carregar = src => scriptsCarregados[src] || (scriptsCarregados[src] = new Promise((ok, erro) => {
+  const el = document.createElement('script')
+  el.src = src; el.onload = ok
+  el.onerror = () => { delete scriptsCarregados[src]; erro(new Error('Falha ao carregar ' + src)) }
+  document.head.appendChild(el)
+}))
+
+const novoId = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), b => b.toString(16).padStart(2, '0')).join('')
+const escTxt = t => t.replace(/[%#|]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase())
+const unescTxt = t => t.replace(/%(25|23|7C)/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
+const numTxt = n => Number.isInteger(n) ? String(n) : n.toFixed(3).replace(/0+$/, '').replace('.', ',')
+const numLer = (t, padrao) => { const x = String(t ?? '').trim().replace(',', '.'); const n = Number(x); return x !== '' && isFinite(n) ? n : padrao }
+
+function textoExportacao(l) {
+  let t = '###' + l.id
+  if (orc(l) > 0) t += '##' + orc(l).toFixed(2).replace('.', ',')
+  l.grupos.forEach(g => g.itens.forEach(it => {
+    t += '#' + escTxt(it.descricao.trim()) + '|' + it.unidade.toLowerCase() + '|' + numTxt(it.qtd)
+  }))
+  return t
+}
+
+function parseLista(txt) {
+  txt = String(txt || '').trim()
+  if (!txt.startsWith('###')) return null
+  let resto = txt.slice(3), i = resto.indexOf('#')
+  const id = i < 0 ? resto : resto.slice(0, i)
+  resto = i < 0 ? '' : resto.slice(i)
+  if (!/^[\w-]{4,40}$/.test(id)) return null
+  let orcamento = null
+  if (resto.startsWith('##')) {
+    resto = resto.slice(2); i = resto.indexOf('#')
+    orcamento = numLer(i < 0 ? resto : resto.slice(0, i), null)
+    resto = i < 0 ? '' : resto.slice(i)
+  }
+  const itens = resto.split('#').filter(Boolean).map(p => {
+    const [d = '', u = '', q = ''] = p.split('|')
+    const un = u.trim().toUpperCase()
+    return { descricao: unescTxt(d).trim(), unidade: UNIDADES.includes(un) ? un : 'UN', qtd: numLer(q, 1) }
+  }).filter(it => it.descricao)
+  return { id, orcamento, itens }
+}
+
+let toastT
+function aviso(msg) {
+  const t = $('#toast'); t.textContent = msg; t.hidden = false
+  clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true }, 3500)
+}
+
+/* compartilhar: gera o QR Code (versão automática, no máximo a 40, correção de erro L = maior capacidade) */
+async function mostrarQR(L) {
+  const l = dados[L], info = $('#qrInfo'), box = $('#qrBox')
+  if (!l.id) { l.id = novoId(); localStorage.setItem(KEY, JSON.stringify(dados)) }
+  $('#qrTitulo').textContent = `Compartilhar “${l.descricao}”`
+  info.textContent = 'Gerando QR Code…'; box.hidden = false; qrAtual = null
+  sheetQR.hidden = false
+  try { await carregar('./js/vendor/qrcode.min.js') } catch { box.hidden = true; info.textContent = 'Não foi possível carregar o gerador de QR Code.'; return }
+  if (sheetQR.hidden) return
+  const bin = Array.from(new TextEncoder().encode(textoExportacao(l)), b => String.fromCharCode(b)).join('') // UTF-8 como bytes
+  if (bin.length > QR_MAX) {
+    box.hidden = true
+    info.textContent = `Lista grande demais para um QR Code: ${bin.length} bytes (máximo ${QR_MAX}). Divida a lista em duas.`
+    return
+  }
+  const qr = qrcode(0, 'L'); qr.addData(bin, 'Byte'); qr.make()
+  qrAtual = qr
+  const n = l.grupos.reduce((a, g) => a + g.itens.length, 0)
+  info.textContent = `${n} ${n === 1 ? 'item' : 'itens'} · ${bin.length} de ${QR_MAX} bytes · QR versão ${(qr.getModuleCount() - 17) / 4}. Toque no QR Code para ampliar.`
+  desenhaQR()
+}
+
+// desenha o mais grande possível, com módulos de tamanho inteiro (nítido) e fundo branco em qualquer tema
+function desenhaQR() {
+  const qr = qrAtual
+  if (!qr) return
+  const n = qr.getModuleCount(), q = 3, total = n + q * 2, dpr = window.devicePixelRatio || 1
+  const css = qrFull ? Math.min(innerWidth, innerHeight) : Math.min(520, $('#qrBox').clientWidth - 16)
+  const escala = Math.max(2, Math.floor(css * dpr / total))
+  const c = $('#qrCanvas')
+  c.width = c.height = total * escala
+  c.style.width = c.style.height = (c.width / dpr) + 'px'
+  const x = c.getContext('2d')
+  x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.fillStyle = '#000'
+  for (let r = 0; r < n; r++) for (let k = 0; k < n; k++) if (qr.isDark(r, k)) x.fillRect((k + q) * escala, (r + q) * escala, escala, escala)
+}
+
+/* importar: lê o QR Code pela câmera */
+function pararCamera() {
+  clearInterval(camTimer); camTimer = null
+  if (camStream) camStream.getTracks().forEach(t => t.stop())
+  camStream = null
+}
+
+async function abrirScanner() {
+  const msg = $('#scanMsg')
+  msg.textContent = 'Abrindo a câmera…'; sheetScan.hidden = false
+  try {
+    await carregar('./js/vendor/jsQR.min.js')
+    camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false })
+  } catch { msg.textContent = 'Não foi possível acessar a câmera.'; return }
+  if (sheetScan.hidden) { pararCamera(); return } // fechou enquanto abria
+  const trk = camStream.getVideoTracks()[0], caps = trk.getCapabilities ? trk.getCapabilities() : {}
+  if (caps.focusMode && caps.focusMode.includes('continuous')) trk.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => { })
+  const v = $('#scanVideo'); v.srcObject = camStream; v.play().catch(() => { })
+  msg.textContent = 'Aponte para o QR Code da lista'
+  clearInterval(camTimer); camTimer = setInterval(lerQuadro, 200)
+}
+
+function lerQuadro() {
+  const v = $('#scanVideo')
+  if (camBusy || !v.videoWidth || !window.jsQR) return
+  camBusy = true
+  try {
+    const w = v.videoWidth, h = v.videoHeight
+    scanCanvas.width = w; scanCanvas.height = h
+    const x = scanCanvas.getContext('2d', { willReadFrequently: true })
+    x.drawImage(v, 0, 0, w, h)
+    const r = jsQR(x.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: 'dontInvert' })
+    if (r && r.binaryData) {
+      const imp = parseLista(new TextDecoder('utf-8').decode(Uint8Array.from(r.binaryData)))
+      if (imp) { pararCamera(); sheetScan.hidden = true; processarImportacao(imp) }
+      else $('#scanMsg').textContent = 'Este QR Code não é de uma lista.'
+    }
+  } finally { camBusy = false }
+}
+
+// mesmo id: atualiza os itens (mantém o preço dos itens que já existiam); id novo: pede o nome e cria a lista
+function processarImportacao(imp) {
+  const total = `${imp.itens.length} ${imp.itens.length === 1 ? 'item' : 'itens'}`
+  const L = dados.findIndex(l => l.id === imp.id)
+  if (L >= 0) {
+    aplicarImportacao(dados[L], imp)
+    listaAberta = L; limparFiltro(); gravar(); scrollTo({ top: 0 })
+    aviso(`Lista “${dados[L].descricao}” atualizada: ${total}`)
+    return
+  }
+  abrirNome('Nome da lista importada', '', v => {
+    const nova = { id: imp.id, descricao: v, semGrupo: true, grupos: [{ descricao: '', itens: imp.itens.map(i => ({ ...i, preco: 0 })) }] }
+    if (imp.orcamento > 0) nova.orcamento = imp.orcamento
+    dados.push(nova); listaAberta = dados.length - 1; limparFiltro()
+    aviso(`Lista “${v}” importada: ${total}`)
+  })
+}
+
+function aplicarImportacao(l, imp) {
+  const antigos = l.grupos.flatMap(g => g.itens.map(it => ({ g, it })))
+  l.grupos.forEach(g => { g.itens = [] })
+  let destino = l.grupos[l.grupos.length - 1]
+  if (!destino) { destino = { descricao: 'Itens', itens: [] }; l.grupos.push(destino) }
+  imp.itens.forEach(n => {
+    const k = antigos.findIndex(a => norm(a.it.descricao) === norm(n.descricao))
+    if (k >= 0) { const a = antigos.splice(k, 1)[0]; a.g.itens.push({ ...a.it, descricao: n.descricao, unidade: n.unidade, qtd: n.qtd }) }
+    else destino.itens.push({ descricao: n.descricao, unidade: n.unidade, qtd: n.qtd, preco: 0 })
+  })
+  if (imp.orcamento > 0) l.orcamento = imp.orcamento
+}
+
 const acoes = {
   'nova-lista': () => abrirNome('Nova lista', '', (v, comGrupos) => {
     const nova = { descricao: v, grupos: [] }
@@ -299,6 +468,8 @@ const acoes = {
     () => { dados[L].orcamento = 0; dados[L].grupos.forEach(g => g.itens.forEach(it => { it.preco = 0 })) }, false),
   resumo: ({ L }) => { $('#resumoTexto').textContent = resumoTexto(dados[L]); $('#btnCopiar').textContent = 'Copiar'; sheetResumo.hidden = false },
   copiar,
+  compartilhar: ({ L }) => mostrarQR(L),
+  importar: abrirScanner,
   'conf-sim': () => { const r = resolveConf; resolveConf = null; sheetConfirm.hidden = true; r?.(true) },
   'conf-nao': () => fechar(),
   tema: () => {
@@ -330,6 +501,9 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && !document.querySelector('.ps-ov')) fechar()
   if (e.key === 'Enter' && e.target.matches?.('[data-action][tabindex="0"]')) e.target.click()
 })
+
+$('#qrBox').addEventListener('click', () => { qrFull = !qrFull; $('#qrBox').classList.toggle('full', qrFull); desenhaQR() })
+addEventListener('resize', () => { if (qrAtual) desenhaQR() })
 
 iconeTema()
 render()

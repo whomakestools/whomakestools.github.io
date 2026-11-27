@@ -1,8 +1,9 @@
 // Service worker do app Listas: deixa a lista funcionar offline (HTML, CSS e JS ficam em cache).
 // A leitura de preço pela câmera (price-scanner/OCR, hospedados fora) continua exigindo internet.
-const CACHE = 'listas-v6' // troque o número para forçar a atualização dos arquivos em cache
+const CACHE = 'listas-v7' // troque o número para forçar a atualização dos arquivos em cache
 const ARQUIVOS = [
   './', './index.html', './css/lista.css', './js/app.js',
+  './js/vendor/qrcode.min.js', './js/vendor/jsQR.min.js',
   './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'
 ]
 

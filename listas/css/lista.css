@@ -112,3 +112,11 @@ summary:focus-visible, .btn:focus-visible, .icon:focus-visible,
   .icon { width: 43px; height: 43px; }
   .icon svg { width: 22px; height: 22px; }
 }
+
+/* compartilhar / importar por QR Code */
+.card.qr { max-width: 560px; }
+.qr-box { display: grid; place-items: center; padding: 8px; background: #fff; border-radius: 12px; cursor: zoom-in; }
+.qr-box canvas { display: block; image-rendering: pixelated; }
+.qr-box.full { position: fixed; inset: 0; z-index: 70; padding: 0; border-radius: 0; cursor: zoom-out; }
+.scan-video { width: 100%; max-height: 60vh; object-fit: cover; border-radius: 12px; background: #000; }
+.toast { position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 80; max-width: calc(100% - 32px); padding: 12px 18px; border-radius: 12px; background: #222; color: #fff; text-align: center; box-shadow: 0 6px 20px #0006; }
