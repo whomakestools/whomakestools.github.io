@@ -96,3 +96,19 @@ summary:focus-visible, .btn:focus-visible, .icon:focus-visible,
 .orc-bar { height: 8px; border-radius: 99px; background: var(--bd); overflow: hidden; }
 .orc-bar i { display: block; height: 100%; border-radius: inherit; background: var(--orc-cor); transition: width .25s; }
 .dica { font-size: .85rem; color: var(--mut); }
+
+/* contador, filtro, opção de grupos e itens soltos na lista */
+.lista > summary .nome small.cont { display: block; font-weight: 400; font-size: .8rem; opacity: .9; }
+.topbar { flex-wrap: wrap; row-gap: 10px; }
+.filtro { flex: 1 0 100%; font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--bd); border-radius: 10px; padding: 9px 12px; }
+.filtro:focus { outline: 2px solid var(--pri); outline-offset: 1px; }
+.card .chk { display: flex; align-items: center; gap: 10px; color: var(--fg); }
+.card .chk input { width: auto; }
+[hidden] { display: none !important; } /* garante que o atributo hidden esconda mesmo com display definido em classe */
+.itens-lista { padding: 6px; }
+
+/* celular: ícones 20% maiores */
+@media (max-width: 640px) {
+  .icon { width: 43px; height: 43px; }
+  .icon svg { width: 22px; height: 22px; }
+}

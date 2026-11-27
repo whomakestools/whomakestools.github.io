@@ -11,6 +11,11 @@ const sheetConfirm = $('#sheetConfirm'), sheetResumo = $('#sheetResumo'), sheetO
 const f = { desc: $('#iDesc'), un: $('#iUn'), qtd: $('#iQtd'), preco: $('#iPreco') }
 
 let dados = ler()
+dados.forEach(l => { if (l.semGrupo && !l.grupos.length) l.grupos.push({ descricao: '', itens: [] }) })
+let filtro = '' // texto do filtro: listas (tela principal) ou itens (lista aberta)
+const filtroEl = $('#filtro')
+const limparFiltro = () => { filtro = ''; filtroEl.value = '' }
+filtroEl.addEventListener('input', () => { filtro = filtroEl.value.trim(); render() })
 const abertos = new Set() // listas/grupos expandidos ("0", "0-1")
 let aoSalvarNome = null, refItem = null, resolveConf = null
 let listaAberta = null // quando há uma lista aberta, só ela é exibida
@@ -18,6 +23,15 @@ let listaAberta = null // quando há uma lista aberta, só ela é exibida
 function ler() { try { return JSON.parse(localStorage.getItem(KEY)) || [] } catch { return [] } }
 const gravar = () => { localStorage.setItem(KEY, JSON.stringify(dados)); render() }
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+const moedaFmt = n => n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+const lerMoeda = el => Number(el.value.replace(/\./g, '').replace(',', '.')) || 0
+const poeMoeda = (el, n) => { el.value = n > 0 ? moedaFmt(n) : '' }
+// máscara com 2 casas decimais: digita só números (1999 vira 19,99)
+const mascara = el => el.addEventListener('input', () => {
+  const d = el.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, 10)
+  el.value = d ? moedaFmt(Number(d) / 100) : ''
+})
 
 /* ---------- totais ---------- */
 const totalItens = itens => itens.reduce((a, { preco, qtd }) => a + preco * qtd, 0)
@@ -26,6 +40,14 @@ const totalLista = l => l.grupos.reduce((a, g) => a + totalItens(g.itens), 0)
 // Itens sem preço aparecem primeiro; os com preço (verdes) vão para o fim. A ordem original é mantida em cada bloco.
 const temPreco = it => it.preco > 0
 const itensOrdenados = g => g.itens.map((it, I) => ({ it, I })).sort((a, b) => temPreco(a.it) - temPreco(b.it))
+
+// quantos itens a lista tem, quantos já têm preço e quantos faltam
+const contagem = l => {
+  let t = 0, c = 0
+  l.grupos.forEach(g => g.itens.forEach(it => { t++; if (temPreco(it)) c++ }))
+  return { t, c, f: t - c }
+}
+const casa = it => !filtro || norm(it.descricao).includes(norm(filtro))
 
 /* ---------- ícones e HTML ---------- */
 const P = {
@@ -55,10 +77,10 @@ const itemHTML = (it, L, G, I) => {
 
 const grupoHTML = (g, L, G) => {
   const k = `${L}-${G}`, r = `data-l="${L}" data-g="${G}"`
-  return `<details class="grupo" data-k="${k}" ${abertos.has(k) ? 'open' : ''}>
+  return `<details class="grupo" data-k="${k}" ${abertos.has(k) || filtro ? 'open' : ''}>
     <summary><span class="nome">${esc(g.descricao)}</span><span class="total">${brl.format(totalItens(g.itens))}</span>
       <span class="acoes-hover">${iconBtn('novo-item', 'Novo item', P.plus, r)}${iconBtn('edit-grupo', 'Renomear grupo', P.edit, r)}${iconBtn('del-grupo', 'Excluir grupo', P.trash, r)}</span></summary>
-    <ul class="itens">${itensOrdenados(g).map(({ it, I }) => itemHTML(it, L, G, I)).join('') || '<li class="vazio">Sem itens.</li>'}</ul>
+    <ul class="itens">${itensOrdenados(g).filter(({ it }) => casa(it)).map(({ it, I }) => itemHTML(it, L, G, I)).join('') || '<li class="vazio">Sem itens.</li>'}</ul>
   </details>`
 }
 
@@ -79,20 +101,41 @@ const orcHTML = (l, L) => {
     <div class="orc-bar"><i style="width:${Math.min(100, pct)}%"></i></div></div>`
 }
 
+const contHTML = l => {
+  const { t, c, f } = contagem(l)
+  if (!t) return ''
+  return `<small class="cont">${c} de ${t} ${t > 1 ? 'itens com preço' : 'item com preço'} · ${f ? 'faltam ' + f : 'todos com preço ✓'}</small>`
+}
+
+// lista "sem grupos": os itens ficam direto na lista (guardados no único grupo interno, sem nome)
+const corpoLista = (l, L) => {
+  if (l.semGrupo) {
+    const itens = itensOrdenados(l.grupos[0]).filter(({ it }) => casa(it))
+    return `<ul class="itens itens-lista">${itens.map(({ it, I }) => itemHTML(it, L, 0, I)).join('') ||
+      `<li class="vazio">${filtro ? 'Nenhum item encontrado.' : 'Sem itens. Use + para adicionar.'}</li>`}</ul>`
+  }
+  const grupos = l.grupos.map((g, G) => ({ g, G })).filter(({ g }) => !filtro || g.itens.some(casa))
+  return `<div class="grupos">${grupos.map(({ g, G }) => grupoHTML(g, L, G)).join('') ||
+    `<p class="vazio">${filtro ? 'Nenhum item encontrado.' : 'Sem grupos. Use + para adicionar.'}</p>`}</div>`
+}
+
 const listaHTML = (l, L) => {
   const r = `data-l="${L}"`
+  const add = l.semGrupo ? iconBtn('novo-item', 'Novo item', P.plus, `${r} data-g="0"`) : iconBtn('novo-grupo', 'Novo grupo', P.plus, r)
   return `<details class="lista" data-k="${L}" ${L === listaAberta ? 'open' : ''}>
-    <summary><span class="nome">${esc(l.descricao)}${saldoHTML(l)}</span><strong class="total">${brl.format(totalLista(l))}</strong>
-      <span class="acoes-hover">${iconBtn('novo-grupo', 'Novo grupo', P.plus, r)}${iconBtn('edit-orc', 'Valor para gastar', P.wallet, r)}${iconBtn('resumo', 'Resumo da lista', P.doc, r)}${iconBtn('zerar-lista', 'Zerar preços da lista', P.undo, r)}${iconBtn('edit-lista', 'Renomear lista', P.edit, r)}${iconBtn('del-lista', 'Excluir lista', P.trash, r)}</span></summary>
-    ${orcHTML(l, L)}<div class="grupos">${l.grupos.map((g, G) => grupoHTML(g, L, G)).join('') || '<p class="vazio">Sem grupos. Use + para adicionar.</p>'}</div>
+    <summary><span class="nome">${esc(l.descricao)}${contHTML(l)}${saldoHTML(l)}</span><strong class="total">${brl.format(totalLista(l))}</strong>
+      <span class="acoes-hover">${add}${iconBtn('edit-orc', 'Valor para gastar', P.wallet, r)}${iconBtn('resumo', 'Resumo da lista', P.doc, r)}${iconBtn('zerar-lista', 'Zerar preços da lista', P.undo, r)}${iconBtn('edit-lista', 'Renomear lista', P.edit, r)}${iconBtn('del-lista', 'Excluir lista', P.trash, r)}</span></summary>
+    ${orcHTML(l, L)}${corpoLista(l, L)}
   </details>`
 }
 
 function render() {
   if (listaAberta != null && !dados[listaAberta]) listaAberta = null
-  geral.innerHTML = dados.length
-    ? dados.map((l, L) => (listaAberta == null || L === listaAberta) ? listaHTML(l, L) : '').join('')
-    : '<p class="vazio">Nenhuma lista ainda. Crie a primeira em “+ Nova lista”.</p>'
+  const visiveis = dados.map((l, L) => ({ l, L })).filter(({ l, L }) =>
+    listaAberta == null ? (!filtro || norm(l.descricao).includes(norm(filtro))) : L === listaAberta)
+  geral.innerHTML = visiveis.map(({ l, L }) => listaHTML(l, L)).join('') ||
+    (dados.length ? '<p class="vazio">Nenhuma lista encontrada.</p>' : '<p class="vazio">Nenhuma lista ainda. Crie a primeira em “+ Nova lista”.</p>')
+  filtroEl.placeholder = listaAberta == null ? 'Filtrar listas pelo nome…' : 'Filtrar itens pela descrição…'
 }
 
 geral.addEventListener('toggle', e => {
@@ -100,11 +143,11 @@ geral.addEventListener('toggle', e => {
   if (!k) return
   if (el.classList.contains('lista')) { // abrir uma lista oculta as outras; fechar (setinha) volta para todas
     const L = Number(k)
-    if (el.open && listaAberta !== L) { listaAberta = L; render(); scrollTo({ top: 0 }) }
-    else if (!el.open && listaAberta === L) { listaAberta = null; render() }
+    if (el.open && listaAberta !== L) { listaAberta = L; limparFiltro(); render(); scrollTo({ top: 0 }) }
+    else if (!el.open && listaAberta === L) { listaAberta = null; limparFiltro(); render() }
     return
   }
-  el.open ? abertos.add(k) : abertos.delete(k)
+  if (!filtro) el.open ? abertos.add(k) : abertos.delete(k)
 }, true)
 
 /* ---------- formulários ---------- */
@@ -125,7 +168,9 @@ function confirmar(msg, label = 'Excluir') {
   })
 }
 
-function abrirNome(titulo, valor, cb) {
+function abrirNome(titulo, valor, cb, opcaoGrupos = false) {
+  $('#chkGrupos').hidden = !opcaoGrupos
+  $('#usarGrupos').checked = false // padrão: lista sem grupos
   $('#nomeTitulo').textContent = titulo
   nomeInput.value = valor
   aoSalvarNome = cb
@@ -137,31 +182,33 @@ $('#formNome').addEventListener('submit', e => {
   e.preventDefault()
   const v = nomeInput.value.trim()
   if (!v) return
-  aoSalvarNome(v); gravar(); fechar()
+  aoSalvarNome(v, $('#usarGrupos').checked); gravar(); fechar()
 })
 
 let refOrc = null
 function abrirOrc(L) {
   refOrc = L
-  $('#oVal').value = orc(dados[L]) > 0 ? orc(dados[L]) : ''
+  poeMoeda($('#oVal'), orc(dados[L]))
   sheetOrc.hidden = false
   if (!matchMedia('(pointer: coarse)').matches) $('#oVal').focus()
 }
 $('#formOrc').addEventListener('submit', e => {
   e.preventDefault()
-  const v = Number($('#oVal').value) || 0
+  const v = lerMoeda($('#oVal'))
   dados[refOrc].orcamento = v > 0 ? v : 0
   gravar(); fechar()
 })
 
-const prev = () => { $('#prev').textContent = 'Total: ' + brl.format((+f.qtd.value || 0) * (+f.preco.value || 0)) }
+const prev = () => { $('#prev').textContent = 'Total: ' + brl.format((+f.qtd.value || 0) * lerMoeda(f.preco)) }
+mascara(f.preco)
+mascara($('#oVal'))
 ;[f.qtd, f.preco].forEach(el => el.addEventListener('input', prev))
 
 function abrirItem(L, G, I) {
   refItem = { L, G, I }
   const it = I >= 0 ? dados[L].grupos[G].itens[I] : { descricao: '', unidade: 'UN', qtd: 1, preco: '' }
   $('#itemTitulo').textContent = I >= 0 ? 'Editar item' : 'Novo item'
-  f.desc.value = it.descricao; f.un.value = it.unidade; f.qtd.value = it.qtd; f.preco.value = it.preco
+  f.desc.value = it.descricao; f.un.value = it.unidade; f.qtd.value = it.qtd; poeMoeda(f.preco, it.preco)
   prev()
   sheetItem.hidden = false
   if (!matchMedia('(pointer: coarse)').matches) f.desc.focus() // no celular o teclado só abre quando o campo é tocado
@@ -170,7 +217,7 @@ function abrirItem(L, G, I) {
 $('#formItem').addEventListener('submit', e => {
   e.preventDefault()
   const { L, G, I } = refItem
-  const it = { descricao: f.desc.value.trim(), unidade: f.un.value, qtd: Number(f.qtd.value) || 0, preco: Number(f.preco.value) || 0 }
+  const it = { descricao: f.desc.value.trim(), unidade: f.un.value, qtd: Number(f.qtd.value) || 0, preco: lerMoeda(f.preco) }
   if (!it.descricao) return
   const itens = dados[L].grupos[G].itens
   if (I >= 0) itens[I] = it; else itens.push(it)
@@ -181,8 +228,8 @@ $('#formItem').addEventListener('submit', e => {
 /* ---------- leitura de preço pela câmera (price-scanner) ---------- */
 async function lerPrecoCamera() {
   if (!window.PriceScanner) return alert('Leitor de preço indisponível. Verifique a conexão.')
-  const r = await PriceScanner.open({ decimals: 2 })
-  if (r) { f.preco.value = r.value.toFixed(2); prev() }
+  const r = await PriceScanner.open({ decimals: 2, autoScan: false }) // começa no modo manual (o usuário pode ligar o automático)
+  if (r) { poeMoeda(f.preco, r.value); prev() }
 }
 if (!window.PriceScanner) $('#btnCam').hidden = true
 
@@ -201,18 +248,22 @@ const qtdTxt = n => Number.isInteger(n) ? String(n) : num(n, 3)
 function resumoTexto(l) {
   const out = [`## ${l.descricao}`, '']
   l.grupos.forEach(g => {
-    out.push(`#${g.descricao} — ${brl.format(totalItens(g.itens))}`, '')
+    if (!l.semGrupo) out.push(`#${g.descricao} — ${brl.format(totalItens(g.itens))}`, '')
     const rows = g.itens.map(it => ({
       d: it.descricao + ':', q: qtdTxt(it.qtd), u: it.unidade,
       p: temPreco(it) ? num(it.preco) : null, t: temPreco(it) ? num(it.qtd * it.preco) : null
     }))
     const w = k => Math.max(0, ...rows.filter(r => r[k] != null).map(r => r[k].length))
     const [wd, wq, wu, wp, wt] = ['d', 'q', 'u', 'p', 't'].map(w)
-    rows.forEach(r => out.push(`${r.d.padEnd(wd)} ${r.q.padStart(wq)} ${r.u.padEnd(wu)}` +
-      (r.p == null ? ' × sem preço' : ` × R$ ${r.p.padStart(wp)} = R$ ${r.t.padStart(wt)}`)))
+    rows.forEach(r => out.push((`${r.d.padEnd(wd)} ${r.q.padStart(wq)} ${r.u.padEnd(wu)}` +
+      (r.p == null ? '' : ` × R$ ${r.p.padStart(wp)} = R$ ${r.t.padStart(wt)}`)).trimEnd()))
     if (rows.length) out.push('')
   })
   out.push(`## TOTAL: ${brl.format(totalLista(l))}`)
+  if (orc(l) > 0) {
+    const saldo = orc(l) - totalLista(l)
+    out.push(`## PARA GASTAR: ${brl.format(orc(l))}`, saldo < 0 ? `## ESTOUROU: ${brl.format(-saldo)}` : `## SALDO: ${brl.format(saldo)}`)
+  }
   const sem = l.grupos.reduce((a, g) => a + g.itens.filter(it => !temPreco(it)).length, 0)
   if (sem) out.push(`(${sem} ${sem > 1 ? 'itens sem preço' : 'item sem preço'})`)
   return out.join('\n').replace(/\u00a0/g, ' ')
@@ -230,7 +281,11 @@ async function copiar() {
 }
 
 const acoes = {
-  'nova-lista': () => abrirNome('Nova lista', '', v => { dados.push({ descricao: v, grupos: [] }); listaAberta = dados.length - 1 }),
+  'nova-lista': () => abrirNome('Nova lista', '', (v, comGrupos) => {
+    const nova = { descricao: v, grupos: [] }
+    if (!comGrupos) { nova.semGrupo = true; nova.grupos.push({ descricao: '', itens: [] }) }
+    dados.push(nova); listaAberta = dados.length - 1; limparFiltro()
+  }, true),
   'edit-orc': ({ L }) => abrirOrc(L),
   'edit-lista': ({ L }) => abrirNome('Renomear lista', dados[L].descricao, v => { dados[L].descricao = v }),
   'del-lista': ({ L }) => excluir(`Excluir a lista “${dados[L].descricao}”?`, () => { dados.splice(L, 1); listaAberta = null }),
