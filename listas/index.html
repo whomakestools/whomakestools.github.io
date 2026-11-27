@@ -4,11 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#5b4bd6">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <title>Who Makes Tools | Listas</title>
   <script>
-    try { document.documentElement.dataset.theme = localStorage.getItem('listas-tema') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') } catch (e) {}
+    try { document.documentElement.dataset.theme = localStorage.getItem('listas-tema') || 'dark' } catch (e) { document.documentElement.dataset.theme = 'dark' } // padrão: modo escuro
   </script>
-  <link rel="stylesheet" href="./css/lista.css?v=7">
+  <link rel="stylesheet" href="./css/lista.css?v=12">
 </head>
 <body>
   <header class="topbar">
@@ -22,6 +26,7 @@
       <button type="button" class="icon" id="btnTema" data-action="tema" title="Modo escuro" aria-label="Alternar modo escuro"></button>
       <button class="btn primary" data-action="nova-lista">+ Nova lista</button>
     </div>
+    <input type="search" id="filtro" class="filtro" placeholder="Filtrar listas pelo nome…" autocomplete="off" aria-label="Filtrar">
   </header>
 
   <main id="geral" class="geral"></main>
@@ -32,6 +37,9 @@
       <h2 id="nomeTitulo"></h2>
       <label>Descrição
         <input type="text" id="nomeInput" maxlength="80" autocomplete="off" required>
+      </label>
+      <label class="chk" id="chkGrupos" hidden>
+        <input type="checkbox" id="usarGrupos"> Organizar a lista em grupos
       </label>
       <div class="acoes">
         <button type="button" class="btn" data-action="fechar">Cancelar</button>
@@ -60,7 +68,7 @@
       </div>
       <label>Preço
         <div class="preco-wrap">
-          <input type="number" id="iPreco" inputmode="decimal" step="0.01" min="0" placeholder="0,00">
+          <input type="text" id="iPreco" inputmode="numeric" autocomplete="off" placeholder="0,00">
           <button type="button" class="btn" id="btnCam" data-action="camera" title="Ler preço pela câmera" aria-label="Ler preço pela câmera">📷</button>
         </div>
       </label>
@@ -77,7 +85,7 @@
     <form class="card" id="formOrc">
       <h2>Valor para gastar</h2>
       <label>Valor (R$)
-        <input type="number" id="oVal" inputmode="decimal" step="0.01" min="0" placeholder="0,00">
+        <input type="text" id="oVal" inputmode="numeric" autocomplete="off" placeholder="0,00">
       </label>
       <p class="dica">Deixe em branco ou 0 para remover.</p>
       <div class="acoes">
@@ -111,7 +119,11 @@
     </div>
   </div>
 
+  <script>
+    // funcionar offline (precisa de HTTPS ou localhost)
+    if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}))
+  </script>
   <script src="https://whomakestools.github.io/leitor/price-scanner.js"></script>
-  <script src="./js/app.js?v=7"></script>
+  <script src="./js/app.js?v=12"></script>
 </body>
 </html>

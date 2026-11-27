@@ -1,0 +1,114 @@
+:root {
+  --bg: #f4f5f9; --card: #fff; --fg: #1f2330; --mut: #6b7186; --bd: #e3e5ee;
+  --pri: #6c5ce7; --danger: #d63a3a; --r: 14px;
+  --l-bg: #5b4bd6; --l-fg: #fff;        /* cabeçalho da lista */
+  --g-bg: #e9e6ff;                      /* cabeçalho do grupo */
+  --ok-bg: #e4f5e9; --ok-bd: #2e9e4f;   /* item com preço */
+  --sh: 0 1px 3px #0001, 0 4px 14px #0000000d;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #14151c; --card: #1e2029; --fg: #eceef6; --mut: #9aa0b8; --bd: #2c2f3d; --pri: #7d6dff; --danger: #ff6b6b; --sh: none;
+  --l-bg: #4a3fb5; --g-bg: #2b2849; --ok-bg: #15301f; --ok-bd: #3ec06a;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+
+.topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; max-width: 640px; margin: 0 auto; padding: 14px 16px; background: var(--bg); }
+h1 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.4rem; }
+.logo { width: 28px; height: 28px; color: var(--pri); fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.geral { max-width: 640px; margin: 0 auto; padding: 0 12px 80px; display: grid; gap: 12px; }
+
+.lista, .grupo { background: var(--card); border: 1px solid var(--bd); border-radius: var(--r); box-shadow: var(--sh); }
+.lista { overflow: hidden; }
+.grupo { margin: 8px; border-radius: 10px; box-shadow: none; overflow: hidden; }
+
+/* níveis com cores diferentes: lista (roxo escuro) > grupo (roxo claro) > itens */
+.lista > summary { background: var(--l-bg); color: var(--l-fg); flex-wrap: wrap; }
+.lista > summary::before { color: inherit; }
+/* lista aberta: a setinha aponta para a esquerda = voltar para as listas */
+.lista[open] > summary::before { content: "‹"; font-size: 1.9em; transform: none; }
+.lista > summary .acoes-hover { flex-basis: 100%; justify-content: flex-end; margin-top: -4px; }
+.lista > summary .icon { color: #ffffffd9; }
+.lista > summary .icon:hover,
+.lista > summary .icon[data-action^="del"]:hover { background: #ffffff2e; color: #fff; }
+.grupo > summary { background: var(--g-bg); font-weight: 600; }
+
+summary { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "›"; color: var(--mut); font-size: 1.4em; line-height: 1; transition: transform .15s; }
+details[open] > summary::before { transform: rotate(90deg); }
+.lista > summary { font-weight: 600; }
+.nome { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.total { white-space: nowrap; }
+.acoes-hover { display: flex; }
+
+.icon { display: inline-grid; place-items: center; flex: none; width: 36px; height: 36px; border: 0; border-radius: 50%; background: none; color: var(--mut); cursor: pointer; }
+.icon:hover { background: var(--bd); color: var(--fg); }
+.icon[data-action^="del"]:hover { color: var(--danger); }
+.icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.itens { list-style: none; margin: 0; padding: 0 6px 6px; }
+.item { display: flex; align-items: center; gap: 4px; padding: 8px 4px 8px 8px; border-top: 1px solid var(--bd); }
+.info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.info small { color: var(--mut); }
+.desc { overflow-wrap: anywhere; }
+.item[data-action] { cursor: pointer; }
+.topo-acoes { display: flex; align-items: center; gap: 6px; }
+.item.ok { background: var(--ok-bg); border-left: 4px solid var(--ok-bd); }
+.item.ok strong { color: var(--ok-bd); }
+.vazio { color: var(--mut); text-align: center; padding: 16px; margin: 0; }
+
+.btn { font: inherit; padding: 10px 16px; border: 1px solid var(--bd); border-radius: 10px; background: var(--card); color: var(--fg); cursor: pointer; }
+.btn.primary { background: var(--pri); border-color: transparent; color: #fff; }
+.btn.danger { background: var(--danger); border-color: transparent; color: #fff; }
+.card p { margin: 0; }
+.resumo { margin: 0; max-height: 50vh; overflow: auto; padding: 12px; background: var(--bg); border: 1px solid var(--bd); border-radius: 10px; white-space: pre; font: 13px/1.5 ui-monospace, Menlo, Consolas, monospace; }
+
+summary:focus-visible, .btn:focus-visible, .icon:focus-visible,
+.card input:focus, .card select:focus { outline: 2px solid var(--pri); outline-offset: 1px; }
+
+.sheet { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; background: #0008; }
+.sheet[hidden] { display: none; }
+.card { width: 100%; max-width: 420px; max-height: 100%; overflow: auto; display: grid; gap: 14px; padding: 20px; background: var(--card); border-radius: var(--r); }
+.card h2 { margin: 0; font-size: 1.15rem; }
+.card label { display: grid; gap: 6px; font-size: .9rem; color: var(--mut); }
+.card input, .card select { width: 100%; font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--bd); border-radius: 10px; padding: 11px 12px; }
+.linha { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.preco-wrap { display: flex; gap: 8px; }
+.prev { text-align: right; color: var(--mut); }
+.acoes { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* celular: modais sempre no topo da tela */
+@media (max-width: 640px) {
+  .sheet { align-items: start; padding-top: max(12px, env(safe-area-inset-top)); }
+}
+
+/* valor para gastar da lista */
+.lista > summary .nome small.saldo { display: block; font-weight: 400; font-size: .8rem; opacity: .9; }
+.lista > summary .nome small.saldo.neg { color: #ffc2c2; opacity: 1; }
+.orc { --orc-cor: var(--ok-bd); margin: 8px; padding: 10px 12px; background: var(--card); border: 1px solid var(--bd); border-radius: 10px; cursor: pointer; }
+.orc.alerta { --orc-cor: #d99a00; }
+.orc.estouro { --orc-cor: var(--danger); }
+.orc-txt { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 8px; margin-bottom: 8px; font-size: .9rem; }
+.orc-txt span:last-child { color: var(--mut); }
+.orc-bar { height: 8px; border-radius: 99px; background: var(--bd); overflow: hidden; }
+.orc-bar i { display: block; height: 100%; border-radius: inherit; background: var(--orc-cor); transition: width .25s; }
+.dica { font-size: .85rem; color: var(--mut); }
+
+/* contador, filtro, opção de grupos e itens soltos na lista */
+.lista > summary .nome small.cont { display: block; font-weight: 400; font-size: .8rem; opacity: .9; }
+.topbar { flex-wrap: wrap; row-gap: 10px; }
+.filtro { flex: 1 0 100%; font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--bd); border-radius: 10px; padding: 9px 12px; }
+.filtro:focus { outline: 2px solid var(--pri); outline-offset: 1px; }
+.card .chk { display: flex; align-items: center; gap: 10px; color: var(--fg); }
+.card .chk input { width: auto; }
+[hidden] { display: none !important; } /* garante que o atributo hidden esconda mesmo com display definido em classe */
+.itens-lista { padding: 6px; }
+
+/* celular: ícones 20% maiores */
+@media (max-width: 640px) {
+  .icon { width: 43px; height: 43px; }
+  .icon svg { width: 22px; height: 22px; }
+}
